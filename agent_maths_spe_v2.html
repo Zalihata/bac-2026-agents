@@ -260,6 +260,7 @@ let conversation = [];
 let isLoading = false;
 let diagnosticDone = false;
 
+const WEBHOOK_URL = 'https://hook.eu1.make.com/omhd75bqteracqaewathwkzqyr9rm61q';
 const messagesEl = document.getElementById('messages');
 const inputEl = document.getElementById('input');
 const sendBtn = document.getElementById('send-btn');
@@ -403,7 +404,7 @@ async function sendToMake(data) {
     priorites: (data.priorites || []).map(p => p.chapitre + ' — ' + p.urgence).join(', '),
     commentaire: data.commentaire_general || '',
     notation_methode: data.notation_et_methode || '',
-    json_brut: JSON.stringify(data)
+    json_brut: JSON.stringify(data).substring(0, 1900)
   };
   try {
     await fetch(WEBHOOK, {
