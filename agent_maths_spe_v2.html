@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diagnostic Maths Spé — Première</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f7f6f3; color: #1a1a1a; min-height: 100vh; }
+.app { display: flex; height: 100vh; }
+
+.sidebar { width: 270px; background: #fff; border-right: 1px solid #e5e5e0; padding: 20px 16px; display: flex; flex-direction: column; gap: 12px; flex-shrink: 0; overflow-y: auto; }
+.sidebar-title { font-size: 11px; font-weight: 500; color: #aaa; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+.phase-badge { font-size: 12px; font-weight: 500; padding: 4px 10px; border-radius: 20px; display: inline-block; }
+.phase-1 { background: #e8f4fd; color: #185fa5; }
+.phase-2 { background: #e8f0e4; color: #3b6d11; }
+
+.chapter-item { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 6px; font-size: 12px; }
+.chapter-item.studied { background: #f0faf5; }
+.chapter-item.partial { background: #fff8ec; }
+.chapter-item.not-studied { background: #fdf3f3; }
+.chapter-item.pending { background: #f7f6f3; color: #aaa; }
+.ch-icon { width: 16px; height: 16px; border-radius: 3px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 10px; }
+.ch-icon.s { background: #1d9e75; color: #fff; }
+.ch-icon.p { background: #ef9f27; color: #fff; }
+.ch-icon.n { background: #e24b4a; color: #fff; }
+.ch-icon.q { background: #d5d4ce; color: #888; }
+
+.domain-section { margin-bottom: 4px; }
+.domain-label { font-size: 11px; color: #aaa; font-weight: 500; margin: 8px 0 4px; text-transform: uppercase; letter-spacing: 0.04em; }
+
+.score-row { display: flex; align-items: center; gap: 8px; padding: 4px 8px; font-size: 12px; }
+.score-bar-bg { flex: 1; height: 4px; background: #f0efe9; border-radius: 2px; }
+.score-bar { height: 4px; border-radius: 2px; transition: width 0.6s, background 0.6s; background: #d5d4ce; }
+.score-val { font-size: 11px; color: #888; width: 28px; text-align: right; flex-shrink: 0; }
+
+.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.header { padding: 14px 24px; border-bottom: 1px solid #e5e5e0; background: #fff; display: flex; align-items: center; gap: 12px; }
+.header-text h1 { font-size: 15px; font-weight: 500; }
+.header-text p { font-size: 12px; color: #888; margin-top: 1px; }
+.phase-indicator { margin-left: auto; font-size: 12px; color: #888; }
+
+.messages { flex: 1; overflow-y: auto; padding: 20px 24px; display: flex; flex-direction: column; gap: 14px; }
+
+.msg { display: flex; gap: 10px; }
+.msg.user { flex-direction: row-reverse; align-self: flex-end; max-width: 600px; }
+.msg.agent { align-self: flex-start; max-width: 680px; }
+
+.avatar { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 500; flex-shrink: 0; }
+.agent .avatar { background: #eae8f5; color: #5a4fb0; }
+.user .avatar { background: #e3f0e8; color: #2d7a4f; }
+
+.bubble { padding: 11px 15px; border-radius: 12px; font-size: 14px; line-height: 1.65; }
+.agent .bubble { background: #fff; border: 1px solid #e5e5e0; border-radius: 4px 12px 12px 12px; }
+.user .bubble { background: #5a4fb0; color: #fff; border-radius: 12px 4px 12px 12px; }
+
+.typing { display: flex; gap: 4px; align-items: center; padding: 4px 0; }
+.dot { width: 6px; height: 6px; border-radius: 50%; background: #bbb; animation: bounce 1.2s infinite; }
+.dot:nth-child(2) { animation-delay: 0.2s; }
+.dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes bounce { 0%,80%,100%{transform:translateY(0)} 40%{transform:translateY(-5px)} }
+
+.input-area { padding: 14px 24px; border-top: 1px solid #e5e5e0; background: #fff; display: flex; gap: 10px; align-items: flex-end; }
+textarea { flex: 1; border: 1px solid #d5d4ce; border-radius: 8px; padding: 9px 13px; font-size: 14px; font-family: inherit; resize: none; line-height: 1.5; max-height: 120px; min-height: 38px; }
+textarea:focus { outline: none; border-color: #5a4fb0; box-shadow: 0 0 0 2px rgba(90,79,176,0.12); }
+button.send { background: #5a4fb0; color: #fff; border: none; border-radius: 8px; padding: 9px 18px; font-size: 14px; font-weight: 500; cursor: pointer; flex-shrink: 0; height: 38px; }
+button.send:hover { background: #4b41a0; }
+button.send:disabled { background: #ccc; cursor: not-allowed; }
+.kb-hint { font-size: 11px; color: #bbb; padding-top: 3px; }
+
+pre { background: #f5f4f0; border-radius: 6px; padding: 8px 12px; font-size: 12px; overflow-x: auto; margin: 6px 0; white-space: pre-wrap; }
+strong { font-weight: 500; }
+
+.final-card { background: #fff; border: 1px solid #e5e5e0; border-radius: 12px; padding: 20px; }
+.final-card h3 { font-size: 14px; font-weight: 500; margin-bottom: 14px; color: #555; }
+.final-row { display: flex; align-items: center; gap: 10px; margin-bottom: 9px; }
+.final-label { font-size: 13px; width: 185px; flex-shrink: 0; }
+.final-sub { font-size: 11px; color: #aaa; }
+.final-bar-bg { flex: 1; height: 5px; background: #f0efe9; border-radius: 3px; }
+.final-bar { height: 5px; border-radius: 3px; transition: width 0.8s; }
+.bl { background: #e24b4a; } .bm { background: #ef9f27; } .bh { background: #1d9e75; }
+.final-score { font-size: 12px; font-weight: 500; width: 32px; text-align: right; color: #555; }
+.priority-tag { display: inline-block; background: #fdf3f3; color: #a32d2d; font-size: 11px; padding: 3px 8px; border-radius: 4px; margin: 2px; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="sidebar">
+    <div>
+      <div class="sidebar-title">Avancement</div>
+      <span class="phase-badge phase-1" id="phase-badge">Phase 1 — Couverture</span>
+    </div>
+
+    <div>
+      <div class="domain-label">Algèbre</div>
+      <div class="chapter-item pending" id="ch-suites-arith"><div class="ch-icon q">?</div>Suites arithmétiques</div>
+      <div class="chapter-item pending" id="ch-suites-geo"><div class="ch-icon q">?</div>Suites géométriques</div>
+      <div class="chapter-item pending" id="ch-poly2"><div class="ch-icon q">?</div>Polynômes 2nd degré</div>
+    </div>
+
+    <div>
+      <div class="domain-label">Analyse</div>
+      <div class="chapter-item pending" id="ch-derivation"><div class="ch-icon q">?</div>Dérivation</div>
+      <div class="chapter-item pending" id="ch-variations"><div class="ch-icon q">?</div>Variations & optimisation</div>
+      <div class="chapter-item pending" id="ch-expo"><div class="ch-icon q">?</div>Fonction exponentielle</div>
+      <div class="chapter-item pending" id="ch-trigo"><div class="ch-icon q">?</div>Trigonométrie</div>
+    </div>
+
+    <div>
+      <div class="domain-label">Géométrie</div>
+      <div class="chapter-item pending" id="ch-scalaire"><div class="ch-icon q">?</div>Produit scalaire</div>
+      <div class="chapter-item pending" id="ch-georep"><div class="ch-icon q">?</div>Géométrie repérée</div>
+    </div>
+
+    <div>
+      <div class="domain-label">Probabilités-Stats</div>
+      <div class="chapter-item pending" id="ch-condis"><div class="ch-icon q">?</div>Probas conditionnelles</div>
+      <div class="chapter-item pending" id="ch-varialea"><div class="ch-icon q">?</div>Variables aléatoires</div>
+      <div class="chapter-item pending" id="ch-bernoulli"><div class="ch-icon q">?</div>Épreuves de Bernoulli</div>
+    </div>
+
+    <div>
+      <div class="domain-label">Automatismes</div>
+      <div class="chapter-item pending" id="ch-auto"><div class="ch-icon q">?</div>Calcul & taux d'évolution</div>
+    </div>
+
+    <div id="scores-section" style="display:none;">
+      <div class="domain-label" style="margin-top:8px;">Scores évaluation</div>
+      <div class="score-row"><span style="font-size:12px;width:90px;flex-shrink:0;">Algèbre</span><div class="score-bar-bg"><div class="score-bar" id="sb-algebre" style="width:0%"></div></div><span class="score-val" id="sv-algebre">—</span></div>
+      <div class="score-row"><span style="font-size:12px;width:90px;flex-shrink:0;">Analyse</span><div class="score-bar-bg"><div class="score-bar" id="sb-analyse" style="width:0%"></div></div><span class="score-val" id="sv-analyse">—</span></div>
+      <div class="score-row"><span style="font-size:12px;width:90px;flex-shrink:0;">Géométrie</span><div class="score-bar-bg"><div class="score-bar" id="sb-geometrie" style="width:0%"></div></div><span class="score-val" id="sv-geometrie">—</span></div>
+      <div class="score-row"><span style="font-size:12px;width:90px;flex-shrink:0;">Probas</span><div class="score-bar-bg"><div class="score-bar" id="sb-probas" style="width:0%"></div></div><span class="score-val" id="sv-probas">—</span></div>
+      <div class="score-row"><span style="font-size:12px;width:90px;flex-shrink:0;">Automatismes</span><div class="score-bar-bg"><div class="score-bar" id="sb-auto" style="width:0%"></div></div><span class="score-val" id="sv-auto">—</span></div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="header">
+      <div class="header-text">
+        <h1>Diagnostic Maths Spé — Première générale</h1>
+        <p>Programme officiel BO 2025 · Épreuve anticipée session 2026</p>
+      </div>
+      <div class="phase-indicator" id="phase-indicator">Phase 1 / 2</div>
+    </div>
+    <div class="messages" id="messages"></div>
+    <div class="input-area">
+      <div style="flex:1;display:flex;flex-direction:column;gap:3px;">
+        <textarea id="input" placeholder="Tape ta réponse ici..." rows="1"></textarea>
+        <div class="kb-hint">Entrée pour envoyer · Maj+Entrée pour sauter une ligne</div>
+      </div>
+      <button class="send" id="send-btn" onclick="sendMessage()">Envoyer</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const CHAPTERS = ['suites-arith','suites-geo','poly2','derivation','variations','expo','trigo','scalaire','georep','condis','varialea','bernoulli','auto'];
+
+const SYSTEM_PROMPT = `Tu es un agent de diagnostic pédagogique pour les mathématiques spécialité de Première générale (programme officiel français, BO 2025, épreuve anticipée session 2026).
+
+L'élève est candidate libre au bac — elle passe TOUT en ponctuel, pas de contrôle continu. L'objectif est de produire un profil complet pour alimenter son rétro-planning personnalisé.
+
+═══════════════════════════════
+STRUCTURE EN 2 PHASES OBLIGATOIRE
+═══════════════════════════════
+
+PHASE 1 — COUVERTURE DU PROGRAMME (déclaratif)
+Présente la liste complète des chapitres et demande pour chacun si elle l'a étudié.
+Les chapitres à couvrir sont exactement :
+- suites-arith : Suites arithmétiques
+- suites-geo : Suites géométriques
+- poly2 : Polynômes du 2nd degré
+- derivation : Dérivation (nombre dérivé, fonction dérivée, tangente)
+- variations : Variations, extremums, optimisation
+- expo : Fonction exponentielle
+- trigo : Trigonométrie (cercle trigo, cosinus/sinus)
+- scalaire : Produit scalaire
+- georep : Géométrie repérée (vecteur normal, équation cercle)
+- condis : Probabilités conditionnelles et indépendance
+- varialea : Variables aléatoires (loi, espérance, variance, écart type)
+- bernoulli : Épreuves de Bernoulli (n ≤ 4)
+- auto : Automatismes (taux d'évolution, calcul algébrique, lecture graphique)
+
+Pour chaque chapitre, l'élève répond : oui (étudié), partiellement, ou non (pas encore).
+Regroupe la présentation par domaine pour que ce soit lisible.
+Accepte aussi une réponse globale du type "j'ai fait tout jusqu'à la dérivation".
+
+À la fin de la phase 1, génère un JSON intermédiaire dans un bloc \`\`\`json ... \`\`\` :
+{
+  "phase": 1,
+  "couverture": {
+    "suites-arith": "oui|partiel|non",
+    "suites-geo": "oui|partiel|non",
+    "poly2": "oui|partiel|non",
+    "derivation": "oui|partiel|non",
+    "variations": "oui|partiel|non",
+    "expo": "oui|partiel|non",
+    "trigo": "oui|partiel|non",
+    "scalaire": "oui|partiel|non",
+    "georep": "oui|partiel|non",
+    "condis": "oui|partiel|non",
+    "varialea": "oui|partiel|non",
+    "bernoulli": "oui|partiel|non",
+    "auto": "oui|partiel|non"
+  }
+}
+
+PHASE 2 — ÉVALUATION (objectif)
+Tu poses entre 12 et 18 questions de maths, UNE À LA FOIS.
+Stratégie de sélection des questions :
+- Priorité aux chapitres déclarés "oui" ou "partiel" — on évalue ce qu'elle connaît
+- Pour les chapitres "non", pose quand même 1-2 questions de base pour détecter d'éventuelles bases de seconde
+- Varie les domaines — ne reste pas bloquée sur un seul
+- Adapte la difficulté selon les réponses précédentes
+
+Tu évalues chaque réponse sur :
+a) La justesse mathématique du résultat
+b) La qualité des justifications et de la rédaction
+c) La maîtrise de la notation formelle (PA(B), fractions vs ÷, parenthèses, etc.)
+
+Points d'attention identifiés sur un devoir récent :
+- Justifications insuffisantes : bon résultat mais pas d'explication
+- Notation : PA(B) vs P(B|A), signe ÷ à éviter, parenthèses manquantes
+- Probas totales : point faible avéré
+- Ne jamais écrire = entre deux expressions inégales
+
+SCORING PAR DOMAINE (1 à 5) :
+- 1 : notions non maîtrisées
+- 2 : comprend les concepts, erreurs fréquentes
+- 3 : niveau correct, quelques lacunes
+- 4 : bonne maîtrise, erreurs mineures
+- 5 : très bonne maîtrise, justifications complètes
+
+À la fin de la phase 2 (après 12-18 questions), génère le profil final dans un bloc \`\`\`json ... \`\`\` :
+{
+  "phase": 2,
+  "diagnostic_complet": true,
+  "couverture": { /* reprendre les données phase 1 */ },
+  "scores": {
+    "algebre": { "score": X, "chapitres": ["suites-arith","suites-geo","poly2"], "points_forts": "...", "lacunes": "..." },
+    "analyse": { "score": X, "chapitres": ["derivation","variations","expo","trigo"], "points_forts": "...", "lacunes": "..." },
+    "geometrie": { "score": X, "chapitres": ["scalaire","georep"], "points_forts": "...", "lacunes": "..." },
+    "probas": { "score": X, "chapitres": ["condis","varialea","bernoulli"], "points_forts": "...", "lacunes": "..." },
+    "automatismes": { "score": X, "chapitres": ["auto"], "points_forts": "...", "lacunes": "..." }
+  },
+  "priorites": [
+    { "chapitre": "id-chapitre", "raison": "non étudié|niveau faible|...", "urgence": "critique|haute|normale" }
+  ],
+  "commentaire_general": "...",
+  "notation_et_methode": "bilan sur la qualité de rédaction et notation"
+}
+
+STYLE :
+- Ton bienveillant et direct
+- Phase 1 : efficace, pas de questions de maths, juste la checklist
+- Phase 2 : une question à la fois, feedback bref après chaque réponse, indice pédagogique si elle bloque
+- Commence par un message d'accueil très court (2-3 phrases) puis lance la phase 1 directement`;
+
+let conversation = [];
+let isLoading = false;
+let diagnosticDone = false;
+
+const messagesEl = document.getElementById('messages');
+const inputEl = document.getElementById('input');
+const sendBtn = document.getElementById('send-btn');
+
+function fmt(text) {
+  return text
+    .replace(/```json([\s\S]*?)```/g, '<pre>$1</pre>')
+    .replace(/```([\s\S]*?)```/g, '<pre>$1</pre>')
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\n/g, '<br>');
+}
+
+function addMsg(role, content) {
+  const d = document.createElement('div');
+  d.className = 'msg ' + role;
+  d.innerHTML = `<div class="avatar">${role==='agent'?'M':'E'}</div><div class="bubble">${fmt(content)}</div>`;
+  messagesEl.appendChild(d);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+
+function addTyping() {
+  const d = document.createElement('div');
+  d.className = 'msg agent'; d.id = 'typing';
+  d.innerHTML = `<div class="avatar">M</div><div class="bubble"><div class="typing"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div>`;
+  messagesEl.appendChild(d);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+
+function removeTyping() { const t = document.getElementById('typing'); if(t) t.remove(); }
+
+function parseJSON(text) {
+  const m = text.match(/```json([\s\S]*?)```/);
+  if (!m) return null;
+  try { return JSON.parse(m[1].trim()); } catch { return null; }
+}
+
+const coverageMap = { 'oui': 's', 'partiel': 'p', 'non': 'n' };
+const coverageLabel = { 'oui': 'Étudié', 'partiel': 'Partiel', 'non': 'Non étudié' };
+const coverageClass = { 'oui': 'studied', 'partiel': 'partial', 'non': 'not-studied' };
+
+function updateCoverage(data) {
+  if (!data || !data.couverture) return;
+  Object.entries(data.couverture).forEach(([ch, val]) => {
+    const el = document.getElementById('ch-' + ch);
+    if (!el) return;
+    const icon = coverageMap[val] || 'q';
+    const cls = coverageClass[val] || 'pending';
+    const iconEl = el.querySelector('.ch-icon');
+    iconEl.className = 'ch-icon ' + icon;
+    iconEl.textContent = icon === 's' ? '✓' : icon === 'p' ? '~' : '✕';
+    el.className = 'chapter-item ' + cls;
+    const name = el.textContent.replace(/[✓~✕?]/,'').trim();
+    el.innerHTML = `<div class="ch-icon ${icon}">${icon==='s'?'✓':icon==='p'?'~':'✕'}</div>${name}`;
+  });
+}
+
+function updateScores(scores) {
+  if (!scores) return;
+  document.getElementById('scores-section').style.display = 'block';
+  const map = { algebre: 'algebre', analyse: 'analyse', geometrie: 'geometrie', probas: 'probas', automatismes: 'auto' };
+  Object.entries(map).forEach(([key, id]) => {
+    const d = scores[key];
+    if (!d) return;
+    const s = d.score || 0;
+    const pct = (s/5)*100;
+    const bar = document.getElementById('sb-' + id);
+    const val = document.getElementById('sv-' + id);
+    if (!bar || !val) return;
+    bar.style.width = pct + '%';
+    bar.style.background = s<=2 ? '#e24b4a' : s<=3 ? '#ef9f27' : '#1d9e75';
+    val.textContent = s + '/5';
+  });
+}
+
+function showFinalProfile(data) {
+  updateCoverage(data);
+  updateScores(data.scores);
+
+  const card = document.createElement('div');
+  card.className = 'final-card';
+  const labels = { algebre:'Algèbre', analyse:'Analyse', geometrie:'Géométrie', probas:'Probabilités-Stats', automatismes:'Automatismes' };
+  let rows = '';
+  if (data.scores) {
+    Object.entries(labels).forEach(([k, label]) => {
+      const d = data.scores[k];
+      if (!d) return;
+      const s = d.score||0;
+      const pct = (s/5)*100;
+      const cls = s<=2?'bl':s<=3?'bm':'bh';
+      rows += `<div class="final-row">
+        <div class="final-label">${label}</div>
+        <div class="final-bar-bg"><div class="final-bar ${cls}" style="width:${pct}%"></div></div>
+        <div class="final-score">${s}/5</div>
+      </div>`;
+    });
+  }
+  let priorities = '';
+  if (data.priorites && data.priorites.length) {
+    priorities = '<div style="margin-top:14px;"><div style="font-size:12px;color:#aaa;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.04em;">Priorités de révision</div>';
+    data.priorites.forEach(p => {
+      priorities += `<span class="priority-tag">${p.chapitre} — ${p.urgence}</span>`;
+    });
+    priorities += '</div>';
+  }
+  card.innerHTML = `<h3>Profil de compétences final</h3>${rows}${priorities}`;
+  if (data.commentaire_general) {
+    card.innerHTML += `<div style="margin-top:12px;font-size:13px;color:#666;line-height:1.6;border-top:1px solid #f0efe9;padding-top:12px;">${data.commentaire_general}</div>`;
+  }
+  messagesEl.appendChild(card);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+
+  document.getElementById('phase-badge').textContent = 'Diagnostic terminé';
+  document.getElementById('phase-badge').style.background = '#f0faf5';
+  document.getElementById('phase-badge').style.color = '#1d9e75';
+  document.getElementById('phase-indicator').textContent = 'Terminé';
+  diagnosticDone = true;
+  sendBtn.disabled = true;
+  inputEl.disabled = true;
+  inputEl.placeholder = 'Diagnostic terminé.';
+  sendToMake(data);
+}
+
+async function sendToMake(data) {
+  const WEBHOOK = 'https://hook.eu1.make.com/omhd75bqteracqaewathwkzqyr9rm61q';
+  const payload = {
+    matiere: 'Maths spé',
+    date: new Date().toISOString(),
+    couverture: data.couverture || {},
+    scores: {
+      score_1: data.scores?.algebre?.score || 0,
+      score_2: data.scores?.analyse?.score || 0,
+      score_3: data.scores?.geometrie?.score || 0,
+      score_4: data.scores?.probas?.score || 0,
+      score_5: data.scores?.automatismes?.score || 0,
+      domaine_1: 'Algèbre',
+      domaine_2: 'Analyse',
+      domaine_3: 'Géométrie',
+      domaine_4: 'Probabilités-Stats',
+      domaine_5: 'Automatismes'
+    },
+    priorites: (data.priorites || []).map(p => p.chapitre + ' — ' + p.urgence).join(', '),
+    commentaire: data.commentaire_general || '',
+    notation_methode: data.notation_et_methode || '',
+    json_brut: JSON.stringify(data)
+  };
+  try {
+    await fetch(WEBHOOK, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const notif = document.createElement('div');
+    notif.style.cssText = 'font-size:12px;color:#1d9e75;padding:8px 16px;text-align:center;';
+    notif.textContent = 'Résultats envoyés vers Notion.';
+    messagesEl.appendChild(notif);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  } catch(e) {
+    const notif = document.createElement('div');
+    notif.style.cssText = 'font-size:12px;color:#e24b4a;padding:8px 16px;text-align:center;';
+    notif.textContent = 'Envoi vers Notion échoué — résultats sauvegardés localement.';
+    messagesEl.appendChild(notif);
+  }
+}
+
+async function callAPI(messages) {
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 1200,
+      system: SYSTEM_PROMPT,
+      messages
+    })
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error?.message || 'Erreur API');
+  return data.content[0].text;
+}
+
+async function sendMessage() {
+  if (isLoading || diagnosticDone) return;
+  const text = inputEl.value.trim();
+  if (!text) return;
+  inputEl.value = '';
+  inputEl.style.height = 'auto';
+  addMsg('user', text);
+  conversation.push({ role: 'user', content: text });
+
+  isLoading = true;
+  sendBtn.disabled = true;
+  addTyping();
+
+  try {
+    const reply = await callAPI(conversation);
+    removeTyping();
+    addMsg('agent', reply);
+    conversation.push({ role: 'assistant', content: reply });
+
+    const json = parseJSON(reply);
+    if (json) {
+      if (json.phase === 1) {
+        updateCoverage(json);
+        document.getElementById('phase-badge').textContent = 'Phase 2 — Évaluation';
+        document.getElementById('phase-badge').className = 'phase-badge phase-2';
+        document.getElementById('phase-indicator').textContent = 'Phase 2 / 2';
+      } else if (json.phase === 2 && json.diagnostic_complet) {
+        showFinalProfile(json);
+      }
+    }
+  } catch(err) {
+    removeTyping();
+    addMsg('agent', 'Erreur : ' + err.message);
+  } finally {
+    isLoading = false;
+    if (!diagnosticDone) sendBtn.disabled = false;
+  }
+}
+
+async function init() {
+  isLoading = true;
+  sendBtn.disabled = true;
+  addTyping();
+  try {
+    const reply = await callAPI([{ role: 'user', content: 'Commençons.' }]);
+    removeTyping();
+    conversation.push({ role: 'user', content: 'Commençons.' });
+    conversation.push({ role: 'assistant', content: reply });
+    addMsg('agent', reply);
+  } catch(err) {
+    removeTyping();
+    addMsg('agent', 'Impossible de démarrer : ' + err.message);
+  } finally {
+    isLoading = false;
+    sendBtn.disabled = false;
+    inputEl.focus();
+  }
+}
+
+inputEl.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+});
+inputEl.addEventListener('input', () => {
+  inputEl.style.height = 'auto';
+  inputEl.style.height = Math.min(inputEl.scrollHeight, 120) + 'px';
+});
+
+init();
+</script>
+</body>
+</html>
