@@ -408,8 +408,7 @@ async function sendToMake(data) {
     chapitres_str: Object.entries(data.couverture || {}).map(([id, statut]) => {
       const urgence = (data.priorites || []).find(p => p.chapitre === id)?.urgence || 'normale';
       return id + ':' + statut + ':' + urgence;
-  }).join('|')
-  }))
+     }).join('|')
   };
   try {
     await fetch(WEBHOOK, {
