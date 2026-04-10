@@ -83,6 +83,29 @@ strong { font-weight: 500; }
 .priority-tag { display: inline-block; background: #fdf3f3; color: #a32d2d; font-size: 11px; padding: 3px 8px; border-radius: 4px; margin: 2px; }
 </style>
 </head>
+  <button onclick="testWebhook()" style="position:fixed;bottom:20px;right:20px;background:#e24b4a;color:#fff;border:none;padding:8px 14px;border-radius:6px;font-size:12px;cursor:pointer;z-index:999;">Test webhook</button>
+
+<script>
+async function testWebhook() {
+  const testData = {
+    matiere: 'Maths spé',
+    date: new Date().toISOString(),
+    couverture: {"suites-arith":"oui","suites-geo":"oui","poly2":"partiel","derivation":"non","variations":"non","expo":"non","trigo":"partiel","scalaire":"non","georep":"non","condis":"oui","varialea":"partiel","bernoulli":"non","auto":"oui"},
+    scores: { score_1:2, score_2:1, score_3:1, score_4:3, score_5:4 },
+    priorites: "derivation — critique, variations — critique, poly2 — haute",
+    commentaire: "Test diagnostic fictif",
+    notation_methode: "Test",
+    json_brut: '{"test":true}',
+    chapitres_str: "suites-arith:oui:normale|suites-geo:oui:normale|poly2:partiel:haute|derivation:non:critique|variations:non:critique|expo:non:normale|trigo:partiel:normale|scalaire:non:normale|georep:non:normale|condis:oui:normale|varialea:partiel:normale|bernoulli:non:normale|auto:oui:normale"
+  };
+  await fetch('https://hook.eu1.make.com/omhd75bqteracqaewathwkzqyr9rm61q', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(testData)
+  });
+  alert('Payload test envoyé !');
+}
+</script>
 <body>
 <div class="app">
   <div class="sidebar">
