@@ -405,11 +405,11 @@ async function sendToMake(data) {
     commentaire: data.commentaire_general || '',
     notation_methode: data.notation_et_methode || '',
     json_brut: JSON.stringify(data).substring(0, 1900),
-    chapitres: Object.entries(data.couverture || {}).map(([id, statut]) => ({
-      id: id,
-      statut: statut,
-      urgence: (data.priorites || []).find(p => p.chapitre === id)?.urgence || 'normale'
-}))
+    chapitres_str: Object.entries(data.couverture || {}).map(([id, statut]) => {
+      const urgence = (data.priorites || []).find(p => p.chapitre === id)?.urgence || 'normale';
+      return id + ':' + statut + ':' + urgence;
+  }).join('|')
+  }))
   };
   try {
     await fetch(WEBHOOK, {
