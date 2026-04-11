@@ -463,7 +463,7 @@ async function sendToMake(data) {
   };
 
   const ok1 = await sendOne(payloadEcrit);
-  await new Promise(resolve => setTimeout(resolve, 2000));
+  await new Promise(resolve => setTimeout(resolve, 5000));
   const ok2 = await sendOne(payloadOral);
 
   const notif = document.createElement('div');
