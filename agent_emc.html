@@ -80,19 +80,16 @@ strong { font-weight: 500; }
       <div class="sidebar-title">Avancement</div>
       <span class="phase-badge phase-1" id="phase-badge">Phase 1 — Couverture</span>
     </div>
-
     <div>
       <div class="domain-label">Axe 1 — Fragilités du lien social</div>
       <div class="chapter-item pending" id="ch-axe1-transformations"><div class="ch-icon q">?</div>D1 — Fragilités liées aux transformations sociales</div>
       <div class="chapter-item pending" id="ch-axe1-defiance"><div class="ch-icon q">?</div>D2 — Défiance vis-à-vis de l'information et de la science</div>
     </div>
-
     <div>
       <div class="domain-label">Axe 2 — Recompositions du lien social</div>
       <div class="chapter-item pending" id="ch-axe2-solidarites"><div class="ch-icon q">?</div>D1 — Nouvelles formes de solidarité et d'engagement</div>
       <div class="chapter-item pending" id="ch-axe2-causes"><div class="ch-icon q">?</div>D2 — Nouvelles causes fédératrices</div>
     </div>
-
     <div>
       <div class="domain-label">Compétences transversales</div>
       <div class="chapter-item pending" id="ch-comp-argumentation"><div class="ch-icon q">?</div>Construire un argument pour/contre</div>
@@ -100,7 +97,6 @@ strong { font-weight: 500; }
       <div class="chapter-item pending" id="ch-comp-jugement"><div class="ch-icon q">?</div>Distinguer fait / opinion / hypothèse</div>
       <div class="chapter-item pending" id="ch-comp-oral"><div class="ch-icon q">?</div>Méthode de l'exposé oral (format CNED)</div>
     </div>
-
     <div id="scores-section" style="display:none;">
       <div class="domain-label" style="margin-top:8px;">Scores</div>
       <div class="score-row"><span style="font-size:12px;width:130px;flex-shrink:0;">Connaissances Axe 1</span><div class="score-bar-bg"><div class="score-bar" id="sb-axe1" style="width:0%"></div></div><span class="score-val" id="sv-axe1">—</span></div>
@@ -109,7 +105,6 @@ strong { font-weight: 500; }
       <div class="score-row"><span style="font-size:12px;width:130px;flex-shrink:0;">Méthode orale</span><div class="score-bar-bg"><div class="score-bar" id="sb-oral" style="width:0%"></div></div><span class="score-val" id="sv-oral">—</span></div>
     </div>
   </div>
-
   <div class="main">
     <div class="header">
       <div class="header-icon">⚖️</div>
@@ -140,14 +135,14 @@ const CHAPTERS = [
 ];
 
 const CHAPTER_LABELS = {
-  'axe1-transformations': 'D1 — Fragilités liées aux transformations sociales',
-  'axe1-defiance': 'D2 — Défiance vis-à-vis de l\'information et de la science',
-  'axe2-solidarites': 'D1 — Nouvelles formes de solidarité et d\'engagement',
-  'axe2-causes': 'D2 — Nouvelles causes fédératrices',
+  'axe1-transformations': 'D1 - Fragilites liees aux transformations sociales',
+  'axe1-defiance': 'D2 - Defiance vis-a-vis de l\'information et de la science',
+  'axe2-solidarites': 'D1 - Nouvelles formes de solidarite et d\'engagement',
+  'axe2-causes': 'D2 - Nouvelles causes federatrices',
   'comp-argumentation': 'Construire un argument pour/contre',
-  'comp-valeurs': 'Identifier valeurs et principes républicains',
-  'comp-jugement': 'Distinguer fait / opinion / hypothèse',
-  'comp-oral': 'Méthode de l\'exposé oral'
+  'comp-valeurs': 'Identifier valeurs et principes republicains',
+  'comp-jugement': 'Distinguer fait / opinion / hypothese',
+  'comp-oral': 'Methode de l\'expose oral'
 };
 
 const DOMAIN_GROUPS = [
@@ -156,77 +151,63 @@ const DOMAIN_GROUPS = [
   { label: 'Compétences transversales', badge: 'COMP', badgeClass: 'disc-comp', chapters: ['comp-argumentation','comp-valeurs','comp-jugement','comp-oral'] }
 ];
 
-const SYSTEM_PROMPT = `Tu es un agent de diagnostic pédagogique pour l'épreuve ponctuelle d'EMC (IP002) du baccalauréat général, programme Première CNED.
+const SYSTEM_PROMPT = `Tu es un agent de diagnostic pedagogique pour l'epreuve ponctuelle d'EMC (IP002) du baccalaureat general, programme Premiere CNED.
 
-L'élève est une candidate libre non réglementée — elle passe TOUT en évaluation ponctuelle, pas de contrôle continu.
+L'eleve est une candidate libre non reglementee - elle passe TOUT en evaluation ponctuelle, pas de controle continu.
 
-FORMAT DE L'ÉPREUVE IP002 (Première, voie générale) :
-- Évaluation orale : 30 min de préparation + 30 min de passage
-- Partie 1 : Exposé du candidat (10 min max)
-  → Présentation d'une situation ou d'un débat lié au domaine choisi
-  → Identification des valeurs et principes républicains en jeu
-  → Réflexion personnelle sur la situation/le débat
+FORMAT DE L'EPREUVE IP002 (Premiere, voie generale) :
+- Evaluation orale : 30 min de preparation + 30 min de passage
+- Partie 1 : Expose du candidat (10 min max)
+  - Presentation d'une situation ou d'un debat lie au domaine choisi
+  - Identification des valeurs et principes republicains en jeu
+  - Reflexion personnelle sur la situation/le debat
 - Partie 2 : Entretien avec l'examinateur (20 min)
-  → Approfondissement, mise en question de l'exposé
-  → Questions sur la capacité à différencier fait/interprétation, argument/opinion, hypothèse/connaissance, croyance/savoir
-  → Mise à distance de ses propres opinions
-- Le candidat présente une liste de 4 domaines étudiés (2 par axe). L'examinateur choisit l'un d'eux.
-- Pour les candidats individuels : choix entre 1 évaluation sur le cycle terminal entier OU 2 évaluations séparées (1ère + Terminale).
+  - Approfondissement, mise en question de l'expose
+  - Questions sur la capacite a differencier fait/interpretation, argument/opinion, hypothese/connaissance, croyance/savoir
+  - Mise a distance de ses propres opinions
+- Le candidat presente une liste de 4 domaines etudies (2 par axe). L'examinateur choisit l'un d'eux.
 
-PROGRAMME EMC PREMIÈRE — 4 domaines + compétences :
+PROGRAMME EMC PREMIERE - 4 domaines + competences :
 
-AXE 1 : Fondements et fragilités du lien social
+AXE 1 : Fondements et fragilites du lien social
 
-axe1-transformations — D1 : Les fragilités liées aux transformations de la société
-  • Familles monoparentales : ~2 millions en France (25% des familles), 85% dirigées par des femmes. Causes : divorce (40%), hors mariage (~50%), veuvage (10%). Problèmes : impayés de pension alimentaire (40% des pensions), difficultés financières (1 mère sur 2 ne boucle pas son budget). Réponse de l'État (Macron 2019) : donner à la CAF la prérogative de prélever directement les pensions impayées. Garde alternée : a doublé entre 2010-2016, reste minoritaire (17%), croît avec l'âge de l'enfant, rare chez les <3 ans (0,7%), plus fréquente dans les déciles de revenus moyens-supérieurs.
-  • Solitude des personnes âgées : 300 000 Français de +60 ans en "mort sociale". 1/3 ne sort pas tous les jours. Isolement familial (22%), amical (28%), voisinage (21%), associatif (55%). 32% des +60 ans sans personne pour parler de sujets personnels. Service "Veiller sur mes parents" (La Poste, 2017) : facteurs qui rendent visite aux seniors, résultats mitigés, syndicats critiquent la commercialisation du lien social.
-  • Précarité des jeunes : emploi précaire = CDD, intérim, apprentissage, contrats aidés. Le diplôme protège moins qu'en 1985 (écart creusé : 7-8 pts en 1985 vs 20+ pts en 2016). Jeunes livreurs mineurs (Uber Eats, Deliveroo, Stuart) : travail illégal sous 18 ans, risque de déscolarisation, pas de statistiques officielles.
-  • Notions clés : intégration, exclusion, déclassement, égalité, équité (égalité en droit ≠ équité = corriger les inégalités de fait), pension alimentaire, prérogative de puissance publique.
+D1 - axe1-transformations : Les fragilites liees aux transformations de la societe
+- Familles monoparentales : ~2 millions en France (25% des familles), 85% dirigees par des femmes. Causes : divorce (40%), hors mariage (~50%), veuvage (10%). 40% des pensions alimentaires impayees. Reponse Etat (Macron 2019) : CAF preleve directement les pensions impayees. Garde alternee : a double entre 2010-2016, reste minoritaire (17%).
+- Solitude des personnes agees : 300 000 Francais +60 ans en "mort sociale". 1/3 ne sort pas tous les jours. Service "Veiller sur mes parents" (La Poste, 2017).
+- Precarite des jeunes : emploi precaire = CDD, interim, apprentissage, contrats aides. Le diplome protege moins qu'en 1985.
+- Notions cles : integration, exclusion, declassement, egalite, equite, pension alimentaire, prerogative de puissance publique.
 
-axe1-defiance — D2 : La défiance vis-à-vis de l'information et de la science
-  • Conspirationnisme/complotisme : remet en cause la "vérité officielle", succès grandissant depuis ~10 ans, amplifié par les réseaux sociaux (caisses de résonance). Exemples : film "Hold-Up" (2020, Pierre Barnérias) sur le Covid-19, QAnon. Contexte : méfiance envers politiques et journalistes.
-  • Modération des réseaux sociaux : Twitter a supprimé 7 000 comptes QAnon (juillet 2020). 59% des fake news vérifiées continuaient à circuler sur Twitter sans label (vs 27% YouTube, 24% Facebook). Facebook a réduit la visibilité des anti-vaccins (mars 2019). Plateformes alternatives : Odysee (sept. 2020), non censuré, rémunération en crypto-monnaie, attire les complotistes français.
-  • Rudy Reichstadt (Conspiracy Watch, fondé 2007, reconnu service de presse 2018) : ne pas débattre avec les conspirationnistes pour ne pas légitimer leurs thèses. Les conspirationnistes = "faussaires".
-  • Pour lutter : développer l'esprit critique, fact-checking (vérifier faits et chiffres en temps réel).
-  • Notions clés : fact-checking, médias mainstream, crypto-monnaie, fake news, liberté d'expression.
+D2 - axe1-defiance : La defiance vis-a-vis de l'information et de la science
+- Conspirationnisme : remet en cause la "verite officielle", amplifie par les reseaux sociaux. Exemples : film "Hold-Up" (2020), QAnon.
+- Moderation des reseaux : Twitter a supprime 7000 comptes QAnon. 59% des fake news continuaient a circuler sans label sur Twitter. Facebook a reduit la visibilite des anti-vaccins (mars 2019).
+- Rudy Reichstadt (Conspiracy Watch, fonde 2007) : ne pas debattre avec les conspirationnistes.
+- Notions cles : fact-checking, fake news, liberte d'expression, esprit critique.
 
 AXE 2 : Les recompositions du lien social
 
-axe2-solidarites — D1 : Les nouvelles formes de solidarité et d'engagement
-  • Nouvelles formes : associations, bénévolat, réseaux d'entraide, universités populaires. Exemple : Petits Frères des Pauvres (lutter contre l'isolement des +60 ans).
-  • Internet et réseaux sociaux comme outils d'engagement : pétitions, collectifs citoyens, crowdfunding, mobilisations en ligne.
-  • Économie participative / collaborative / solidaire / circulaire : covoiturage, coopératives, monnaies locales, économie du partage.
-  • Notions clés : solidarité, engagement, responsabilité individuelle et collective, économie solidaire.
+D1 - axe2-solidarites : Les nouvelles formes de solidarite et d'engagement
+- Nouvelles formes : associations, benevolat, reseaux d'entraide, universites populaires.
+- Internet comme outil d'engagement : petitions, collectifs citoyens, crowdfunding, mobilisations en ligne.
+- Economie participative / collaborative / solidaire / circulaire.
+- Notions cles : solidarite, engagement, responsabilite individuelle et collective.
 
-axe2-causes — D2 : De nouvelles causes fédératrices
-  • Défense de l'environnement et protection de la biodiversité : mouvements climatiques (Extinction Rebellion, Fridays for Future), Charte de l'environnement 2004 (principe de précaution inscrit dans la Constitution), ZAN.
-  • Question animale : bien-être animal, végétarisme/véganisme, débat sur l'élevage intensif.
-  • Notions clés : principe de précaution, biodiversité, citoyenneté écologique, consensus scientifique.
+D2 - axe2-causes : De nouvelles causes federatrices
+- Defense de l'environnement : Extinction Rebellion, Fridays for Future, Charte de l'environnement 2004 (principe de precaution dans la Constitution).
+- Question animale : bien-etre animal, vegetarisme/veganisme.
+- Notions cles : principe de precaution, biodiversite, citoyennete ecologique, consensus scientifique.
 
-COMPÉTENCES TRANSVERSALES (évaluées à l'oral) :
-- comp-argumentation : construire des arguments pour et contre, les hiérarchiser, les présenter à l'oral
-- comp-valeurs : identifier les valeurs républicaines (liberté d'expression, égalité, fraternité, laïcité) et principes en jeu dans une situation
-- comp-jugement : différencier fait/interprétation, argument/opinion, hypothèse/connaissance, croyance/savoir
-- comp-oral : structure de l'exposé CNED (présentation courte de la question → arguments contre ses idées → arguments pour ses idées → conclusion sur les 2 termes essentiels du débat)
+COMPETENCES TRANSVERSALES :
+- comp-argumentation : construire des arguments pour et contre, les hierarchiser, les presenter a l'oral
+- comp-valeurs : identifier les valeurs republicaines (liberte d'expression, egalite, fraternite, laicite) en jeu
+- comp-jugement : differencier fait/interpretation, argument/opinion, hypothese/connaissance, croyance/savoir
+- comp-oral : structure de l'expose CNED (presentation courte -> arguments contre ses idees -> arguments pour ses idees -> conclusion)
 
-GRILLE D'ÉVALUATION OFFICIELLE :
-- Faire le lien entre valeurs/principes républicains et situations/débats concrets
-- Rendre compte d'une réflexion personnelle (évoquer les difficultés de mise en œuvre des valeurs)
-- Connaître les valeurs et principes de la République
-- Proposer un exposé cohérent dans une langue adaptée
-- Entrer en interaction avec l'évaluateur (argumentation convaincante)
-- Exercer son jugement (fait vs interprétation, argument vs opinion, hypothèse vs connaissance)
-- Mettre à distance ses propres opinions et représentations
-- Rendre compte d'une situation complexe
-- Considérer les autres dans leur diversité et leurs différences
+STRUCTURE - 2 PHASES
 
-═══════════════════════════════
-STRUCTURE — 2 PHASES
-═══════════════════════════════
-
-PHASE 1 — COUVERTURE
-Tu reçois le message "Voici ma couverture : ...".
-Génère immédiatement ce JSON puis passe à la phase 2 :
+PHASE 1 - COUVERTURE
+Tu recois "Voici ma couverture : ...".
+Genere immediatement ce JSON puis passe a la phase 2 :
+` + "```json" + `
 {
   "phase": 1,
   "couverture": {
@@ -240,45 +221,52 @@ Génère immédiatement ce JSON puis passe à la phase 2 :
     "comp-oral": "oui|partiel|non"
   }
 }
+` + "```" + `
 
-PHASE 2 — ÉVALUATION
-12 à 16 questions, UNE PAR UNE.
+PHASE 2 - EVALUATION
+12 a 16 questions, UNE PAR UNE.
 
-Stratégie :
-- Priorité aux domaines "oui" ou "partiel" pour les questions de contenu
-- Varier les types :
-  • Connaissances : dates, chiffres, acteurs, notions ("Qu'est-ce qu'une famille monoparentale ? Quelles en sont les causes principales ?")
-  • Compréhension : expliquer un mécanisme ("Pourquoi les réseaux sociaux amplifient-ils les théories du complot ?")
-  • Débat : arguments pour et contre ("Faut-il interdire les sites conspirationnistes ? Donne 2 arguments pour et 2 contre.")
-  • Notions : distinguer des concepts ("Différencie égalité et équité.")
-  • Valeurs : identifier les principes en jeu ("Quel principe républicain est en jeu dans la question des pensions alimentaires ?")
-  • Méthode orale : ("Comment structures-tu un exposé de 10 minutes pour l'épreuve EMC ?")
-- Alterner axe 1 / axe 2 / compétences transversales
-- Ne jamais poser deux questions consécutives sur le même domaine
-- Adapter la difficulté selon les réponses précédentes
-- Feedback en 1 phrase maximum après chaque réponse, puis question suivante
+4 DOMAINES ORIENTES REVISION :
 
-NOTATION (1 à 5) :
-1 = non maîtrisé, 2 = lacunes importantes, 3 = correct, 4 = bon, 5 = excellent
+1. CONNAISSANCES AXE 1 - Fragilites du lien social (~25%)
+Questions sur les faits, chiffres, acteurs, mecanismes des deux domaines de l'axe 1. Ex : "Qu'est-ce qu'une famille monoparentale ? Quelles en sont les causes principales ?" / "Pourquoi les reseaux sociaux amplifient-ils les theories du complot ?"
 
-JSON final :
+2. CONNAISSANCES AXE 2 - Recompositions du lien social (~25%)
+Questions sur les nouvelles formes d'engagement et les nouvelles causes. Ex : "Donne un exemple de nouvelle forme de solidarite numerique." / "Quel principe constitutionnel encadre la protection de l'environnement ?"
+
+3. COMPETENCES TRANSVERSALES (~30%)
+Exercices pratiques : construire un argument, identifier une valeur republicaine dans une situation, distinguer fait/opinion/hypothese. Ex : "Donne 2 arguments pour et 2 arguments contre l'interdiction des sites conspirationnistes." / "Identifie la valeur republicaine en jeu dans la question des pensions alimentaires impayees."
+
+4. METHODE ORALE (~20%)
+Evaluer la maitrise du format de l'expose EMC CNED. Ex : "Comment structures-tu ton expose de 10 minutes ?" / "Simule l'introduction d'un expose sur la solitude des personnes agees."
+
+REGLES :
+- Alterner axe 1 / axe 2 / competences - jamais deux questions consecutives sur le meme domaine
+- Feedback en 1 phrase max apres chaque reponse, puis question suivante
+- UNE question a la fois
+
+NOTATION (1 a 5) : 1=non maitrise, 2=lacunes importantes, 3=correct, 4=bon, 5=excellent
+
+JSON final apres la derniere question :
+` + "```json" + `
 {
   "phase": 2,
   "diagnostic_complet": true,
-  "couverture": { ... },
+  "couverture": {},
   "scores": {
-    "connaissances_axe1": { "score": X, "points_forts": "...", "lacunes": "..." },
-    "connaissances_axe2": { "score": X, "points_forts": "...", "lacunes": "..." },
-    "competences_transversales": { "score": X, "points_forts": "...", "lacunes": "..." },
-    "methode_orale": { "score": X, "points_forts": "...", "lacunes": "..." }
+    "connaissances_axe1": { "score": 0, "points_forts": "...", "lacunes": "..." },
+    "connaissances_axe2": { "score": 0, "points_forts": "...", "lacunes": "..." },
+    "competences_transversales": { "score": 0, "points_forts": "...", "lacunes": "..." },
+    "methode_orale": { "score": 0, "points_forts": "...", "lacunes": "..." }
   },
   "priorites": [{ "chapitre": "id", "raison": "...", "urgence": "critique|haute|normale" }],
   "commentaire_general": "...",
-  "sequences_fortes": ["id1", "id2"],
-  "sequences_a_retravailler": ["id1", "id2"]
+  "sequences_fortes": ["id1"],
+  "sequences_a_retravailler": ["id1"]
 }
+` + "```" + `
 
-STYLE : Accueillant, direct. Tutoyer. Courte intro (2-3 phrases) puis grille de couverture. Questions courtes et précises. Feedback constructif après chaque réponse (1 phrase max) puis question suivante immédiatement.`;
+STYLE : Accueillant, direct. Tutoyer. Questions courtes. Feedback 1 phrase max puis question suivante.`;
 
 let conversation = [];
 let isLoading = false;
@@ -322,8 +310,8 @@ function parseJSON(text) {
   try { return JSON.parse(m[1].trim()); } catch { return null; }
 }
 
-const coverageClass = { 'oui': 'studied', 'partiel': 'partial', 'non': 'not-studied' };
-const coverageIcon = { 'oui': 's', 'partiel': 'p', 'non': 'n' };
+const coverageClass  = { 'oui': 'studied', 'partiel': 'partial', 'non': 'not-studied' };
+const coverageIcon   = { 'oui': 's', 'partiel': 'p', 'non': 'n' };
 const coverageSymbol = { 'oui': '✓', 'partiel': '~', 'non': '✕' };
 
 function updateCoverage(data) {
@@ -331,11 +319,8 @@ function updateCoverage(data) {
   Object.entries(data.couverture).forEach(([ch, val]) => {
     const el = document.getElementById('ch-' + ch);
     if (!el) return;
-    const icon = coverageIcon[val] || 'q';
-    const cls = coverageClass[val] || 'pending';
-    const sym = coverageSymbol[val] || '?';
-    el.className = 'chapter-item ' + cls;
-    el.innerHTML = `<div class="ch-icon ${icon}">${sym}</div>${CHAPTER_LABELS[ch]||ch}`;
+    el.className = 'chapter-item ' + (coverageClass[val] || 'pending');
+    el.innerHTML = `<div class="ch-icon ${coverageIcon[val]||'q'}">${coverageSymbol[val]||'?'}</div>${CHAPTER_LABELS[ch]||ch}`;
   });
 }
 
@@ -364,9 +349,7 @@ function showCoverageUI() {
   const container = document.createElement('div');
   container.id = 'coverage-ui';
   container.style.cssText = 'background:#fff;border:1px solid #e0e2e8;border-radius:12px;padding:16px;margin:8px 0;max-width:680px;';
-
-  let html = '<div style="font-size:13px;font-weight:500;margin-bottom:12px;color:#555;">Pour chaque domaine, indique si tu l\'as étudié :</div>';
-
+  let html = '<div style="font-size:13px;font-weight:500;margin-bottom:12px;color:#555;">Pour chaque domaine, indique si tu l\'as etudie :</div>';
   DOMAIN_GROUPS.forEach(domain => {
     html += `<div style="margin-bottom:12px;">
       <div style="font-size:11px;font-weight:500;color:#aaa;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">
@@ -384,8 +367,7 @@ function showCoverageUI() {
     });
     html += '</div>';
   });
-
-  html += `<button onclick="validateCoverage()" style="margin-top:12px;width:100%;background:#1d6b50;color:#fff;border:none;border-radius:8px;padding:10px;font-size:14px;font-weight:500;cursor:pointer;">Valider mes réponses →</button>`;
+  html += `<button onclick="validateCoverage()" style="margin-top:12px;width:100%;background:#1d6b50;color:#fff;border:none;border-radius:8px;padding:10px;font-size:14px;font-weight:500;cursor:pointer;">Valider mes reponses →</button>`;
   container.innerHTML = html;
   messagesEl.appendChild(container);
   messagesEl.scrollTop = messagesEl.scrollHeight;
@@ -404,15 +386,14 @@ async function validateCoverage() {
   const missing = CHAPTERS.filter(ch => !coverageSelections[ch]);
   if (missing.length > 0) {
     const btn = document.querySelector('#coverage-ui button[onclick="validateCoverage()"]');
-    btn.textContent = `⚠ ${missing.length} élément(s) non renseigné(s)`;
-    setTimeout(() => btn.textContent = 'Valider mes réponses →', 2000);
+    btn.textContent = `⚠ ${missing.length} element(s) non renseigne(s)`;
+    setTimeout(() => btn.textContent = 'Valider mes reponses →', 2000);
     return;
   }
   document.getElementById('coverage-ui').remove();
   const summary = CHAPTERS.map(ch => `${CHAPTER_LABELS[ch]}: ${coverageSelections[ch]}`).join(', ');
-  addMsg('user', 'Réponses envoyées ✓');
+  addMsg('user', 'Reponses envoyees ✓');
   conversation.push({ role: 'user', content: `Voici ma couverture : ${summary}` });
-
   isLoading = true; sendBtn.disabled = true; addTyping();
   try {
     const reply = await callAPI(conversation);
@@ -421,12 +402,10 @@ async function validateCoverage() {
     const json = parseJSON(reply);
     if (json && json.phase === 1) {
       updateCoverage(json);
-      document.getElementById('phase-badge').textContent = 'Phase 2 — Évaluation';
+      document.getElementById('phase-badge').textContent = 'Phase 2 — Evaluation';
       document.getElementById('phase-badge').className = 'phase-badge phase-2';
       document.getElementById('phase-indicator').textContent = 'Phase 2 / 2';
-    } else if (json && json.phase === 2 && json.diagnostic_complet) {
-      showFinalProfile(json);
-    }
+    } else if (json && json.phase === 2 && json.diagnostic_complet) { showFinalProfile(json); }
   } catch(err) { removeTyping(); addMsg('agent', 'Erreur : ' + err.message); }
   finally { isLoading = false; sendBtn.disabled = false; inputEl.disabled = false; inputEl.focus(); }
 }
@@ -436,10 +415,10 @@ function showFinalProfile(data) {
   const card = document.createElement('div');
   card.className = 'final-card';
   const labels = {
-    connaissances_axe1: 'Connaissances Axe 1 (Fragilités)',
+    connaissances_axe1: 'Connaissances Axe 1 (Fragilites)',
     connaissances_axe2: 'Connaissances Axe 2 (Recompositions)',
-    competences_transversales: 'Compétences transversales',
-    methode_orale: 'Méthode de l\'exposé oral'
+    competences_transversales: 'Competences transversales',
+    methode_orale: 'Methode de l\'expose oral'
   };
   let rows = '';
   if (data.scores) {
@@ -450,29 +429,27 @@ function showFinalProfile(data) {
       rows += `<div class="final-row"><div class="final-label">${label}</div><div class="final-bar-bg"><div class="final-bar ${cls}" style="width:${pct}%"></div></div><div class="final-score">${s}/5</div></div>`;
     });
   }
-  let html = `<h3>Profil de compétences — EMC</h3>${rows}`;
+  let html = `<h3>Profil de competences — EMC</h3>${rows}`;
   if (data.sequences_fortes && data.sequences_fortes.length) {
     html += '<div style="margin-top:12px;"><div style="font-size:12px;color:#1d9e75;margin-bottom:4px;font-weight:500;">✓ Points forts</div>';
     data.sequences_fortes.forEach(id => { html += `<span style="display:inline-block;background:#f0faf5;color:#1d6b50;font-size:11px;padding:3px 8px;border-radius:4px;margin:2px;">${CHAPTER_LABELS[id]||id}</span>`; });
     html += '</div>';
   }
   if (data.priorites && data.priorites.length) {
-    html += '<div style="margin-top:10px;"><div style="font-size:12px;color:#aaa;margin-bottom:4px;font-weight:500;text-transform:uppercase;letter-spacing:0.04em;">À retravailler</div>';
+    html += '<div style="margin-top:10px;"><div style="font-size:12px;color:#aaa;margin-bottom:4px;font-weight:500;text-transform:uppercase;letter-spacing:0.04em;">A retravailler</div>';
     data.priorites.forEach(p => { html += `<span class="priority-tag">${CHAPTER_LABELS[p.chapitre]||p.chapitre} — ${p.urgence}</span>`; });
     html += '</div>';
   }
-  if (data.commentaire_general) {
-    html += `<div style="margin-top:12px;font-size:13px;color:#666;line-height:1.6;border-top:1px solid #f0efe9;padding-top:12px;">${data.commentaire_general}</div>`;
-  }
+  if (data.commentaire_general) html += `<div style="margin-top:12px;font-size:13px;color:#666;line-height:1.6;border-top:1px solid #f0efe9;padding-top:12px;">${data.commentaire_general}</div>`;
   card.innerHTML = html;
   messagesEl.appendChild(card);
   messagesEl.scrollTop = messagesEl.scrollHeight;
-  document.getElementById('phase-badge').textContent = 'Diagnostic terminé';
+  document.getElementById('phase-badge').textContent = 'Diagnostic termine';
   document.getElementById('phase-badge').style.background = '#f0faf5';
   document.getElementById('phase-badge').style.color = '#1d9e75';
-  document.getElementById('phase-indicator').textContent = 'Terminé';
+  document.getElementById('phase-indicator').textContent = 'Termine';
   diagnosticDone = true; sendBtn.disabled = true; inputEl.disabled = true;
-  inputEl.placeholder = 'Diagnostic terminé.';
+  inputEl.placeholder = 'Diagnostic termine.';
   sendToMake(data);
 }
 
@@ -489,30 +466,36 @@ async function sendToMake(data) {
       score_5: 0,
       domaine_1: 'Connaissances Axe 1',
       domaine_2: 'Connaissances Axe 2',
-      domaine_3: 'Compétences transversales',
-      domaine_4: 'Méthode orale',
+      domaine_3: 'Competences transversales',
+      domaine_4: 'Methode orale',
       domaine_5: ''
     },
     priorites: (data.priorites||[]).map(p => (CHAPTER_LABELS[p.chapitre]||p.chapitre) + ' — ' + p.urgence).join(', '),
     commentaire: data.commentaire_general || '',
     notation_methode: '',
-    json_brut: JSON.stringify(data).substring(0, 1800),
-    chapitres_str: Object.entries(data.couverture || {}).map(([id, statut]) => {
-      const urgence = (data.priorites||[]).find(p => p.chapitre === id)?.urgence || 'normale';
-      return id + ':' + statut + ':' + urgence;
-    }).join('|')
+    json_brut: JSON.stringify(data).substring(0, 1800)
   };
+  payload.chapitres_str = [
+    { label: payload.scores.domaine_1, score: payload.scores.score_1 },
+    { label: payload.scores.domaine_2, score: payload.scores.score_2 },
+    { label: payload.scores.domaine_3, score: payload.scores.score_3 },
+    { label: payload.scores.domaine_4, score: payload.scores.score_4 },
+    { label: payload.scores.domaine_5, score: payload.scores.score_5 }
+  ].filter(d => d.label).map(d => {
+    const statut  = d.score >= 4 ? 'oui' : d.score >= 3 ? 'partiel' : 'non';
+    const urgence = d.score <= 2 ? 'critique' : d.score <= 3 ? 'haute' : 'normale';
+    return d.label + ':' + statut + ':' + urgence;
+  }).join('|');
   try {
     await fetch(WEBHOOK_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
     const notif = document.createElement('div');
     notif.style.cssText = 'font-size:12px;color:#1d9e75;padding:8px 16px;text-align:center;';
-    notif.textContent = 'Résultats envoyés vers Notion ✓';
-    messagesEl.appendChild(notif);
-    messagesEl.scrollTop = messagesEl.scrollHeight;
+    notif.textContent = 'Resultats envoyes vers Notion ✓';
+    messagesEl.appendChild(notif); messagesEl.scrollTop = messagesEl.scrollHeight;
   } catch(e) {
     const notif = document.createElement('div');
     notif.style.cssText = 'font-size:12px;color:#e24b4a;padding:8px 16px;text-align:center;';
-    notif.textContent = 'Envoi vers Notion échoué.';
+    notif.textContent = 'Envoi vers Notion echoue.';
     messagesEl.appendChild(notif);
   }
 }
@@ -542,7 +525,7 @@ async function sendMessage() {
     if (json) {
       if (json.phase === 1) {
         updateCoverage(json);
-        document.getElementById('phase-badge').textContent = 'Phase 2 — Évaluation';
+        document.getElementById('phase-badge').textContent = 'Phase 2 — Evaluation';
         document.getElementById('phase-badge').className = 'phase-badge phase-2';
         document.getElementById('phase-indicator').textContent = 'Phase 2 / 2';
       } else if (json.phase === 2 && json.diagnostic_complet) { showFinalProfile(json); }
@@ -561,7 +544,7 @@ async function init() {
     addMsg('agent', reply);
     showCoverageUI();
   } catch(err) {
-    removeTyping(); addMsg('agent', 'Impossible de démarrer : ' + err.message);
+    removeTyping(); addMsg('agent', 'Impossible de demarrer : ' + err.message);
     inputEl.disabled = false; sendBtn.disabled = false;
   } finally { isLoading = false; }
 }
@@ -570,19 +553,33 @@ async function testWebhook() {
   const testData = {
     matiere: 'EMC',
     date: new Date().toISOString(),
-    couverture: {
-      "axe1-transformations":"oui","axe1-defiance":"oui",
-      "axe2-solidarites":"partiel","axe2-causes":"non",
-      "comp-argumentation":"partiel","comp-valeurs":"non","comp-jugement":"non","comp-oral":"non"
+    couverture: {"axe1-transformations":"oui","axe1-defiance":"oui","axe2-solidarites":"partiel","axe2-causes":"non","comp-argumentation":"partiel","comp-valeurs":"non","comp-jugement":"non","comp-oral":"non"},
+    scores: {
+      score_1: 3, score_2: 2, score_3: 2, score_4: 1, score_5: 0,
+      domaine_1: 'Connaissances Axe 1',
+      domaine_2: 'Connaissances Axe 2',
+      domaine_3: 'Competences transversales',
+      domaine_4: 'Methode orale',
+      domaine_5: ''
     },
-    scores: { score_1:3, score_2:2, score_3:2, score_4:1, score_5:0 },
-    priorites: "axe2-causes — critique, comp-valeurs — haute, comp-oral — haute",
-    commentaire: "Test EMC", notation_methode: "",
-    json_brut: '{"test":true}',
-    chapitres_str: "axe1-transformations:oui:normale|axe1-defiance:oui:normale|axe2-causes:non:critique|comp-oral:non:haute"
+    priorites: 'Methode orale — critique, Competences transversales — haute',
+    commentaire: 'Test EMC',
+    notation_methode: '',
+    json_brut: '{"test":true}'
   };
+  testData.chapitres_str = [
+    { label: testData.scores.domaine_1, score: testData.scores.score_1 },
+    { label: testData.scores.domaine_2, score: testData.scores.score_2 },
+    { label: testData.scores.domaine_3, score: testData.scores.score_3 },
+    { label: testData.scores.domaine_4, score: testData.scores.score_4 },
+    { label: testData.scores.domaine_5, score: testData.scores.score_5 }
+  ].filter(d => d.label).map(d => {
+    const statut  = d.score >= 4 ? 'oui' : d.score >= 3 ? 'partiel' : 'non';
+    const urgence = d.score <= 2 ? 'critique' : d.score <= 3 ? 'haute' : 'normale';
+    return d.label + ':' + statut + ':' + urgence;
+  }).join('|');
   await fetch(WEBHOOK_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(testData) });
-  alert('Payload test EMC envoyé !');
+  alert('Payload test EMC envoye !');
 }
 
 inputEl.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } });
