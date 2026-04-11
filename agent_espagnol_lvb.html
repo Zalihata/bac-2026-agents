@@ -410,11 +410,17 @@ async function sendToMake(data) {
     ? data.priorites_revision.join(', ')
     : (data.priorites_revision || '');
 
-  // Utiliser les labels lisibles (pas les IDs) pour Notion
+  // Labels lisibles pour Notion
   const labelMap = Object.fromEntries(COVERAGE_ITEMS.map(i => [i.id, i.label]));
+  // Urgence déduite des priorités de révision (items cités = critique/haute)
+  const prioritesList = prioritesStr.split(',').map(s => s.trim().toLowerCase());
   const chapitresStr = Object.entries(coverageState).map(([id, statut]) => {
     const label = labelMap[id] || id;
-    return label + ':' + statut + ':normale';
+    const labelLower = label.toLowerCase();
+    const urgence = prioritesList.some(p => labelLower.includes(p.substring(0, 10)))
+      ? (prioritesList.indexOf(prioritesList.find(p => labelLower.includes(p.substring(0, 10)))) === 0 ? 'critique' : 'haute')
+      : 'normale';
+    return label + ':' + statut + ':' + urgence;
   }).join('|');
 
   const payload = {
@@ -516,19 +522,41 @@ inputEl.addEventListener('input', () => {
 });
 
 async function testWebhook() {
+  const testCouverture = {
+    ser_estar: 'partiel', subjonctif: 'non', passe: 'partiel', pronoms: 'oui',
+    negatif: 'oui', prepositions: 'partiel', subordonnees: 'non',
+    comprehension_texte: 'partiel', expression_ecrite: 'non',
+    seq1_mythes: 'oui', seq2_migrations: 'non', seq3_arte: 'partiel',
+    seq4_digital: 'non', seq6_territorio: 'non'
+  };
+  const testPriorites = 'Subjonctif présent & imparfait, Passé simple & imparfait, Ser et Estar';
+  // Build chapitres_str from COVERAGE_ITEMS labels — même logique que sendToMake
+  const testLabelMap = Object.fromEntries(COVERAGE_ITEMS.map(i => [i.id, i.label]));
+  const urgenceMap = {
+    subjonctif: 'critique', passe: 'haute', ser_estar: 'haute',
+    seq3_arte: 'normale', seq1_mythes: 'normale'
+  };
+  const testChapitresStr = Object.entries(testCouverture).map(([id, statut]) => {
+    const label = testLabelMap[id] || id;
+    const urgence = urgenceMap[id] || 'normale';
+    return label + ':' + statut + ':' + urgence;
+  }).join('|');
+
   const testData = {
     matiere: 'Espagnol LVB',
     date: new Date().toISOString(),
-    couverture: { ser_estar: 'partiel', subjonctif: 'non', passe: 'partiel', pronoms: 'oui', negatif: 'oui', prepositions: 'partiel', subordonnees: 'non', comprehension_texte: 'partiel', expression_ecrite: 'non', seq1_mythes: 'oui', seq2_migrations: 'non', seq3_arte: 'partiel', seq4_digital: 'non', seq6_territorio: 'non' },
-    scores: { score_1: 3, score_2: 2, score_3: 3, score_4: 4, score_5: 2, domaine_1: 'Grammaire', domaine_2: 'Conjugaison', domaine_3: 'Lexique thématique', domaine_4: 'Compréhension', domaine_5: 'Expression & culture' },
-    priorites: 'Subjonctif présent et imparfait, Passé simple irréguliers, Ser vs Estar',
+    couverture: testCouverture,
+    scores: { score_1: 3, score_2: 2, score_3: 3, score_4: 4, score_5: 2,
+      domaine_1: 'Grammaire', domaine_2: 'Conjugaison', domaine_3: 'Lexique thématique',
+      domaine_4: 'Compréhension', domaine_5: 'Expression & culture' },
+    priorites: testPriorites,
     commentaire: 'Test — payload Espagnol LVB',
     notation_methode: 'Compréhension de texte, Vocabulaire thématique',
     json_brut: JSON.stringify({ test: true }),
-    chapitres_str: 'Ser et Estar:partiel:normale|Subjonctif présent & imparfait:non:critique|Passé simple & imparfait:partiel:haute|Pronoms personnels (COD/COI):oui:normale'
+    chapitres_str: testChapitresStr
   };
   await fetch(WEBHOOK, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(testData) });
-  alert('Payload test Espagnol LVB envoyé !');
+  alert('Payload test Espagnol LVB envoyé — ' + Object.keys(testCouverture).length + ' chapitres.');
 }
 
 
