@@ -465,7 +465,7 @@ async function sendToMake(data) {
   notif.textContent = ok1 && ok2 ? 'Résultats envoyés vers Notion (Français écrit + Français oral).' : 'Envoi partiel — vérifie Notion.';
   messagesEl.appendChild(notif);
   messagesEl.scrollTop = messagesEl.scrollHeight;
-};
+}
 
   try {
     await fetch(WEBHOOK_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payloadEcrit) });
