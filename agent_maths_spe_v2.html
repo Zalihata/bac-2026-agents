@@ -83,28 +83,6 @@ strong { font-weight: 500; }
 .priority-tag { display: inline-block; background: #fdf3f3; color: #a32d2d; font-size: 11px; padding: 3px 8px; border-radius: 4px; margin: 2px; }
 </style>
 </head>
-  <button onclick="testWebhook()" style="position:fixed;bottom:20px;left:20px;background:#d5d4ce;color:#888;border:none;padding:6px 12px;border-radius:6px;font-size:11px;cursor:pointer;z-index:999;opacity:0.6;">⚙ Test</button>
-<script>
-async function testWebhook() {
-  const testData = {
-    matiere: 'Maths',
-    date: new Date().toISOString(),
-    couverture: {"suites-arith":"oui","suites-geo":"oui","poly2":"partiel","derivation":"non","variations":"non","expo":"non","trigo":"partiel","scalaire":"non","georep":"non","condis":"oui","varialea":"partiel","bernoulli":"non","auto":"oui"},
-    scores: { score_1:2, score_2:1, score_3:1, score_4:3, score_5:4 },
-    priorites: "derivation — critique, variations — critique, poly2 — haute",
-    commentaire: "Test diagnostic fictif",
-    notation_methode: "Test",
-    json_brut: '{"test":true}',
-    chapitres_str: "suites-arith:oui:normale|suites-geo:oui:normale|poly2:partiel:haute|derivation:non:critique|variations:non:critique|expo:non:normale|trigo:partiel:normale|scalaire:non:normale|georep:non:normale|condis:oui:normale|varialea:partiel:normale|bernoulli:non:normale|auto:oui:normale"
-  };
-  await fetch('https://hook.eu1.make.com/omhd75bqteracqaewathwkzqyr9rm61q', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(testData)
-  });
-  alert('Payload test envoyé !');
-}
-</script>
 <body>
 <div class="app">
   <div class="sidebar">
@@ -175,8 +153,34 @@ async function testWebhook() {
   </div>
 </div>
 
+<button onclick="testWebhook()" style="position:fixed;bottom:20px;left:20px;background:#d5d4ce;color:#888;border:none;padding:6px 12px;border-radius:6px;font-size:11px;cursor:pointer;z-index:999;opacity:0.6;">⚙ Test</button>
+
 <script>
 const CHAPTERS = ['suites-arith','suites-geo','poly2','derivation','variations','expo','trigo','scalaire','georep','condis','varialea','bernoulli','auto'];
+
+const CHAPTER_LABELS = {
+  'suites-arith': 'Suites arithmétiques',
+  'suites-geo': 'Suites géométriques',
+  'poly2': 'Polynômes du 2nd degré',
+  'derivation': 'Dérivation',
+  'variations': 'Variations & optimisation',
+  'expo': 'Fonction exponentielle',
+  'trigo': 'Trigonométrie',
+  'scalaire': 'Produit scalaire',
+  'georep': 'Géométrie repérée',
+  'condis': 'Probas conditionnelles',
+  'varialea': 'Variables aléatoires',
+  'bernoulli': 'Épreuves de Bernoulli',
+  'auto': 'Automatismes'
+};
+
+const DOMAIN_GROUPS = [
+  { label: 'Algèbre', chapters: ['suites-arith','suites-geo','poly2'] },
+  { label: 'Analyse', chapters: ['derivation','variations','expo','trigo'] },
+  { label: 'Géométrie', chapters: ['scalaire','georep'] },
+  { label: 'Probabilités', chapters: ['condis','varialea','bernoulli'] },
+  { label: 'Automatismes', chapters: ['auto'] }
+];
 
 const SYSTEM_PROMPT = `Tu es un agent de diagnostic pédagogique pour les mathématiques spécialité de Première générale (programme officiel français, BO 2025, épreuve anticipée session 2026).
 
@@ -187,48 +191,36 @@ STRUCTURE EN 2 PHASES OBLIGATOIRE
 ═══════════════════════════════
 
 PHASE 1 — COUVERTURE DU PROGRAMME (déclaratif)
-Présente la liste complète des chapitres et demande pour chacun si elle l'a étudié.
-Les chapitres à couvrir sont exactement :
+L'élève a déjà renseigné sa couverture via une interface interactive. Tu recevras un message du type "Voici ma couverture : Suites arithmétiques: oui, ...". Analyse ces données et génère immédiatement le JSON de phase 1 puis passe en phase 2.
+
+Les chapitres sont :
 - suites-arith : Suites arithmétiques
 - suites-geo : Suites géométriques
 - poly2 : Polynômes du 2nd degré
-- derivation : Dérivation (nombre dérivé, fonction dérivée, tangente)
+- derivation : Dérivation
 - variations : Variations, extremums, optimisation
 - expo : Fonction exponentielle
-- trigo : Trigonométrie (cercle trigo, cosinus/sinus)
+- trigo : Trigonométrie
 - scalaire : Produit scalaire
-- georep : Géométrie repérée (vecteur normal, équation cercle)
+- georep : Géométrie repérée
 - condis : Probabilités conditionnelles et indépendance
-- varialea : Variables aléatoires (loi, espérance, variance, écart type)
-- bernoulli : Épreuves de Bernoulli (n ≤ 4)
-- auto : Automatismes (taux d'évolution, calcul algébrique, lecture graphique)
+- varialea : Variables aléatoires
+- bernoulli : Épreuves de Bernoulli
+- auto : Automatismes
 
-Pour chaque chapitre, l'élève répond : oui (étudié), partiellement, ou non (pas encore).
-Regroupe la présentation par domaine pour que ce soit lisible.
-Accepte aussi une réponse globale du type "j'ai fait tout jusqu'à la dérivation".
-
-À la fin de la phase 1, génère un JSON intermédiaire dans un bloc \`\`\`json ... \`\`\` :
+À la réception de la couverture, génère ce JSON dans un bloc \`\`\`json ... \`\`\` :
 {
   "phase": 1,
   "couverture": {
     "suites-arith": "oui|partiel|non",
-    "suites-geo": "oui|partiel|non",
-    "poly2": "oui|partiel|non",
-    "derivation": "oui|partiel|non",
-    "variations": "oui|partiel|non",
-    "expo": "oui|partiel|non",
-    "trigo": "oui|partiel|non",
-    "scalaire": "oui|partiel|non",
-    "georep": "oui|partiel|non",
-    "condis": "oui|partiel|non",
-    "varialea": "oui|partiel|non",
-    "bernoulli": "oui|partiel|non",
-    "auto": "oui|partiel|non"
+    ...
   }
 }
+Puis enchaîne immédiatement avec la Phase 2.
 
 PHASE 2 — ÉVALUATION (objectif)
 Tu poses entre 12 et 18 questions de maths, UNE À LA FOIS.
+
 Stratégie de sélection des questions :
 - Priorité aux chapitres déclarés "oui" ou "partiel" — on évalue ce qu'elle connaît
 - Pour les chapitres "non", pose quand même 1-2 questions de base pour détecter d'éventuelles bases de seconde
@@ -278,13 +270,13 @@ SCORING PAR DOMAINE (1 à 5) :
 
 STYLE :
 - Ton bienveillant et direct
-- Phase 1 : efficace, pas de questions de maths, juste la checklist
 - Phase 2 : une question à la fois, feedback bref après chaque réponse, indice pédagogique si elle bloque
-- Commence par un message d'accueil très court (2-3 phrases) puis lance la phase 1 directement`;
+- Commence par un message d'accueil très court (2-3 phrases) qui explique qu'elle va d'abord cocher les chapitres étudiés, puis répondre à des questions`;
 
 let conversation = [];
 let isLoading = false;
 let diagnosticDone = false;
+let coverageSelections = {};
 
 const WEBHOOK_URL = 'https://hook.eu1.make.com/omhd75bqteracqaewathwkzqyr9rm61q';
 const messagesEl = document.getElementById('messages');
@@ -324,7 +316,6 @@ function parseJSON(text) {
 }
 
 const coverageMap = { 'oui': 's', 'partiel': 'p', 'non': 'n' };
-const coverageLabel = { 'oui': 'Étudié', 'partiel': 'Partiel', 'non': 'Non étudié' };
 const coverageClass = { 'oui': 'studied', 'partiel': 'partial', 'non': 'not-studied' };
 
 function updateCoverage(data) {
@@ -334,11 +325,8 @@ function updateCoverage(data) {
     if (!el) return;
     const icon = coverageMap[val] || 'q';
     const cls = coverageClass[val] || 'pending';
-    const iconEl = el.querySelector('.ch-icon');
-    iconEl.className = 'ch-icon ' + icon;
-    iconEl.textContent = icon === 's' ? '✓' : icon === 'p' ? '~' : '✕';
     el.className = 'chapter-item ' + cls;
-    const name = el.textContent.replace(/[✓~✕?]/,'').trim();
+    const name = CHAPTER_LABELS[ch] || ch;
     el.innerHTML = `<div class="ch-icon ${icon}">${icon==='s'?'✓':icon==='p'?'~':'✕'}</div>${name}`;
   });
 }
@@ -359,6 +347,97 @@ function updateScores(scores) {
     bar.style.background = s<=2 ? '#e24b4a' : s<=3 ? '#ef9f27' : '#1d9e75';
     val.textContent = s + '/5';
   });
+}
+
+function showCoverageUI() {
+  const container = document.createElement('div');
+  container.id = 'coverage-ui';
+  container.style.cssText = 'background:#fff;border:1px solid #e5e5e0;border-radius:12px;padding:16px;margin:8px 0;max-width:680px;';
+
+  let html = '<div style="font-size:13px;font-weight:500;margin-bottom:12px;color:#555;">Pour chaque chapitre, indique si tu l\'as étudié :</div>';
+
+  DOMAIN_GROUPS.forEach(domain => {
+    html += `<div style="margin-bottom:12px;">
+      <div style="font-size:11px;font-weight:500;color:#aaa;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">${domain.label}</div>`;
+    domain.chapters.forEach(ch => {
+      html += `<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid #f5f4f0;">
+        <span style="font-size:13px;">${CHAPTER_LABELS[ch]}</span>
+        <div style="display:flex;gap:4px;">
+          <button onclick="setCoverage('${ch}','oui',this)" style="padding:4px 10px;border-radius:5px;border:1px solid #d5d4ce;background:#fff;font-size:12px;cursor:pointer;">Oui</button>
+          <button onclick="setCoverage('${ch}','partiel',this)" style="padding:4px 10px;border-radius:5px;border:1px solid #d5d4ce;background:#fff;font-size:12px;cursor:pointer;">Partiel</button>
+          <button onclick="setCoverage('${ch}','non',this)" style="padding:4px 10px;border-radius:5px;border:1px solid #d5d4ce;background:#fff;font-size:12px;cursor:pointer;">Non</button>
+        </div>
+      </div>`;
+    });
+    html += '</div>';
+  });
+
+  html += `<button onclick="validateCoverage()" style="margin-top:12px;width:100%;background:#5a4fb0;color:#fff;border:none;border-radius:8px;padding:10px;font-size:14px;font-weight:500;cursor:pointer;">Valider mes réponses →</button>`;
+
+  container.innerHTML = html;
+  messagesEl.appendChild(container);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+
+function setCoverage(ch, val, btn) {
+  coverageSelections[ch] = val;
+  const btns = btn.parentElement.querySelectorAll('button');
+  btns.forEach(b => {
+    b.style.background = '#fff';
+    b.style.color = '#1a1a1a';
+    b.style.borderColor = '#d5d4ce';
+  });
+  const colors = { oui: '#1d9e75', partiel: '#ef9f27', non: '#e24b4a' };
+  btn.style.background = colors[val];
+  btn.style.color = '#fff';
+  btn.style.borderColor = colors[val];
+}
+
+async function validateCoverage() {
+  const missing = CHAPTERS.filter(ch => !coverageSelections[ch]);
+  if (missing.length > 0) {
+    const btn = document.querySelector('#coverage-ui button[onclick="validateCoverage()"]');
+    btn.textContent = `⚠ ${missing.length} chapitre(s) non renseigné(s)`;
+    setTimeout(() => btn.textContent = 'Valider mes réponses →', 2000);
+    return;
+  }
+
+  document.getElementById('coverage-ui').remove();
+
+  const summary = CHAPTERS.map(ch => `${CHAPTER_LABELS[ch]}: ${coverageSelections[ch]}`).join(', ');
+  const userMsg = `Voici ma couverture : ${summary}`;
+
+  addMsg('user', 'Réponses envoyées ✓');
+  conversation.push({ role: 'user', content: userMsg });
+
+  isLoading = true;
+  sendBtn.disabled = true;
+  addTyping();
+
+  try {
+    const reply = await callAPI(conversation);
+    removeTyping();
+    addMsg('agent', reply);
+    conversation.push({ role: 'assistant', content: reply });
+
+    const json = parseJSON(reply);
+    if (json && json.phase === 1) {
+      updateCoverage(json);
+      document.getElementById('phase-badge').textContent = 'Phase 2 — Évaluation';
+      document.getElementById('phase-badge').className = 'phase-badge phase-2';
+      document.getElementById('phase-indicator').textContent = 'Phase 2 / 2';
+    } else if (json && json.phase === 2 && json.diagnostic_complet) {
+      showFinalProfile(json);
+    }
+  } catch(err) {
+    removeTyping();
+    addMsg('agent', 'Erreur : ' + err.message);
+  } finally {
+    isLoading = false;
+    sendBtn.disabled = false;
+    inputEl.disabled = false;
+    inputEl.focus();
+  }
 }
 
 function showFinalProfile(data) {
@@ -410,7 +489,6 @@ function showFinalProfile(data) {
 }
 
 async function sendToMake(data) {
-  const WEBHOOK = 'https://hook.eu1.make.com/omhd75bqteracqaewathwkzqyr9rm61q';
   const payload = {
     matiere: 'Maths',
     date: new Date().toISOString(),
@@ -434,10 +512,10 @@ async function sendToMake(data) {
     chapitres_str: Object.entries(data.couverture || {}).map(([id, statut]) => {
       const urgence = (data.priorites || []).find(p => p.chapitre === id)?.urgence || 'normale';
       return id + ':' + statut + ':' + urgence;
-     }).join('|')
+    }).join('|')
   };
   try {
-    await fetch(WEBHOOK, {
+    await fetch(WEBHOOK_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
@@ -513,6 +591,7 @@ async function sendMessage() {
 async function init() {
   isLoading = true;
   sendBtn.disabled = true;
+  inputEl.disabled = true;
   addTyping();
   try {
     const reply = await callAPI([{ role: 'user', content: 'Commençons.' }]);
@@ -520,14 +599,35 @@ async function init() {
     conversation.push({ role: 'user', content: 'Commençons.' });
     conversation.push({ role: 'assistant', content: reply });
     addMsg('agent', reply);
+    showCoverageUI();
   } catch(err) {
     removeTyping();
     addMsg('agent', 'Impossible de démarrer : ' + err.message);
+    inputEl.disabled = false;
+    sendBtn.disabled = false;
   } finally {
     isLoading = false;
-    sendBtn.disabled = false;
-    inputEl.focus();
   }
+}
+
+async function testWebhook() {
+  const testData = {
+    matiere: 'Maths',
+    date: new Date().toISOString(),
+    couverture: {"suites-arith":"oui","suites-geo":"oui","poly2":"partiel","derivation":"non","variations":"non","expo":"non","trigo":"partiel","scalaire":"non","georep":"non","condis":"oui","varialea":"partiel","bernoulli":"non","auto":"oui"},
+    scores: { score_1:2, score_2:1, score_3:1, score_4:3, score_5:4 },
+    priorites: "derivation — critique, variations — critique, poly2 — haute",
+    commentaire: "Test diagnostic fictif",
+    notation_methode: "Test",
+    json_brut: '{"test":true}',
+    chapitres_str: "suites-arith:oui:normale|suites-geo:oui:normale|poly2:partiel:haute|derivation:non:critique|variations:non:critique|expo:non:normale|trigo:partiel:normale|scalaire:non:normale|georep:non:normale|condis:oui:normale|varialea:partiel:normale|bernoulli:non:normale|auto:oui:normale"
+  };
+  await fetch(WEBHOOK_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(testData)
+  });
+  alert('Payload test envoyé !');
 }
 
 inputEl.addEventListener('keydown', e => {
