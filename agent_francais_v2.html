@@ -459,10 +459,9 @@ async function sendToMake(data) {
   };
 
   const [ok1, ok2] = await Promise.all([sendOne(payloadEcrit), sendOne(payloadOral)]);
-
   const notif = document.createElement('div');
   notif.style.cssText = 'font-size:12px;color:#1d9e75;padding:8px 16px;text-align:center;';
-  notif.textContent = ok1 && ok2 ? 'Résultats envoyés vers Notion (Français écrit + Français oral).' : 'Envoi partiel — vérifie Notion.';
+  notif.textContent = ok1 && ok2 ? 'Résultats envoyés vers Notion (Francais ecrit + Francais oral).' : 'Envoi partiel — vérifie Notion.';
   messagesEl.appendChild(notif);
   messagesEl.scrollTop = messagesEl.scrollHeight;
 }
