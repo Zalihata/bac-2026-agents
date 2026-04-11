@@ -95,9 +95,9 @@
       <div class="domain-score" id="score-conjugaison">—</div>
     </div>
     <div class="domain">
-      <div class="domain-name">Lexique</div>
-      <div class="domain-bar"><div class="domain-fill" id="bar-lexique"></div></div>
-      <div class="domain-score" id="score-lexique">—</div>
+      <div class="domain-name">Lexique thématique</div>
+      <div class="domain-bar"><div class="domain-fill" id="bar-lexique_thematique"></div></div>
+      <div class="domain-score" id="score-lexique_thematique">—</div>
     </div>
     <div class="domain">
       <div class="domain-name">Compréhension</div>
@@ -105,9 +105,9 @@
       <div class="domain-score" id="score-comprehension">—</div>
     </div>
     <div class="domain">
-      <div class="domain-name">Expression écrite</div>
-      <div class="domain-bar"><div class="domain-fill" id="bar-expression"></div></div>
-      <div class="domain-score" id="score-expression">—</div>
+      <div class="domain-name">Expression &amp; culture</div>
+      <div class="domain-bar"><div class="domain-fill" id="bar-expression_culture"></div></div>
+      <div class="domain-score" id="score-expression_culture">—</div>
     </div>
 
     <hr class="sidebar-divider">
@@ -132,13 +132,13 @@ const PROXY = 'https://bac-2026-agents.vercel.app/api/proxy';
 const WEBHOOK = 'https://hook.eu1.make.com/omhd75bqteracqaewathwkzqyr9rm61q';
 const MODEL = 'claude-sonnet-4-20250514';
 
-const DOMAINS = ['grammaire', 'conjugaison', 'lexique', 'comprehension', 'expression'];
+const DOMAINS = ['grammaire', 'conjugaison', 'lexique_thematique', 'comprehension', 'expression_culture'];
 const DOMAIN_LABELS = {
-  grammaire: 'Grammaire',
-  conjugaison: 'Conjugaison',
-  lexique: 'Lexique',
-  comprehension: 'Compréhension',
-  expression: 'Expression écrite'
+  grammaire:          'Grammaire',
+  conjugaison:        'Conjugaison',
+  lexique_thematique: 'Lexique thématique',
+  comprehension:      'Compréhension',
+  expression_culture: 'Expression & culture'
 };
 const TOTAL_QUESTIONS = 15;
 
@@ -166,7 +166,7 @@ const COVERAGE_ITEMS = [
 // ── STATE ────────────────────────────────────────────────────────────────────
 let phase = 1;
 let conversation = [];
-let scores = { grammaire: null, conjugaison: null, lexique: null, comprehension: null, expression: null };
+let scores = { grammaire: null, conjugaison: null, lexique_thematique: null, comprehension: null, expression_culture: null };
 let qCount = 0;
 let diagnosticDone = false;
 let isLoading = false;
@@ -187,18 +187,25 @@ TON RÔLE :
 Tu évalues les connaissances de l'élève en posant exactement ${TOTAL_QUESTIONS} questions, une à la fois, en espagnol principalement. Tu adaptes la difficulté selon les réponses.
 
 5 DOMAINES À ÉVALUER (score 0-5 chacun) :
-- grammaire : ser/estar, subjonctif, pronoms, négation, prépositions, tournure emphatique
-- conjugaison : passé simple, imparfait, subjonctif imparfait, futur, conditionnel
-- lexique : vocabulaire thématique par séquence, faux-amis, synonymes, champ lexical
-- comprehension : lecture de texte en espagnol, inférence, reformulation
-- expression : capacité à rédiger en espagnol sur un thème culturel, cohérence, connecteurs
+- grammaire (~25%) : ser/estar, subjonctif, pronoms personnels, négation, prépositions por/para, tournure emphatique
+- conjugaison (~20%) : passé simple / imparfait (distinction), subjonctif imparfait, futur, conditionnel
+- lexique_thematique (~20%) : vocabulaire par séquence étudiée — pont entre langue et culture ; champ lexical, faux-amis, connecteurs
+- comprehension (~15%) : lecture d'un texte authentique espagnol, inférence, reformulation en espagnol
+- expression_culture (~20%) : mini-rédaction (50-80 mots) en espagnol sur une thématique culturelle étudiée ; évalue fond ET forme
 
-FORMAT DE TES QUESTIONS :
-- Répartis les 15 questions : ~5 sur les faits de langue, ~3 sur la compréhension, ~4 sur les thématiques culturelles (1 question par séquence déclarée "oui" ou "partiel"), ~3 sur l'expression écrite
-- Pour les questions de grammaire ou conjugaison : consigne en français, réponse en espagnol
-- Pour la compréhension : propose un court extrait authentique en espagnol (3-5 lignes) lié aux thèmes étudiés, pose une question de compréhension
-- Pour les thématiques culturelles : demande de résumer un thème, d'expliquer un personnage (Evita, Che Guevara, Pablo Escobar, Don Quijote…), de donner son opinion argumentée en espagnol
-- Pour l'expression : donne une consigne de mini-rédaction (50-80 mots) sur un sujet culturel étudié
+RÉPARTITION DES 15 QUESTIONS (respecte cette distribution) :
+- Q1-Q4 : Grammaire (4 questions — ser/estar, subjonctif, pronoms, négation/prépositions)
+- Q5-Q7 : Conjugaison (3 questions — passé simple/imparfait, puis deux autres temps)
+- Q8-Q9 : Lexique thématique (2 questions — vocabulaire ciblé sur les séquences déclarées "oui" ou "partiel")
+- Q10-Q11 : Compréhension (1 extrait de texte authentique ~5 lignes + 2 questions dessus)
+- Q12-Q13 : Thématiques culturelles (2 questions — résumer un thème, commenter une figure ou un enjeu des séquences déclarées)
+- Q14-Q15 : Expression & culture (1 consigne de mini-rédaction sur thème culturel ; évalue Q14 puis pose Q15 de suivi/correction)
+
+RÈGLES DE FORMAT :
+- Grammaire/conjugaison : consigne en français, réponse attendue en espagnol
+- Compréhension : donne le texte puis pose la question — ne demande jamais de chercher un texte
+- Questions culturelles : en espagnol, ton de conversation authentique, demande un avis ou une description argumentée
+- Expression : consigne claire en français + critères (longueur, thème, structure attendue)
 - Corrige toujours la réponse précédente avant de poser la suivante
 - Ne pose qu'UNE question à la fois
 
@@ -225,9 +232,9 @@ Après la question ${TOTAL_QUESTIONS}, fournis OBLIGATOIREMENT un bloc JSON stru
   "scores": {
     "grammaire": X,
     "conjugaison": X,
-    "lexique": X,
+    "lexique_thematique": X,
     "comprehension": X,
-    "expression": X
+    "expression_culture": X
   },
   "points_forts": ["...", "..."],
   "points_faibles": ["...", "..."],
@@ -415,16 +422,16 @@ async function sendToMake(data) {
     date: new Date().toISOString(),
     couverture: coverageState,
     scores: {
-      score_1: s.grammaire     || 0,
-      score_2: s.conjugaison   || 0,
-      score_3: s.lexique       || 0,
-      score_4: s.comprehension || 0,
-      score_5: s.expression    || 0,
+      score_1: s.grammaire          || 0,
+      score_2: s.conjugaison        || 0,
+      score_3: s.lexique_thematique || 0,
+      score_4: s.comprehension      || 0,
+      score_5: s.expression_culture || 0,
       domaine_1: 'Grammaire',
       domaine_2: 'Conjugaison',
-      domaine_3: 'Lexique',
+      domaine_3: 'Lexique thématique',
       domaine_4: 'Compréhension',
-      domaine_5: 'Expression écrite'
+      domaine_5: 'Expression & culture'
     },
     priorites: prioritesStr,
     commentaire: data.recommandation || '',
@@ -513,7 +520,7 @@ async function testWebhook() {
     matiere: 'Espagnol LVB',
     date: new Date().toISOString(),
     couverture: { ser_estar: 'partiel', subjonctif: 'non', passe: 'partiel', pronoms: 'oui', negatif: 'oui', prepositions: 'partiel', subordonnees: 'non', comprehension_texte: 'partiel', expression_ecrite: 'non', seq1_mythes: 'oui', seq2_migrations: 'non', seq3_arte: 'partiel', seq4_digital: 'non', seq6_territorio: 'non' },
-    scores: { score_1: 3, score_2: 2, score_3: 3, score_4: 4, score_5: 2, domaine_1: 'Grammaire', domaine_2: 'Conjugaison', domaine_3: 'Lexique', domaine_4: 'Compréhension', domaine_5: 'Expression écrite' },
+    scores: { score_1: 3, score_2: 2, score_3: 3, score_4: 4, score_5: 2, domaine_1: 'Grammaire', domaine_2: 'Conjugaison', domaine_3: 'Lexique thématique', domaine_4: 'Compréhension', domaine_5: 'Expression & culture' },
     priorites: 'Subjonctif présent et imparfait, Passé simple irréguliers, Ser vs Estar',
     commentaire: 'Test — payload Espagnol LVB',
     notation_methode: 'Compréhension de texte, Vocabulaire thématique',
