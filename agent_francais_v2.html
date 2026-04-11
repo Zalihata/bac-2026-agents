@@ -147,7 +147,29 @@ strong { font-weight: 500; }
   </div>
 </div>
 
+<button onclick="testWebhook()" style="position:fixed;bottom:20px;left:20px;background:#d5d4ce;color:#888;border:none;padding:6px 12px;border-radius:6px;font-size:11px;cursor:pointer;z-index:999;opacity:0.6;">⚙ Test</button>
+
 <script>
+const CHAPTERS = ['rimbaud','manon','sarraute','graffigny','dissert','commentaire','lineaire','grammaire','entretien'];
+
+const CHAPTER_LABELS = {
+  'rimbaud': 'Rimbaud — Les Cahiers de Douai',
+  'manon': 'Abbé Prévost — Manon Lescaut',
+  'sarraute': 'Sarraute — Pour un oui ou pour un non',
+  'graffigny': 'Graffigny — Lettres d\'une Péruvienne',
+  'dissert': 'Dissertation',
+  'commentaire': 'Commentaire composé',
+  'lineaire': 'Explication linéaire',
+  'grammaire': 'Question de grammaire',
+  'entretien': 'Entretien oral'
+};
+
+const DOMAIN_GROUPS = [
+  { label: 'Œuvres & parcours', chapters: ['rimbaud','manon','sarraute','graffigny'] },
+  { label: 'Méthode écrit (T001)', chapters: ['dissert','commentaire'] },
+  { label: 'Méthode oral (T002)', chapters: ['lineaire','grammaire','entretien'] }
+];
+
 const SYSTEM_PROMPT = `Tu es un agent de diagnostic pédagogique pour le Français EAF (Épreuves Anticipées de Français) de Première générale au baccalauréat français.
 
 L'élève est candidate libre au bac — elle passe TOUT en ponctuel, pas de contrôle continu. Elle prépare deux épreuves :
@@ -165,55 +187,31 @@ PROGRAMME CNED OFFICIEL SESSION 2026 — 4 objets d'étude :
 
 1. LA POÉSIE DU XIXe AU XXIe SIÈCLE
    Œuvre intégrale : Arthur Rimbaud, Les Cahiers de Douai (1870)
-   Extraits étudiés : « Vénus anadyomène », « Le Dormeur du val »
    Parcours « Émancipations créatrices »
-   Textes du parcours : Aloysius Bertrand, Gaspard de la nuit, « Un Rêve » (1842) ; Raymond Queneau, L'Instant fatal, « Si tu t'imagines » (1946)
-   Lecture cursive au choix : Apollinaire Calligrammes OU Ponge Le Parti pris des choses OU Prévert Paroles
 
 2. LE ROMAN ET LE RÉCIT DU MOYEN ÂGE AU XXIe SIÈCLE
    Œuvre intégrale : Abbé Prévost, Manon Lescaut (1731)
-   Extraits étudiés : « La rencontre », « Les plaintes d'un amant »
    Parcours « Personnages en marge, plaisirs du romanesque »
-   Textes du parcours : Stendhal, Le Rouge et le noir, Première partie chapitre 4 (1830) ; Flaubert, Madame Bovary, Deuxième partie chapitre 12 (1857)
-   Lecture cursive au choix : Gaudé Salina OU Colombani La Tresse OU Gaël Faye Petit pays
 
 3. LE THÉÂTRE DU XVIIe AU XXIe SIÈCLE
    Œuvre intégrale : Nathalie Sarraute, Pour un oui ou pour un non (1981)
-   Extraits étudiés : « Les origines de la dispute », « Une deuxième crise en miroir de la première »
    Parcours « Théâtre et dispute »
-   Textes du parcours : Corneille, Cinna, Acte I scène 1, le monologue d'Émilie (1643) ; Molière, Le Misanthrope, Acte I scène 1 (1666)
-   Lecture cursive au choix : Le Prénom OU Le Mariage de Figaro OU Le Tartuffe
 
 4. LA LITTÉRATURE D'IDÉES DU XVIe AU XVIIIe SIÈCLE
    Œuvre intégrale : Françoise de Graffigny, Lettres d'une Péruvienne (1747)
-   Extraits étudiés : « Le règne de l'apparence » (lettre XVI), « Le système politique français » (lettre XX)
    Parcours « Un nouvel univers s'est offert à mes yeux »
-   Textes du parcours : Bougainville, Voyage autour du monde, « Les Tahitiens » (1771) ; Montesquieu, Lettres persanes, « La mode française » lettre 99 (1721)
-   Lecture cursive au choix : Djavann Comment peut-on être français ? OU Nothomb Stupeur et tremblements OU Garde Ce qu'il advint du sauvage blanc
-
-POUR L'ENTRETIEN ORAL : l'élève choisit UNE œuvre parmi les lectures cursives ou les œuvres intégrales étudiées en cours d'année.
 
 ═══════════════════════════════
 STRUCTURE EN 2 PHASES OBLIGATOIRE
 ═══════════════════════════════
 
 PHASE 1 — COUVERTURE DU PROGRAMME (déclaratif)
-Présente les chapitres groupés par objet d'étude et demande pour chacun si elle l'a étudié.
+L'élève a déjà renseigné sa couverture via une interface interactive. Tu recevras un message du type "Voici ma couverture : Rimbaud: oui, ...". Analyse ces données et génère immédiatement le JSON de phase 1 puis passe en phase 2.
+
 Les identifiants de chapitres sont exactement :
-- rimbaud : Rimbaud — Les Cahiers de Douai + parcours Émancipations créatrices
-- manon : Abbé Prévost — Manon Lescaut + parcours Personnages en marge
-- sarraute : Nathalie Sarraute — Pour un oui ou pour un non + parcours Théâtre et dispute
-- graffigny : Françoise de Graffigny — Lettres d'une Péruvienne + parcours Un nouvel univers
-- dissert : Méthode — Dissertation
-- commentaire : Méthode — Commentaire composé
-- lineaire : Méthode — Explication linéaire
-- grammaire : Méthode — Question de grammaire
-- entretien : Méthode — Entretien (présentation de la lecture personnelle)
+- rimbaud, manon, sarraute, graffigny, dissert, commentaire, lineaire, grammaire, entretien
 
-Pour chaque chapitre, l'élève répond : oui (étudié), partiellement, ou non (pas encore).
-Accepte aussi une réponse globale ("j'ai fait Rimbaud et Manon Lescaut mais pas le reste").
-
-À la fin de la phase 1, génère un JSON intermédiaire dans un bloc \`\`\`json ... \`\`\` :
+À la réception de la couverture, génère ce JSON dans un bloc \`\`\`json ... \`\`\` :
 {
   "phase": 1,
   "couverture": {
@@ -228,51 +226,25 @@ Accepte aussi une réponse globale ("j'ai fait Rimbaud et Manon Lescaut mais pas
     "entretien": "oui|partiel|non"
   }
 }
+Puis enchaîne immédiatement avec la Phase 2.
 
 PHASE 2 — ÉVALUATION (objectif)
 Tu poses entre 12 et 18 questions, UNE À LA FOIS.
+
 Stratégie :
 - Priorité aux chapitres déclarés "oui" ou "partiel"
 - Varie les domaines : connaissance des œuvres, maîtrise méthodologique, culture du parcours
+- Varie les types de questions : connaissance du texte, analyse stylistique, question de méthode, mise en situation orale
+- Ne pose jamais deux questions consécutives sur le même chapitre
 - Adapte la difficulté selon les réponses précédentes
 - Pour les chapitres "non", 1 question de culture générale pour détecter des bases
 
-TYPES DE QUESTIONS À POSER :
-Connaissance des œuvres :
-  - Résumé d'une œuvre, situation d'un extrait
-  - Thèmes majeurs, enjeux de lecture
-  - Caractéristiques stylistiques (registres, figures de style, versification pour la poésie)
-  - Contexte biographique/historique pertinent
-
-Connaissance des parcours :
-  - Définition et enjeux du parcours
-  - Liens entre l'œuvre principale et les textes du parcours
-  - Exemples d'œuvres ou textes complémentaires du parcours
-
-Méthode écrit :
-  - Structure d'une dissertation (thèse, antithèse, synthèse)
-  - Construction d'un plan de commentaire
-  - Rédaction d'une introduction ou d'une transition
-  - Formulation d'une problématique
-
-Méthode oral :
-  - Structure d'une explication linéaire (mouvement par mouvement)
-  - Identification d'un procédé stylistique et de son effet
-  - Formulation d'une phrase de grammaire (classe, fonction, nature)
-  - Présentation d'une lecture personnelle pour l'entretien
-
-ÉVALUATION DE CHAQUE RÉPONSE :
-a) Exactitude du contenu littéraire
-b) Précision du vocabulaire technique (registre, isotopie, hyperbole, etc.)
-c) Qualité de la formulation (clarté, structure)
-d) Maîtrise méthodologique pour les questions de méthode
-
 SCORING PAR DOMAINE (1 à 5) :
-- 1 : notions non maîtrisées, erreurs de base
+- 1 : notions non maîtrisées
 - 2 : comprend les concepts, lacunes importantes
 - 3 : niveau correct, quelques imprécisions
 - 4 : bonne maîtrise, formulation fluide
-- 5 : très bonne maîtrise, vocabulary précis, méthode solide
+- 5 : très bonne maîtrise, vocabulaire précis, méthode solide
 
 À la fin de la phase 2, génère le profil final dans un bloc \`\`\`json ... \`\`\` :
 {
@@ -280,30 +252,10 @@ SCORING PAR DOMAINE (1 à 5) :
   "diagnostic_complet": true,
   "couverture": { /* reprendre les données phase 1 */ },
   "scores": {
-    "oeuvres": {
-      "score": X,
-      "chapitres": ["rimbaud","apollinaire","manon","lagarce","olympe"],
-      "points_forts": "...",
-      "lacunes": "..."
-    },
-    "parcours": {
-      "score": X,
-      "chapitres": ["marges","crise","combattre"],
-      "points_forts": "...",
-      "lacunes": "..."
-    },
-    "methode_ecrit": {
-      "score": X,
-      "chapitres": ["dissert","commentaire"],
-      "points_forts": "...",
-      "lacunes": "..."
-    },
-    "methode_oral": {
-      "score": X,
-      "chapitres": ["lineaire","grammaire","entretien"],
-      "points_forts": "...",
-      "lacunes": "..."
-    }
+    "oeuvres": { "score": X, "chapitres": ["rimbaud","manon","sarraute","graffigny"], "points_forts": "...", "lacunes": "..." },
+    "parcours": { "score": X, "chapitres": ["rimbaud","manon","sarraute","graffigny"], "points_forts": "...", "lacunes": "..." },
+    "methode_ecrit": { "score": X, "chapitres": ["dissert","commentaire"], "points_forts": "...", "lacunes": "..." },
+    "methode_oral": { "score": X, "chapitres": ["lineaire","grammaire","entretien"], "points_forts": "...", "lacunes": "..." }
   },
   "priorites": [
     { "chapitre": "id-chapitre", "raison": "non étudié|niveau faible|...", "urgence": "critique|haute|normale" }
@@ -314,14 +266,15 @@ SCORING PAR DOMAINE (1 à 5) :
 
 STYLE :
 - Ton bienveillant, direct, jamais condescendant
-- Phase 1 : rapide et efficace, aucune question de littérature
 - Phase 2 : une question à la fois, feedback constructif, exemple ou indice si elle bloque
-- Commence par un accueil très court (2-3 phrases) puis lance la phase 1 directement`;
+- Commence par un accueil très court (2-3 phrases) qui explique qu'elle va cocher les chapitres étudiés puis répondre à des questions`;
 
 let conversation = [];
 let isLoading = false;
 let diagnosticDone = false;
+let coverageSelections = {};
 
+const WEBHOOK_URL = 'https://hook.eu1.make.com/omhd75bqteracqaewathwkzqyr9rm61q';
 const messagesEl = document.getElementById('messages');
 const inputEl = document.getElementById('input');
 const sendBtn = document.getElementById('send-btn');
@@ -362,18 +315,6 @@ const coverageClass = { 'oui': 'studied', 'partiel': 'partial', 'non': 'not-stud
 const coverageIcon = { 'oui': 's', 'partiel': 'p', 'non': 'n' };
 const coverageSymbol = { 'oui': '✓', 'partiel': '~', 'non': '✕' };
 
-const chapterNames = {
-  'rimbaud': 'Rimbaud — Les Cahiers de Douai',
-  'manon': 'Abbé Prévost — Manon Lescaut',
-  'sarraute': 'Sarraute — Pour un oui ou pour un non',
-  'graffigny': 'Graffigny — Lettres d\'une Péruvienne',
-  'dissert': 'Dissertation',
-  'commentaire': 'Commentaire composé',
-  'lineaire': 'Explication linéaire',
-  'grammaire': 'Question de grammaire',
-  'entretien': 'Entretien oral'
-};
-
 function updateCoverage(data) {
   if (!data || !data.couverture) return;
   Object.entries(data.couverture).forEach(([ch, val]) => {
@@ -382,7 +323,7 @@ function updateCoverage(data) {
     const icon = coverageIcon[val] || 'q';
     const cls = coverageClass[val] || 'pending';
     const sym = coverageSymbol[val] || '?';
-    const name = chapterNames[ch] || ch;
+    const name = CHAPTER_LABELS[ch] || ch;
     el.className = 'chapter-item ' + cls;
     el.innerHTML = `<div class="ch-icon ${icon}">${sym}</div>${name}`;
   });
@@ -391,12 +332,7 @@ function updateCoverage(data) {
 function updateScores(scores) {
   if (!scores) return;
   document.getElementById('scores-section').style.display = 'block';
-  const map = {
-    oeuvres: 'oeuvres',
-    parcours: 'parcours',
-    methode_ecrit: 'ecrit',
-    methode_oral: 'oral'
-  };
+  const map = { oeuvres: 'oeuvres', parcours: 'parcours', methode_ecrit: 'ecrit', methode_oral: 'oral' };
   Object.entries(map).forEach(([key, id]) => {
     const d = scores[key];
     if (!d) return;
@@ -409,6 +345,97 @@ function updateScores(scores) {
     bar.style.background = s<=2 ? '#e24b4a' : s<=3 ? '#ef9f27' : '#1d9e75';
     val.textContent = s + '/5';
   });
+}
+
+function showCoverageUI() {
+  const container = document.createElement('div');
+  container.id = 'coverage-ui';
+  container.style.cssText = 'background:#fff;border:1px solid #e5e5e0;border-radius:12px;padding:16px;margin:8px 0;max-width:680px;';
+
+  let html = '<div style="font-size:13px;font-weight:500;margin-bottom:12px;color:#555;">Pour chaque chapitre, indique si tu l\'as étudié :</div>';
+
+  DOMAIN_GROUPS.forEach(domain => {
+    html += `<div style="margin-bottom:12px;">
+      <div style="font-size:11px;font-weight:500;color:#aaa;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">${domain.label}</div>`;
+    domain.chapters.forEach(ch => {
+      html += `<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid #f5f4f0;">
+        <span style="font-size:13px;">${CHAPTER_LABELS[ch]}</span>
+        <div style="display:flex;gap:4px;">
+          <button onclick="setCoverage('${ch}','oui',this)" style="padding:4px 10px;border-radius:5px;border:1px solid #d5d4ce;background:#fff;font-size:12px;cursor:pointer;">Oui</button>
+          <button onclick="setCoverage('${ch}','partiel',this)" style="padding:4px 10px;border-radius:5px;border:1px solid #d5d4ce;background:#fff;font-size:12px;cursor:pointer;">Partiel</button>
+          <button onclick="setCoverage('${ch}','non',this)" style="padding:4px 10px;border-radius:5px;border:1px solid #d5d4ce;background:#fff;font-size:12px;cursor:pointer;">Non</button>
+        </div>
+      </div>`;
+    });
+    html += '</div>';
+  });
+
+  html += `<button onclick="validateCoverage()" style="margin-top:12px;width:100%;background:#6b3fa0;color:#fff;border:none;border-radius:8px;padding:10px;font-size:14px;font-weight:500;cursor:pointer;">Valider mes réponses →</button>`;
+
+  container.innerHTML = html;
+  messagesEl.appendChild(container);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+
+function setCoverage(ch, val, btn) {
+  coverageSelections[ch] = val;
+  const btns = btn.parentElement.querySelectorAll('button');
+  btns.forEach(b => {
+    b.style.background = '#fff';
+    b.style.color = '#1a1a1a';
+    b.style.borderColor = '#d5d4ce';
+  });
+  const colors = { oui: '#1d9e75', partiel: '#ef9f27', non: '#e24b4a' };
+  btn.style.background = colors[val];
+  btn.style.color = '#fff';
+  btn.style.borderColor = colors[val];
+}
+
+async function validateCoverage() {
+  const missing = CHAPTERS.filter(ch => !coverageSelections[ch]);
+  if (missing.length > 0) {
+    const btn = document.querySelector('#coverage-ui button[onclick="validateCoverage()"]');
+    btn.textContent = `⚠ ${missing.length} chapitre(s) non renseigné(s)`;
+    setTimeout(() => btn.textContent = 'Valider mes réponses →', 2000);
+    return;
+  }
+
+  document.getElementById('coverage-ui').remove();
+
+  const summary = CHAPTERS.map(ch => `${CHAPTER_LABELS[ch]}: ${coverageSelections[ch]}`).join(', ');
+  const userMsg = `Voici ma couverture : ${summary}`;
+
+  addMsg('user', 'Réponses envoyées ✓');
+  conversation.push({ role: 'user', content: userMsg });
+
+  isLoading = true;
+  sendBtn.disabled = true;
+  addTyping();
+
+  try {
+    const reply = await callAPI(conversation);
+    removeTyping();
+    addMsg('agent', reply);
+    conversation.push({ role: 'assistant', content: reply });
+
+    const json = parseJSON(reply);
+    if (json && json.phase === 1) {
+      updateCoverage(json);
+      document.getElementById('phase-badge').textContent = 'Phase 2 — Évaluation';
+      document.getElementById('phase-badge').className = 'phase-badge phase-2';
+      document.getElementById('phase-indicator').textContent = 'Phase 2 / 2';
+    } else if (json && json.phase === 2 && json.diagnostic_complet) {
+      showFinalProfile(json);
+    }
+  } catch(err) {
+    removeTyping();
+    addMsg('agent', 'Erreur : ' + err.message);
+  } finally {
+    isLoading = false;
+    sendBtn.disabled = false;
+    inputEl.disabled = false;
+    inputEl.focus();
+  }
 }
 
 function showFinalProfile(data) {
@@ -442,7 +469,7 @@ function showFinalProfile(data) {
   if (data.priorites && data.priorites.length) {
     priorities = '<div style="margin-top:14px;"><div style="font-size:12px;color:#aaa;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.04em;">Priorités de révision</div>';
     data.priorites.forEach(p => {
-      priorities += `<span class="priority-tag">${chapterNames[p.chapitre]||p.chapitre} — ${p.urgence}</span>`;
+      priorities += `<span class="priority-tag">${CHAPTER_LABELS[p.chapitre]||p.chapitre} — ${p.urgence}</span>`;
     });
     priorities += '</div>';
   }
@@ -465,7 +492,6 @@ function showFinalProfile(data) {
 }
 
 async function sendToMake(data) {
-  const WEBHOOK = 'https://hook.eu1.make.com/omhd75bqteracqaewathwkzqyr9rm61q';
   const payload = {
     matiere: 'Français',
     date: new Date().toISOString(),
@@ -482,13 +508,17 @@ async function sendToMake(data) {
       domaine_4: 'Methode oral',
       domaine_5: ''
     },
-    priorites: (data.priorites || []).map(p => (chapterNames[p.chapitre]||p.chapitre) + ' — ' + p.urgence).join(', '),
+    priorites: (data.priorites || []).map(p => (CHAPTER_LABELS[p.chapitre]||p.chapitre) + ' — ' + p.urgence).join(', '),
     commentaire: data.commentaire_general || '',
     notation_methode: data.methode_et_style || '',
-    json_brut: JSON.stringify(data)
+    json_brut: JSON.stringify(data).substring(0, 1800),
+    chapitres_str: Object.entries(data.couverture || {}).map(([id, statut]) => {
+      const urgence = (data.priorites || []).find(p => p.chapitre === id)?.urgence || 'normale';
+      return id + ':' + statut + ':' + urgence;
+    }).join('|')
   };
   try {
-    await fetch(WEBHOOK, {
+    await fetch(WEBHOOK_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
@@ -564,6 +594,7 @@ async function sendMessage() {
 async function init() {
   isLoading = true;
   sendBtn.disabled = true;
+  inputEl.disabled = true;
   addTyping();
   try {
     const reply = await callAPI([{ role: 'user', content: 'Commençons.' }]);
@@ -571,14 +602,35 @@ async function init() {
     conversation.push({ role: 'user', content: 'Commençons.' });
     conversation.push({ role: 'assistant', content: reply });
     addMsg('agent', reply);
+    showCoverageUI();
   } catch(err) {
     removeTyping();
     addMsg('agent', 'Impossible de démarrer : ' + err.message);
+    inputEl.disabled = false;
+    sendBtn.disabled = false;
   } finally {
     isLoading = false;
-    sendBtn.disabled = false;
-    inputEl.focus();
   }
+}
+
+async function testWebhook() {
+  const testData = {
+    matiere: 'Français',
+    date: new Date().toISOString(),
+    couverture: {"rimbaud":"oui","manon":"oui","sarraute":"partiel","graffigny":"non","dissert":"partiel","commentaire":"partiel","lineaire":"oui","grammaire":"non","entretien":"non"},
+    scores: { score_1:3, score_2:2, score_3:2, score_4:3, score_5:0 },
+    priorites: "graffigny — critique, grammaire — critique, entretien — haute",
+    commentaire: "Test diagnostic fictif Français",
+    notation_methode: "Test",
+    json_brut: '{"test":true}',
+    chapitres_str: "rimbaud:oui:normale|manon:oui:normale|sarraute:partiel:normale|graffigny:non:critique|dissert:partiel:normale|commentaire:partiel:normale|lineaire:oui:normale|grammaire:non:critique|entretien:non:haute"
+  };
+  await fetch(WEBHOOK_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(testData)
+  });
+  alert('Payload test Français envoyé !');
 }
 
 inputEl.addEventListener('keydown', e => {
