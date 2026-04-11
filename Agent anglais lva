@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diagnostic Anglais LVA — Première</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f7f6f3; color: #1a1a1a; min-height: 100vh; }
+.app { display: flex; height: 100vh; }
+.sidebar { width: 270px; background: #fff; border-right: 1px solid #e5e5e0; padding: 20px 16px; display: flex; flex-direction: column; gap: 12px; flex-shrink: 0; overflow-y: auto; }
+.sidebar-title { font-size: 11px; font-weight: 500; color: #aaa; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+.phase-badge { font-size: 12px; font-weight: 500; padding: 4px 10px; border-radius: 20px; display: inline-block; }
+.phase-1 { background: #e8f4fd; color: #185fa5; }
+.phase-2 { background: #fef3e8; color: #b45309; }
+.chapter-item { display: flex; align-items: flex-start; gap: 8px; padding: 6px 8px; border-radius: 6px; font-size: 12px; line-height: 1.4; }
+.chapter-item.studied { background: #f0faf5; }
+.chapter-item.partial { background: #fff8ec; }
+.chapter-item.not-studied { background: #fdf3f3; }
+.chapter-item.pending { background: #f7f6f3; color: #aaa; }
+.ch-icon { width: 16px; height: 16px; border-radius: 3px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 10px; margin-top: 1px; }
+.ch-icon.s { background: #1d9e75; color: #fff; }
+.ch-icon.p { background: #ef9f27; color: #fff; }
+.ch-icon.n { background: #e24b4a; color: #fff; }
+.ch-icon.q { background: #d5d4ce; color: #888; }
+.domain-label { font-size: 11px; color: #aaa; font-weight: 500; margin: 8px 0 4px; text-transform: uppercase; letter-spacing: 0.04em; }
+.score-row { display: flex; align-items: center; gap: 8px; padding: 4px 8px; font-size: 12px; }
+.score-bar-bg { flex: 1; height: 4px; background: #f0efe9; border-radius: 2px; }
+.score-bar { height: 4px; border-radius: 2px; transition: width 0.6s, background 0.6s; background: #d5d4ce; }
+.score-val { font-size: 11px; color: #888; width: 28px; text-align: right; flex-shrink: 0; }
+.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.header { padding: 14px 24px; border-bottom: 1px solid #e5e5e0; background: #fff; display: flex; align-items: center; gap: 12px; }
+.header-text h1 { font-size: 15px; font-weight: 500; }
+.header-text p { font-size: 12px; color: #888; margin-top: 1px; }
+.phase-indicator { margin-left: auto; font-size: 12px; color: #888; }
+.messages { flex: 1; overflow-y: auto; padding: 20px 24px; display: flex; flex-direction: column; gap: 14px; }
+.msg { display: flex; gap: 10px; }
+.msg.user { flex-direction: row-reverse; align-self: flex-end; max-width: 600px; }
+.msg.agent { align-self: flex-start; max-width: 680px; }
+.avatar { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 500; flex-shrink: 0; }
+.agent .avatar { background: #fef3e8; color: #b45309; }
+.user .avatar { background: #e3f0e8; color: #2d7a4f; }
+.bubble { padding: 11px 15px; border-radius: 12px; font-size: 14px; line-height: 1.65; }
+.agent .bubble { background: #fff; border: 1px solid #e5e5e0; border-radius: 4px 12px 12px 12px; }
+.user .bubble { background: #b45309; color: #fff; border-radius: 12px 4px 12px 12px; }
+.typing { display: flex; gap: 4px; align-items: center; padding: 4px 0; }
+.dot { width: 6px; height: 6px; border-radius: 50%; background: #bbb; animation: bounce 1.2s infinite; }
+.dot:nth-child(2) { animation-delay: 0.2s; }
+.dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes bounce { 0%,80%,100%{transform:translateY(0)} 40%{transform:translateY(-5px)} }
+.input-area { padding: 14px 24px; border-top: 1px solid #e5e5e0; background: #fff; display: flex; gap: 10px; align-items: flex-end; }
+textarea { flex: 1; border: 1px solid #d5d4ce; border-radius: 8px; padding: 9px 13px; font-size: 14px; font-family: inherit; resize: none; line-height: 1.5; max-height: 120px; min-height: 38px; }
+textarea:focus { outline: none; border-color: #b45309; box-shadow: 0 0 0 2px rgba(180,83,9,0.12); }
+button.send { background: #b45309; color: #fff; border: none; border-radius: 8px; padding: 9px 18px; font-size: 14px; font-weight: 500; cursor: pointer; flex-shrink: 0; height: 38px; }
+button.send:hover { background: #92400e; }
+button.send:disabled { background: #ccc; cursor: not-allowed; }
+.kb-hint { font-size: 11px; color: #bbb; padding-top: 3px; }
+pre { background: #f5f4f0; border-radius: 6px; padding: 8px 12px; font-size: 12px; overflow-x: auto; margin: 6px 0; white-space: pre-wrap; }
+strong { font-weight: 500; }
+.final-card { background: #fff; border: 1px solid #e5e5e0; border-radius: 12px; padding: 20px; }
+.final-card h3 { font-size: 14px; font-weight: 500; margin-bottom: 14px; color: #555; }
+.final-row { display: flex; align-items: center; gap: 10px; margin-bottom: 9px; }
+.final-label { font-size: 13px; width: 200px; flex-shrink: 0; }
+.final-bar-bg { flex: 1; height: 5px; background: #f0efe9; border-radius: 3px; }
+.final-bar { height: 5px; border-radius: 3px; transition: width 0.8s; }
+.bl { background: #e24b4a; } .bm { background: #ef9f27; } .bh { background: #1d9e75; }
+.final-score { font-size: 12px; font-weight: 500; width: 32px; text-align: right; color: #555; }
+.priority-tag { display: inline-block; background: #fdf3f3; color: #a32d2d; font-size: 11px; padding: 3px 8px; border-radius: 4px; margin: 2px; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="sidebar">
+    <div>
+      <div class="sidebar-title">Avancement</div>
+      <span class="phase-badge phase-1" id="phase-badge">Phase 1 — Couverture</span>
+    </div>
+    <div>
+      <div class="domain-label">Séquences CNED</div>
+      <div class="chapter-item pending" id="ch-seq1"><div class="ch-icon q">?</div>Seq 1 — Citoyenneté & mondes virtuels</div>
+      <div class="chapter-item pending" id="ch-seq2"><div class="ch-icon q">?</div>Seq 2 — Art et pouvoir</div>
+      <div class="chapter-item pending" id="ch-seq3"><div class="ch-icon q">?</div>Seq 3 — Territoire et mémoire</div>
+      <div class="chapter-item pending" id="ch-seq4"><div class="ch-icon q">?</div>Seq 4 — Innovations scientifiques</div>
+      <div class="chapter-item pending" id="ch-seq5"><div class="ch-icon q">?</div>Seq 5 — Fictions et réalités</div>
+      <div class="chapter-item pending" id="ch-seq6"><div class="ch-icon q">?</div>Seq 6 — Espace privé et public</div>
+      <div class="chapter-item pending" id="ch-seq7"><div class="ch-icon q">?</div>Seq 7 — Diversité et inclusion</div>
+      <div class="chapter-item pending" id="ch-seq8"><div class="ch-icon q">?</div>Seq 8 — Identités et échanges</div>
+    </div>
+    <div>
+      <div class="domain-label">Compétences</div>
+      <div class="chapter-item pending" id="ch-compecrit"><div class="ch-icon q">?</div>Compréhension écrit</div>
+      <div class="chapter-item pending" id="ch-expecrit"><div class="ch-icon q">?</div>Expression écrite</div>
+      <div class="chapter-item pending" id="ch-vocab"><div class="ch-icon q">?</div>Vocabulaire & grammaire</div>
+    </div>
+    <div id="scores-section" style="display:none;">
+      <div class="domain-label" style="margin-top:8px;">Scores</div>
+      <div class="score-row"><span style="font-size:12px;width:110px;flex-shrink:0;">Compréhension</span><div class="score-bar-bg"><div class="score-bar" id="sb-comprehension" style="width:0%"></div></div><span class="score-val" id="sv-comprehension">—</span></div>
+      <div class="score-row"><span style="font-size:12px;width:110px;flex-shrink:0;">Expression</span><div class="score-bar-bg"><div class="score-bar" id="sb-expression" style="width:0%"></div></div><span class="score-val" id="sv-expression">—</span></div>
+      <div class="score-row"><span style="font-size:12px;width:110px;flex-shrink:0;">Thèmes</span><div class="score-bar-bg"><div class="score-bar" id="sb-themes" style="width:0%"></div></div><span class="score-val" id="sv-themes">—</span></div>
+      <div class="score-row"><span style="font-size:12px;width:110px;flex-shrink:0;">Langue</span><div class="score-bar-bg"><div class="score-bar" id="sb-langue" style="width:0%"></div></div><span class="score-val" id="sv-langue">—</span></div>
+    </div>
+  </div>
+  <div class="main">
+    <div class="header">
+      <div class="header-text">
+        <h1>Diagnostic Anglais LVA — Première générale</h1>
+        <p>Épreuve IP003 · Compréhension écrit + Expression écrite · Niveau B2 · Candidat libre</p>
+      </div>
+      <div class="phase-indicator" id="phase-indicator">Phase 1 / 2</div>
+    </div>
+    <div class="messages" id="messages"></div>
+    <div class="input-area">
+      <div style="flex:1;display:flex;flex-direction:column;gap:3px;">
+        <textarea id="input" placeholder="Type your answer here... / Tape ta réponse ici..." rows="1"></textarea>
+        <div class="kb-hint">Entrée pour envoyer · Maj+Entrée pour sauter une ligne</div>
+      </div>
+      <button class="send" id="send-btn" onclick="sendMessage()">Envoyer</button>
+      <button id="mic-btn" onclick="toggleMic()" title="Dicter ma réponse" style="background:#fff;border:1px solid #d5d4ce;border-radius:8px;padding:9px 12px;font-size:16px;cursor:pointer;flex-shrink:0;height:38px;line-height:1;">🎤</button>
+    </div>
+  </div>
+</div>
+
+<button onclick="testWebhook()" style="position:fixed;bottom:20px;left:20px;background:#d5d4ce;color:#888;border:none;padding:6px 12px;border-radius:6px;font-size:11px;cursor:pointer;z-index:999;opacity:0.6;">⚙ Test</button>
+
+<script>
+const CHAPTERS = ['seq1','seq2','seq3','seq4','seq5','seq6','seq7','seq8','compecrit','expecrit','vocab'];
+
+const CHAPTER_LABELS = {
+  'seq1': 'Citoyenneté & mondes virtuels',
+  'seq2': 'Art et pouvoir',
+  'seq3': 'Territoire et mémoire',
+  'seq4': 'Innovations scientifiques et responsabilité',
+  'seq5': 'Fictions et réalités',
+  'seq6': 'Espace privé et espace public',
+  'seq7': 'Diversité et inclusion',
+  'seq8': 'Identités et échanges',
+  'compecrit': 'Compréhension de l\'écrit',
+  'expecrit': 'Expression écrite',
+  'vocab': 'Vocabulaire & grammaire'
+};
+
+const DOMAIN_GROUPS = [
+  { label: 'Séquences thématiques', chapters: ['seq1','seq2','seq3','seq4','seq5','seq6','seq7','seq8'] },
+  { label: 'Compétences langagières', chapters: ['compecrit','expecrit','vocab'] }
+];
+
+const SYSTEM_PROMPT = `You are a pedagogical diagnostic agent for the English LVA (IP003) exam for French Première générale students at the CNED.
+
+The student is a "candidat libre" — she takes ALL exams as "contrôle continu ponctuel". 
+
+EXAM FORMAT (IP003 — Première):
+- Written exam: 1h30
+- Part 1: Reading comprehension (10 pts) — one or two texts, answer in French or English
+- Part 2: Written expression (10 pts) — write in English on a topic linked to the texts
+- Target level: B2
+
+CNED PROGRAMME — 8 sequences:
+1. seq1 — Citoyenneté et mondes virtuels: "Unsociable Networks?" — social media, nomophobia, digital etiquette
+2. seq2 — Art et pouvoir: "Artivism" — street art, graffiti, Banksy, activism
+3. seq3 — Territoire et mémoire: "Remembering our Heritage"
+4. seq4 — Innovations scientifiques et responsabilité: "Useful and Ethical?"
+5. seq5 — Fictions et réalités: "Fiction and Reality: both sides of the same coin?"
+6. seq6 — Espace privé et espace public: "Where do people socially interact in American cities today?"
+7. seq7 — Diversité et inclusion: "Discrimination Against Women, Social Issues and Impact on Health"
+8. seq8 — Identités et échanges: "Black British"
+
+═══════════════════════════════
+STRUCTURE — 2 PHASES
+═══════════════════════════════
+
+PHASE 1 — COVERAGE
+The student has already filled in a coverage grid. You will receive a message like "Voici ma couverture : ...".
+Generate immediately this JSON then move to phase 2:
+{
+  "phase": 1,
+  "couverture": {
+    "seq1": "oui|partiel|non", "seq2": "oui|partiel|non", "seq3": "oui|partiel|non",
+    "seq4": "oui|partiel|non", "seq5": "oui|partiel|non", "seq6": "oui|partiel|non",
+    "seq7": "oui|partiel|non", "seq8": "oui|partiel|non",
+    "compecrit": "oui|partiel|non", "expecrit": "oui|partiel|non", "vocab": "oui|partiel|non"
+  }
+}
+
+PHASE 2 — EVALUATION
+12 to 18 questions, ONE AT A TIME. The questions must be in ENGLISH (this is a language exam).
+Strategy:
+- Priority to sequences marked "oui" or "partiel"
+- Vary types: reading comprehension questions (identify main idea, find details, infer meaning), expression tasks (write 2-3 sentences on a topic), vocabulary/grammar questions, cultural knowledge about sequences studied
+- Vary difficulty — start accessible, increase progressively
+- Never two consecutive questions on the same sequence
+- Adapt based on previous answers
+- Evaluate: accuracy of content, quality of written English, vocabulary range, grammar correctness
+
+SCORING (1 to 5):
+1 = not mastered, 2 = major gaps, 3 = correct, 4 = good, 5 = excellent
+
+Final JSON:
+{
+  "phase": 2,
+  "diagnostic_complet": true,
+  "couverture": { ... },
+  "scores": {
+    "comprehension": { "score": X, "points_forts": "...", "lacunes": "..." },
+    "expression": { "score": X, "points_forts": "...", "lacunes": "..." },
+    "themes": { "score": X, "points_forts": "...", "lacunes": "..." },
+    "langue": { "score": X, "points_forts": "...", "lacunes": "..." }
+  },
+  "priorites": [{ "chapitre": "id", "raison": "...", "urgence": "critique|haute|normale" }],
+  "commentaire_general": "...",
+  "niveau_estime": "A2|B1|B1+|B2"
+}
+
+STYLE: Welcoming, direct. Short welcome (2-3 sentences) then coverage grid. Questions in English. Feedback in French for clarity.`;
+
+let conversation = [];
+let isLoading = false;
+let diagnosticDone = false;
+let coverageSelections = {};
+
+const WEBHOOK_URL = 'https://hook.eu1.make.com/omhd75bqteracqaewathwkzqyr9rm61q';
+const messagesEl = document.getElementById('messages');
+const inputEl = document.getElementById('input');
+const sendBtn = document.getElementById('send-btn');
+
+function fmt(text) {
+  return text
+    .replace(/```json([\s\S]*?)```/g, '<pre>$1</pre>')
+    .replace(/```([\s\S]*?)```/g, '<pre>$1</pre>')
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\n/g, '<br>');
+}
+
+function addMsg(role, content) {
+  const d = document.createElement('div');
+  d.className = 'msg ' + role;
+  d.innerHTML = `<div class="avatar">${role==='agent'?'E':'S'}</div><div class="bubble">${fmt(content)}</div>`;
+  messagesEl.appendChild(d);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+
+function addTyping() {
+  const d = document.createElement('div');
+  d.className = 'msg agent'; d.id = 'typing';
+  d.innerHTML = `<div class="avatar">E</div><div class="bubble"><div class="typing"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div>`;
+  messagesEl.appendChild(d);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+
+function removeTyping() { const t = document.getElementById('typing'); if(t) t.remove(); }
+
+function parseJSON(text) {
+  const m = text.match(/```json([\s\S]*?)```/);
+  if (!m) return null;
+  try { return JSON.parse(m[1].trim()); } catch { return null; }
+}
+
+const coverageClass = { 'oui': 'studied', 'partiel': 'partial', 'non': 'not-studied' };
+const coverageIcon = { 'oui': 's', 'partiel': 'p', 'non': 'n' };
+const coverageSymbol = { 'oui': '✓', 'partiel': '~', 'non': '✕' };
+
+function updateCoverage(data) {
+  if (!data || !data.couverture) return;
+  Object.entries(data.couverture).forEach(([ch, val]) => {
+    const el = document.getElementById('ch-' + ch);
+    if (!el) return;
+    const icon = coverageIcon[val] || 'q';
+    const cls = coverageClass[val] || 'pending';
+    const sym = coverageSymbol[val] || '?';
+    el.className = 'chapter-item ' + cls;
+    el.innerHTML = `<div class="ch-icon ${icon}">${sym}</div>${CHAPTER_LABELS[ch]||ch}`;
+  });
+}
+
+function updateScores(scores) {
+  if (!scores) return;
+  document.getElementById('scores-section').style.display = 'block';
+  const map = { comprehension: 'comprehension', expression: 'expression', themes: 'themes', langue: 'langue' };
+  Object.entries(map).forEach(([key, id]) => {
+    const d = scores[key]; if (!d) return;
+    const s = d.score || 0;
+    const bar = document.getElementById('sb-' + id);
+    const val = document.getElementById('sv-' + id);
+    if (!bar || !val) return;
+    bar.style.width = (s/5*100) + '%';
+    bar.style.background = s<=2 ? '#e24b4a' : s<=3 ? '#ef9f27' : '#1d9e75';
+    val.textContent = s + '/5';
+  });
+}
+
+function showCoverageUI() {
+  const container = document.createElement('div');
+  container.id = 'coverage-ui';
+  container.style.cssText = 'background:#fff;border:1px solid #e5e5e0;border-radius:12px;padding:16px;margin:8px 0;max-width:680px;';
+
+  let html = '<div style="font-size:13px;font-weight:500;margin-bottom:12px;color:#555;">Pour chaque séquence, indique si tu l\'as étudiée :</div>';
+
+  DOMAIN_GROUPS.forEach(domain => {
+    html += `<div style="margin-bottom:12px;"><div style="font-size:11px;font-weight:500;color:#aaa;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">${domain.label}</div>`;
+    domain.chapters.forEach(ch => {
+      html += `<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid #f5f4f0;">
+        <span style="font-size:13px;">${CHAPTER_LABELS[ch]}</span>
+        <div style="display:flex;gap:4px;">
+          <button onclick="setCoverage('${ch}','oui',this)" style="padding:4px 10px;border-radius:5px;border:1px solid #d5d4ce;background:#fff;font-size:12px;cursor:pointer;">Oui</button>
+          <button onclick="setCoverage('${ch}','partiel',this)" style="padding:4px 10px;border-radius:5px;border:1px solid #d5d4ce;background:#fff;font-size:12px;cursor:pointer;">Partiel</button>
+          <button onclick="setCoverage('${ch}','non',this)" style="padding:4px 10px;border-radius:5px;border:1px solid #d5d4ce;background:#fff;font-size:12px;cursor:pointer;">Non</button>
+        </div>
+      </div>`;
+    });
+    html += '</div>';
+  });
+
+  html += `<button onclick="validateCoverage()" style="margin-top:12px;width:100%;background:#b45309;color:#fff;border:none;border-radius:8px;padding:10px;font-size:14px;font-weight:500;cursor:pointer;">Valider mes réponses →</button>`;
+  container.innerHTML = html;
+  messagesEl.appendChild(container);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+
+function setCoverage(ch, val, btn) {
+  coverageSelections[ch] = val;
+  btn.parentElement.querySelectorAll('button').forEach(b => {
+    b.style.background = '#fff'; b.style.color = '#1a1a1a'; b.style.borderColor = '#d5d4ce';
+  });
+  const colors = { oui: '#1d9e75', partiel: '#ef9f27', non: '#e24b4a' };
+  btn.style.background = colors[val]; btn.style.color = '#fff'; btn.style.borderColor = colors[val];
+}
+
+async function validateCoverage() {
+  const missing = CHAPTERS.filter(ch => !coverageSelections[ch]);
+  if (missing.length > 0) {
+    const btn = document.querySelector('#coverage-ui button[onclick="validateCoverage()"]');
+    btn.textContent = `⚠ ${missing.length} élément(s) non renseigné(s)`;
+    setTimeout(() => btn.textContent = 'Valider mes réponses →', 2000);
+    return;
+  }
+  document.getElementById('coverage-ui').remove();
+  const summary = CHAPTERS.map(ch => `${CHAPTER_LABELS[ch]}: ${coverageSelections[ch]}`).join(', ');
+  addMsg('user', 'Réponses envoyées ✓');
+  conversation.push({ role: 'user', content: `Voici ma couverture : ${summary}` });
+
+  isLoading = true; sendBtn.disabled = true; addTyping();
+  try {
+    const reply = await callAPI(conversation);
+    removeTyping(); addMsg('agent', reply);
+    conversation.push({ role: 'assistant', content: reply });
+    const json = parseJSON(reply);
+    if (json && json.phase === 1) {
+      updateCoverage(json);
+      document.getElementById('phase-badge').textContent = 'Phase 2 — Évaluation';
+      document.getElementById('phase-badge').className = 'phase-badge phase-2';
+      document.getElementById('phase-indicator').textContent = 'Phase 2 / 2';
+    } else if (json && json.phase === 2 && json.diagnostic_complet) {
+      showFinalProfile(json);
+    }
+  } catch(err) { removeTyping(); addMsg('agent', 'Erreur : ' + err.message); }
+  finally { isLoading = false; sendBtn.disabled = false; inputEl.disabled = false; inputEl.focus(); }
+}
+
+function showFinalProfile(data) {
+  updateCoverage(data); updateScores(data.scores);
+  const card = document.createElement('div');
+  card.className = 'final-card';
+  const labels = { comprehension: 'Compréhension écrit', expression: 'Expression écrite', themes: 'Connaissance des thèmes', langue: 'Correction & richesse de la langue' };
+  let rows = '';
+  if (data.scores) {
+    Object.entries(labels).forEach(([k, label]) => {
+      const d = data.scores[k]; if (!d) return;
+      const s = d.score||0; const pct = (s/5)*100;
+      const cls = s<=2?'bl':s<=3?'bm':'bh';
+      rows += `<div class="final-row"><div class="final-label">${label}</div><div class="final-bar-bg"><div class="final-bar ${cls}" style="width:${pct}%"></div></div><div class="final-score">${s}/5</div></div>`;
+    });
+  }
+  let html = `<h3>Profil de compétences — Anglais LVA</h3>${rows}`;
+  if (data.niveau_estime) {
+    html += `<div style="margin-top:12px;font-size:13px;"><strong>Niveau estimé :</strong> ${data.niveau_estime} <span style="color:#aaa;font-size:12px;">(objectif B2)</span></div>`;
+  }
+  if (data.priorites && data.priorites.length) {
+    html += '<div style="margin-top:12px;"><div style="font-size:12px;color:#aaa;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.04em;">Priorités</div>';
+    data.priorites.forEach(p => { html += `<span class="priority-tag">${CHAPTER_LABELS[p.chapitre]||p.chapitre} — ${p.urgence}</span>`; });
+    html += '</div>';
+  }
+  if (data.commentaire_general) {
+    html += `<div style="margin-top:12px;font-size:13px;color:#666;line-height:1.6;border-top:1px solid #f0efe9;padding-top:12px;">${data.commentaire_general}</div>`;
+  }
+  card.innerHTML = html;
+  messagesEl.appendChild(card);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+  document.getElementById('phase-badge').textContent = 'Diagnostic terminé';
+  document.getElementById('phase-badge').style.background = '#f0faf5';
+  document.getElementById('phase-badge').style.color = '#1d9e75';
+  document.getElementById('phase-indicator').textContent = 'Terminé';
+  diagnosticDone = true; sendBtn.disabled = true; inputEl.disabled = true;
+  inputEl.placeholder = 'Diagnostic terminé.';
+  sendToMake(data);
+}
+
+async function sendToMake(data) {
+  const payload = {
+    matiere: 'Anglais LVA',
+    date: new Date().toISOString(),
+    couverture: data.couverture || {},
+    scores: {
+      score_1: data.scores?.comprehension?.score || 0,
+      score_2: data.scores?.expression?.score || 0,
+      score_3: data.scores?.themes?.score || 0,
+      score_4: data.scores?.langue?.score || 0,
+      score_5: 0,
+      domaine_1: 'Comprehension', domaine_2: 'Expression', domaine_3: 'Themes', domaine_4: 'Langue', domaine_5: ''
+    },
+    priorites: (data.priorites||[]).map(p => (CHAPTER_LABELS[p.chapitre]||p.chapitre) + ' — ' + p.urgence).join(', '),
+    commentaire: data.commentaire_general || '',
+    notation_methode: data.niveau_estime || '',
+    json_brut: JSON.stringify(data).substring(0, 1800),
+    chapitres_str: Object.entries(data.couverture || {}).map(([id, statut]) => {
+      const urgence = (data.priorites||[]).find(p => p.chapitre === id)?.urgence || 'normale';
+      return id + ':' + statut + ':' + urgence;
+    }).join('|')
+  };
+  try {
+    await fetch(WEBHOOK_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+    const notif = document.createElement('div');
+    notif.style.cssText = 'font-size:12px;color:#1d9e75;padding:8px 16px;text-align:center;';
+    notif.textContent = 'Résultats envoyés vers Notion.';
+    messagesEl.appendChild(notif);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  } catch(e) {
+    const notif = document.createElement('div');
+    notif.style.cssText = 'font-size:12px;color:#e24b4a;padding:8px 16px;text-align:center;';
+    notif.textContent = 'Envoi vers Notion échoué.';
+    messagesEl.appendChild(notif);
+  }
+}
+
+async function callAPI(messages) {
+  const res = await fetch('https://bac-2026-agents.vercel.app/api/proxy', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1200, system: SYSTEM_PROMPT, messages })
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error?.message || 'Erreur API');
+  return data.content[0].text;
+}
+
+async function sendMessage() {
+  if (isLoading || diagnosticDone) return;
+  const text = inputEl.value.trim(); if (!text) return;
+  inputEl.value = ''; inputEl.style.height = 'auto';
+  addMsg('user', text); conversation.push({ role: 'user', content: text });
+  isLoading = true; sendBtn.disabled = true; addTyping();
+  try {
+    const reply = await callAPI(conversation);
+    removeTyping(); addMsg('agent', reply);
+    conversation.push({ role: 'assistant', content: reply });
+    const json = parseJSON(reply);
+    if (json) {
+      if (json.phase === 1) {
+        updateCoverage(json);
+        document.getElementById('phase-badge').textContent = 'Phase 2 — Évaluation';
+        document.getElementById('phase-badge').className = 'phase-badge phase-2';
+        document.getElementById('phase-indicator').textContent = 'Phase 2 / 2';
+      } else if (json.phase === 2 && json.diagnostic_complet) { showFinalProfile(json); }
+    }
+  } catch(err) { removeTyping(); addMsg('agent', 'Erreur : ' + err.message); }
+  finally { isLoading = false; if (!diagnosticDone) sendBtn.disabled = false; }
+}
+
+async function init() {
+  isLoading = true; sendBtn.disabled = true; inputEl.disabled = true; addTyping();
+  try {
+    const reply = await callAPI([{ role: 'user', content: 'Commençons.' }]);
+    removeTyping();
+    conversation.push({ role: 'user', content: 'Commençons.' });
+    conversation.push({ role: 'assistant', content: reply });
+    addMsg('agent', reply);
+    showCoverageUI();
+  } catch(err) {
+    removeTyping(); addMsg('agent', 'Impossible de démarrer : ' + err.message);
+    inputEl.disabled = false; sendBtn.disabled = false;
+  } finally { isLoading = false; }
+}
+
+async function testWebhook() {
+  const testData = {
+    matiere: 'Anglais LVA',
+    date: new Date().toISOString(),
+    couverture: {"seq1":"oui","seq2":"oui","seq3":"partiel","seq4":"non","seq5":"non","seq6":"non","seq7":"non","seq8":"non","compecrit":"partiel","expecrit":"partiel","vocab":"partiel"},
+    scores: { score_1:3, score_2:2, score_3:2, score_4:3, score_5:0 },
+    priorites: "seq4 — critique, seq5 — haute",
+    commentaire: "Test LVA", notation_methode: "B1",
+    json_brut: '{"test":true}',
+    chapitres_str: "seq1:oui:normale|seq2:oui:normale|seq3:partiel:normale|seq4:non:critique|seq5:non:haute"
+  };
+  await fetch(WEBHOOK_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(testData) });
+  alert('Payload test Anglais LVA envoyé !');
+}
+
+inputEl.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } });
+inputEl.addEventListener('input', () => { inputEl.style.height = 'auto'; inputEl.style.height = Math.min(inputEl.scrollHeight, 120) + 'px'; });
+
+init();
+
+let recognition = null;
+let isListening = false;
+
+function toggleMic() {
+  const micBtn = document.getElementById('mic-btn');
+  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+    alert('La reconnaissance vocale n\'est disponible que sur Chrome ou Edge.');
+    return;
+  }
+  if (isListening) { recognition.stop(); return; }
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  recognition = new SR();
+  recognition.lang = 'en-US';
+  recognition.interimResults = true;
+  recognition.continuous = false;
+  recognition.onstart = () => { isListening = true; micBtn.textContent = '⏹'; micBtn.style.borderColor = '#e24b4a'; micBtn.style.color = '#e24b4a'; };
+  recognition.onresult = (e) => {
+    const transcript = Array.from(e.results).map(r => r[0].transcript).join('');
+    inputEl.value = transcript;
+    inputEl.style.height = 'auto';
+    inputEl.style.height = Math.min(inputEl.scrollHeight, 120) + 'px';
+  };
+  recognition.onend = () => { isListening = false; micBtn.textContent = '🎤'; micBtn.style.borderColor = '#d5d4ce'; micBtn.style.color = 'inherit'; };
+  recognition.onerror = () => { isListening = false; micBtn.textContent = '🎤'; micBtn.style.borderColor = '#d5d4ce'; };
+  recognition.start();
+}
+</script>
+</body>
+</html>
