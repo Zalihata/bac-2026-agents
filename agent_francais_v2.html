@@ -451,6 +451,22 @@ async function sendToMake(data) {
     chapitres_str: mkChapStr(['rimbaud','manon','sarraute','graffigny','lineaire','grammaire','entretien'], data.priorites_oral)
   };
 
+  const sendOne = async (payload) => {
+    try {
+      await fetch(WEBHOOK_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+      return true;
+    } catch(e) { return false; }
+  };
+
+  const [ok1, ok2] = await Promise.all([sendOne(payloadEcrit), sendOne(payloadOral)]);
+
+  const notif = document.createElement('div');
+  notif.style.cssText = 'font-size:12px;color:#1d9e75;padding:8px 16px;text-align:center;';
+  notif.textContent = ok1 && ok2 ? 'Résultats envoyés vers Notion (Français écrit + Français oral).' : 'Envoi partiel — vérifie Notion.';
+  messagesEl.appendChild(notif);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+};
+
   try {
     await fetch(WEBHOOK_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payloadEcrit) });
     await fetch(WEBHOOK_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payloadOral) });
