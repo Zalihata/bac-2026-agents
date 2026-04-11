@@ -420,12 +420,18 @@ async function sendToMake(data) {
     commentaire: data.commentaire_general || '',
     notation_methode: data.dossier_readiness || '',
     json_brut: JSON.stringify(data).substring(0, 1800),
-    chapitres_str: Object.entries(data.couverture || {}).map(([id, statut]) => {
-  const urgence = (data.priorites||[]).find(p => p.chapitre === id)?.urgence || 'normale';
-  const label = CHAPTER_LABELS[id] || id;
-  return label + ':' + statut + ':' + urgence;
-}).join('|')
   };
+  payload.chapitres_str = [
+  { label: payload.scores.domaine_1, score: payload.scores.score_1 },
+  { label: payload.scores.domaine_2, score: payload.scores.score_2 },
+  { label: payload.scores.domaine_3, score: payload.scores.score_3 },
+  { label: payload.scores.domaine_4, score: payload.scores.score_4 },
+  { label: payload.scores.domaine_5, score: payload.scores.score_5 }
+].filter(d => d.label).map(d => {
+  const statut  = d.score >= 4 ? 'oui' : d.score >= 3 ? 'partiel' : 'non';
+  const urgence = d.score <= 2 ? 'critique' : d.score <= 3 ? 'haute' : 'normale';
+  return d.label + ':' + statut + ':' + urgence;
+}).join('|');
   try {
     await fetch(WEBHOOK_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
     const notif = document.createElement('div');
@@ -499,8 +505,18 @@ async function testWebhook() {
     priorites: "dossier — critique, richesse — haute",
     commentaire: "Test LLCE", notation_methode: "Dossier non commencé",
     json_brut: '{"test":true}',
-    chapitres_str: "Producing & Sharing Knowledge / Digital Divide:oui:normale|Autres séquences du cours LLCE:partiel:normale|Expression orale en continu:partiel:normale|Méthodologie du dossier personnel:non:critique"
-  };
+     };
+  testData.chapitres_str = [
+  { label: testData.scores.domaine_1, score: testData.scores.score_1 },
+  { label: testData.scores.domaine_2, score: testData.scores.score_2 },
+  { label: testData.scores.domaine_3, score: testData.scores.score_3 },
+  { label: testData.scores.domaine_4, score: testData.scores.score_4 },
+  { label: testData.scores.domaine_5, score: testData.scores.score_5 }
+].filter(d => d.label).map(d => {
+  const statut  = d.score >= 4 ? 'oui' : d.score >= 3 ? 'partiel' : 'non';
+  const urgence = d.score <= 2 ? 'critique' : d.score <= 3 ? 'haute' : 'normale';
+  return d.label + ':' + statut + ':' + urgence;
+}).join('|');
   await fetch(WEBHOOK_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(testData) });
   alert('Payload test Anglais LLCE envoyé !');
 }
