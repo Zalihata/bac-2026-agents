@@ -140,6 +140,7 @@ strong { font-weight: 500; }
         <div class="kb-hint">Entrée pour envoyer · Maj+Entrée pour sauter une ligne</div>
       </div>
       <button class="send" id="send-btn" onclick="sendMessage()">Envoyer</button>
+      <button id="mic-btn" onclick="toggleMic()" title="Dicter ma réponse" style="background:#fff;border:1px solid #d5d4ce;border-radius:8px;padding:9px 12px;font-size:16px;cursor:pointer;flex-shrink:0;height:38px;line-height:1;">🎤</button>
     </div>
   </div>
 </div>
@@ -534,6 +535,52 @@ inputEl.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey)
 inputEl.addEventListener('input', () => { inputEl.style.height = 'auto'; inputEl.style.height = Math.min(inputEl.scrollHeight, 120) + 'px'; });
 
 init();
+
+// — Voice input —
+let recognition = null;
+let isListening = false;
+
+function toggleMic() {
+  const micBtn = document.getElementById('mic-btn');
+  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+    alert('La reconnaissance vocale n\'est disponible que sur Chrome ou Edge.');
+    return;
+  }
+  if (isListening) {
+    recognition.stop();
+    return;
+  }
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  recognition = new SR();
+  recognition.lang = 'fr-FR';
+  recognition.interimResults = true;
+  recognition.continuous = false;
+
+  recognition.onstart = () => {
+    isListening = true;
+    micBtn.textContent = '⏹';
+    micBtn.style.borderColor = '#e24b4a';
+    micBtn.style.color = '#e24b4a';
+  };
+  recognition.onresult = (e) => {
+    const transcript = Array.from(e.results).map(r => r[0].transcript).join('');
+    inputEl.value = transcript;
+    inputEl.style.height = 'auto';
+    inputEl.style.height = Math.min(inputEl.scrollHeight, 120) + 'px';
+  };
+  recognition.onend = () => {
+    isListening = false;
+    micBtn.textContent = '🎤';
+    micBtn.style.borderColor = '#d5d4ce';
+    micBtn.style.color = 'inherit';
+  };
+  recognition.onerror = () => {
+    isListening = false;
+    micBtn.textContent = '🎤';
+    micBtn.style.borderColor = '#d5d4ce';
+  };
+  recognition.start();
+}
 </script>
 </body>
 </html>
