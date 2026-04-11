@@ -88,7 +88,6 @@ strong { font-weight: 500; }
       <div class="sidebar-title">Avancement</div>
       <span class="phase-badge phase-1" id="phase-badge">Phase 1 — Couverture</span>
     </div>
-
     <div>
       <div class="domain-label">Poésie XIXe–XXIe s.</div>
       <div class="chapter-item pending" id="ch-rimbaud"><div class="ch-icon q">?</div>Rimbaud — Les Cahiers de Douai + parcours Émancipations créatrices</div>
@@ -105,25 +104,23 @@ strong { font-weight: 500; }
       <div class="domain-label">Littérature d'idées</div>
       <div class="chapter-item pending" id="ch-graffigny"><div class="ch-icon q">?</div>Graffigny — Lettres d'une Péruvienne + parcours Un nouvel univers</div>
     </div>
-
     <div>
       <div class="domain-label">Méthodes écrit (T001)</div>
       <div class="chapter-item pending" id="ch-dissert"><div class="ch-icon q">?</div>Dissertation</div>
       <div class="chapter-item pending" id="ch-commentaire"><div class="ch-icon q">?</div>Commentaire composé</div>
     </div>
-
     <div>
       <div class="domain-label">Méthodes oral (T002)</div>
       <div class="chapter-item pending" id="ch-lineaire"><div class="ch-icon q">?</div>Explication linéaire</div>
       <div class="chapter-item pending" id="ch-grammaire"><div class="ch-icon q">?</div>Question de grammaire</div>
       <div class="chapter-item pending" id="ch-entretien"><div class="ch-icon q">?</div>Entretien sur le parcours</div>
     </div>
-
     <div id="scores-section" style="display:none;">
-      <div class="domain-label" style="margin-top:8px;">Scores évaluation</div>
+      <div class="domain-label" style="margin-top:8px;">Scores — Écrit (T001)</div>
       <div class="score-row"><span style="font-size:12px;width:100px;flex-shrink:0;">Œuvres</span><div class="score-bar-bg"><div class="score-bar" id="sb-oeuvres" style="width:0%"></div></div><span class="score-val" id="sv-oeuvres">—</span></div>
-      <div class="score-row"><span style="font-size:12px;width:100px;flex-shrink:0;">Parcours</span><div class="score-bar-bg"><div class="score-bar" id="sb-parcours" style="width:0%"></div></div><span class="score-val" id="sv-parcours">—</span></div>
       <div class="score-row"><span style="font-size:12px;width:100px;flex-shrink:0;">Méthode écrit</span><div class="score-bar-bg"><div class="score-bar" id="sb-ecrit" style="width:0%"></div></div><span class="score-val" id="sv-ecrit">—</span></div>
+      <div class="domain-label" style="margin-top:8px;">Scores — Oral (T002)</div>
+      <div class="score-row"><span style="font-size:12px;width:100px;flex-shrink:0;">Parcours</span><div class="score-bar-bg"><div class="score-bar" id="sb-parcours" style="width:0%"></div></div><span class="score-val" id="sv-parcours">—</span></div>
       <div class="score-row"><span style="font-size:12px;width:100px;flex-shrink:0;">Méthode oral</span><div class="score-bar-bg"><div class="score-bar" id="sb-oral" style="width:0%"></div></div><span class="score-val" id="sv-oral">—</span></div>
     </div>
   </div>
@@ -156,7 +153,7 @@ const CHAPTER_LABELS = {
   'rimbaud': 'Rimbaud — Les Cahiers de Douai',
   'manon': 'Abbé Prévost — Manon Lescaut',
   'sarraute': 'Sarraute — Pour un oui ou pour un non',
-  'graffigny': 'Graffigny — Lettres d\'une Péruvienne',
+  'graffigny': "Graffigny — Lettres d'une Péruvienne",
   'dissert': 'Dissertation',
   'commentaire': 'Commentaire composé',
   'lineaire': 'Explication linéaire',
@@ -170,48 +167,21 @@ const DOMAIN_GROUPS = [
   { label: 'Méthode oral (T002)', chapters: ['lineaire','grammaire','entretien'] }
 ];
 
-const SYSTEM_PROMPT = `Tu es un agent de diagnostic pédagogique pour le Français EAF (Épreuves Anticipées de Français) de Première générale au baccalauréat français.
+const SYSTEM_PROMPT = `Tu es un agent de diagnostic pédagogique pour le Français EAF de Première générale au baccalauréat français.
 
-L'élève est candidate libre au bac — elle passe TOUT en ponctuel, pas de contrôle continu. Elle prépare deux épreuves :
-- T001 : Écrit (4h) — dissertation ou commentaire composé sur une œuvre au programme
-- T002 : Oral (20 min) — explication linéaire d'un texte + question de grammaire + entretien sur le parcours
+L'élève est candidate libre au bac — elle passe TOUT en ponctuel. Elle prépare deux épreuves séparées :
+- T001 : Écrit (4h) — dissertation ou commentaire composé
+- T002 : Oral (20 min) — explication linéaire + question de grammaire + entretien
 
-BARÈME OFFICIEL ORAL EAF :
-- Lecture à voix haute : 2 pts
-- Explication linéaire : 8 pts
-- Question de grammaire : 2 pts
-- Entretien sur la lecture personnelle : 8 pts
-Total : 20 pts
+PROGRAMME CNED SESSION 2026 :
+1. Rimbaud, Les Cahiers de Douai — parcours Émancipations créatrices
+2. Abbé Prévost, Manon Lescaut — parcours Personnages en marge
+3. Sarraute, Pour un oui ou pour un non — parcours Théâtre et dispute
+4. Graffigny, Lettres d'une Péruvienne — parcours Un nouvel univers
 
-PROGRAMME CNED OFFICIEL SESSION 2026 — 4 objets d'étude :
-
-1. LA POÉSIE DU XIXe AU XXIe SIÈCLE
-   Œuvre intégrale : Arthur Rimbaud, Les Cahiers de Douai (1870)
-   Parcours « Émancipations créatrices »
-
-2. LE ROMAN ET LE RÉCIT DU MOYEN ÂGE AU XXIe SIÈCLE
-   Œuvre intégrale : Abbé Prévost, Manon Lescaut (1731)
-   Parcours « Personnages en marge, plaisirs du romanesque »
-
-3. LE THÉÂTRE DU XVIIe AU XXIe SIÈCLE
-   Œuvre intégrale : Nathalie Sarraute, Pour un oui ou pour un non (1981)
-   Parcours « Théâtre et dispute »
-
-4. LA LITTÉRATURE D'IDÉES DU XVIe AU XVIIIe SIÈCLE
-   Œuvre intégrale : Françoise de Graffigny, Lettres d'une Péruvienne (1747)
-   Parcours « Un nouvel univers s'est offert à mes yeux »
-
-═══════════════════════════════
-STRUCTURE EN 2 PHASES OBLIGATOIRE
-═══════════════════════════════
-
-PHASE 1 — COUVERTURE DU PROGRAMME (déclaratif)
-L'élève a déjà renseigné sa couverture via une interface interactive. Tu recevras un message du type "Voici ma couverture : Rimbaud: oui, ...". Analyse ces données et génère immédiatement le JSON de phase 1 puis passe en phase 2.
-
-Les identifiants de chapitres sont exactement :
-- rimbaud, manon, sarraute, graffigny, dissert, commentaire, lineaire, grammaire, entretien
-
-À la réception de la couverture, génère ce JSON dans un bloc \`\`\`json ... \`\`\` :
+PHASE 1 — COUVERTURE
+L'élève a renseigné sa couverture via une interface. Tu recevras "Voici ma couverture : ...".
+Génère immédiatement ce JSON puis passe en phase 2 :
 {
   "phase": 1,
   "couverture": {
@@ -226,48 +196,32 @@ Les identifiants de chapitres sont exactement :
     "entretien": "oui|partiel|non"
   }
 }
-Puis enchaîne immédiatement avec la Phase 2.
 
-PHASE 2 — ÉVALUATION (objectif)
-Tu poses entre 12 et 18 questions, UNE À LA FOIS.
+PHASE 2 — ÉVALUATION
+12 à 18 questions, UNE À LA FOIS. Varie : œuvres, parcours, méthode écrit, méthode oral. Ne pose jamais deux questions consécutives sur le même chapitre. Adapte la difficulté.
 
-Stratégie :
-- Priorité aux chapitres déclarés "oui" ou "partiel"
-- Varie les domaines : connaissance des œuvres, maîtrise méthodologique, culture du parcours
-- Varie les types de questions : connaissance du texte, analyse stylistique, question de méthode, mise en situation orale
-- Ne pose jamais deux questions consécutives sur le même chapitre
-- Adapte la difficulté selon les réponses précédentes
-- Pour les chapitres "non", 1 question de culture générale pour détecter des bases
+SCORING (1 à 5) : 1=non maîtrisé, 2=lacunes importantes, 3=correct, 4=bonne maîtrise, 5=excellent
 
-SCORING PAR DOMAINE (1 à 5) :
-- 1 : notions non maîtrisées
-- 2 : comprend les concepts, lacunes importantes
-- 3 : niveau correct, quelques imprécisions
-- 4 : bonne maîtrise, formulation fluide
-- 5 : très bonne maîtrise, vocabulaire précis, méthode solide
-
-À la fin de la phase 2, génère le profil final dans un bloc \`\`\`json ... \`\`\` :
+JSON final :
 {
   "phase": 2,
   "diagnostic_complet": true,
-  "couverture": { /* reprendre les données phase 1 */ },
+  "couverture": { ... },
   "scores": {
-    "oeuvres": { "score": X, "chapitres": ["rimbaud","manon","sarraute","graffigny"], "points_forts": "...", "lacunes": "..." },
-    "parcours": { "score": X, "chapitres": ["rimbaud","manon","sarraute","graffigny"], "points_forts": "...", "lacunes": "..." },
-    "methode_ecrit": { "score": X, "chapitres": ["dissert","commentaire"], "points_forts": "...", "lacunes": "..." },
-    "methode_oral": { "score": X, "chapitres": ["lineaire","grammaire","entretien"], "points_forts": "...", "lacunes": "..." }
+    "oeuvres": { "score": X, "points_forts": "...", "lacunes": "..." },
+    "parcours": { "score": X, "points_forts": "...", "lacunes": "..." },
+    "methode_ecrit": { "score": X, "points_forts": "...", "lacunes": "..." },
+    "methode_oral": { "score": X, "points_forts": "...", "lacunes": "..." }
   },
-  "priorites": [
-    { "chapitre": "id-chapitre", "raison": "non étudié|niveau faible|...", "urgence": "critique|haute|normale" }
-  ],
-  "commentaire_general": "...",
-  "methode_et_style": "bilan sur la qualité de formulation et maîtrise du vocabulaire littéraire"
+  "priorites_ecrit": [{ "chapitre": "id", "raison": "...", "urgence": "critique|haute|normale" }],
+  "priorites_oral": [{ "chapitre": "id", "raison": "...", "urgence": "critique|haute|normale" }],
+  "commentaire_ecrit": "bilan T001",
+  "commentaire_oral": "bilan T002",
+  "commentaire_general": "bilan global",
+  "methode_et_style": "qualité de formulation"
 }
 
-STYLE :
-- Ton bienveillant, direct, jamais condescendant
-- Phase 2 : une question à la fois, feedback constructif, exemple ou indice si elle bloque
-- Commence par un accueil très court (2-3 phrases) qui explique qu'elle va cocher les chapitres étudiés puis répondre à des questions`;
+STYLE : bienveillant, direct. Accueil court (2-3 phrases) puis grille de couverture.`;
 
 let conversation = [];
 let isLoading = false;
@@ -323,9 +277,8 @@ function updateCoverage(data) {
     const icon = coverageIcon[val] || 'q';
     const cls = coverageClass[val] || 'pending';
     const sym = coverageSymbol[val] || '?';
-    const name = CHAPTER_LABELS[ch] || ch;
     el.className = 'chapter-item ' + cls;
-    el.innerHTML = `<div class="ch-icon ${icon}">${sym}</div>${name}`;
+    el.innerHTML = `<div class="ch-icon ${icon}">${sym}</div>${CHAPTER_LABELS[ch]||ch}`;
   });
 }
 
@@ -334,14 +287,12 @@ function updateScores(scores) {
   document.getElementById('scores-section').style.display = 'block';
   const map = { oeuvres: 'oeuvres', parcours: 'parcours', methode_ecrit: 'ecrit', methode_oral: 'oral' };
   Object.entries(map).forEach(([key, id]) => {
-    const d = scores[key];
-    if (!d) return;
+    const d = scores[key]; if (!d) return;
     const s = d.score || 0;
-    const pct = (s/5)*100;
     const bar = document.getElementById('sb-' + id);
     const val = document.getElementById('sv-' + id);
     if (!bar || !val) return;
-    bar.style.width = pct + '%';
+    bar.style.width = (s/5*100) + '%';
     bar.style.background = s<=2 ? '#e24b4a' : s<=3 ? '#ef9f27' : '#1d9e75';
     val.textContent = s + '/5';
   });
@@ -355,8 +306,7 @@ function showCoverageUI() {
   let html = '<div style="font-size:13px;font-weight:500;margin-bottom:12px;color:#555;">Pour chaque chapitre, indique si tu l\'as étudié :</div>';
 
   DOMAIN_GROUPS.forEach(domain => {
-    html += `<div style="margin-bottom:12px;">
-      <div style="font-size:11px;font-weight:500;color:#aaa;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">${domain.label}</div>`;
+    html += `<div style="margin-bottom:12px;"><div style="font-size:11px;font-weight:500;color:#aaa;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">${domain.label}</div>`;
     domain.chapters.forEach(ch => {
       html += `<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid #f5f4f0;">
         <span style="font-size:13px;">${CHAPTER_LABELS[ch]}</span>
@@ -371,7 +321,6 @@ function showCoverageUI() {
   });
 
   html += `<button onclick="validateCoverage()" style="margin-top:12px;width:100%;background:#6b3fa0;color:#fff;border:none;border-radius:8px;padding:10px;font-size:14px;font-weight:500;cursor:pointer;">Valider mes réponses →</button>`;
-
   container.innerHTML = html;
   messagesEl.appendChild(container);
   messagesEl.scrollTop = messagesEl.scrollHeight;
@@ -379,16 +328,11 @@ function showCoverageUI() {
 
 function setCoverage(ch, val, btn) {
   coverageSelections[ch] = val;
-  const btns = btn.parentElement.querySelectorAll('button');
-  btns.forEach(b => {
-    b.style.background = '#fff';
-    b.style.color = '#1a1a1a';
-    b.style.borderColor = '#d5d4ce';
+  btn.parentElement.querySelectorAll('button').forEach(b => {
+    b.style.background = '#fff'; b.style.color = '#1a1a1a'; b.style.borderColor = '#d5d4ce';
   });
   const colors = { oui: '#1d9e75', partiel: '#ef9f27', non: '#e24b4a' };
-  btn.style.background = colors[val];
-  btn.style.color = '#fff';
-  btn.style.borderColor = colors[val];
+  btn.style.background = colors[val]; btn.style.color = '#fff'; btn.style.borderColor = colors[val];
 }
 
 async function validateCoverage() {
@@ -399,25 +343,16 @@ async function validateCoverage() {
     setTimeout(() => btn.textContent = 'Valider mes réponses →', 2000);
     return;
   }
-
   document.getElementById('coverage-ui').remove();
-
   const summary = CHAPTERS.map(ch => `${CHAPTER_LABELS[ch]}: ${coverageSelections[ch]}`).join(', ');
-  const userMsg = `Voici ma couverture : ${summary}`;
-
   addMsg('user', 'Réponses envoyées ✓');
-  conversation.push({ role: 'user', content: userMsg });
+  conversation.push({ role: 'user', content: `Voici ma couverture : ${summary}` });
 
-  isLoading = true;
-  sendBtn.disabled = true;
-  addTyping();
-
+  isLoading = true; sendBtn.disabled = true; addTyping();
   try {
     const reply = await callAPI(conversation);
-    removeTyping();
-    addMsg('agent', reply);
+    removeTyping(); addMsg('agent', reply);
     conversation.push({ role: 'assistant', content: reply });
-
     const json = parseJSON(reply);
     if (json && json.phase === 1) {
       updateCoverage(json);
@@ -427,56 +362,38 @@ async function validateCoverage() {
     } else if (json && json.phase === 2 && json.diagnostic_complet) {
       showFinalProfile(json);
     }
-  } catch(err) {
-    removeTyping();
-    addMsg('agent', 'Erreur : ' + err.message);
-  } finally {
-    isLoading = false;
-    sendBtn.disabled = false;
-    inputEl.disabled = false;
-    inputEl.focus();
-  }
+  } catch(err) { removeTyping(); addMsg('agent', 'Erreur : ' + err.message); }
+  finally { isLoading = false; sendBtn.disabled = false; inputEl.disabled = false; inputEl.focus(); }
 }
 
 function showFinalProfile(data) {
-  updateCoverage(data);
-  updateScores(data.scores);
-
+  updateCoverage(data); updateScores(data.scores);
   const card = document.createElement('div');
   card.className = 'final-card';
-  const labels = {
-    oeuvres: 'Connaissance des œuvres',
-    parcours: 'Connaissance des parcours',
-    methode_ecrit: 'Méthode écrit (T001)',
-    methode_oral: 'Méthode oral (T002)'
+
+  const mkRow = (label, key) => {
+    const d = data.scores?.[key]; if (!d) return '';
+    const s = d.score||0; const pct = (s/5)*100;
+    const cls = s<=2?'bl':s<=3?'bm':'bh';
+    return `<div class="final-row"><div class="final-label">${label}</div><div class="final-bar-bg"><div class="final-bar ${cls}" style="width:${pct}%"></div></div><div class="final-score">${s}/5</div></div>`;
   };
-  let rows = '';
-  if (data.scores) {
-    Object.entries(labels).forEach(([k, label]) => {
-      const d = data.scores[k];
-      if (!d) return;
-      const s = d.score||0;
-      const pct = (s/5)*100;
-      const cls = s<=2?'bl':s<=3?'bm':'bh';
-      rows += `<div class="final-row">
-        <div class="final-label">${label}</div>
-        <div class="final-bar-bg"><div class="final-bar ${cls}" style="width:${pct}%"></div></div>
-        <div class="final-score">${s}/5</div>
-      </div>`;
-    });
+
+  let html = `<h3>Profil de compétences final</h3>
+    <div style="font-size:11px;font-weight:500;color:#aaa;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:8px;">Écrit — T001</div>
+    ${mkRow('Connaissance des œuvres','oeuvres')}${mkRow('Méthode écrit','methode_ecrit')}
+    <div style="font-size:11px;font-weight:500;color:#aaa;text-transform:uppercase;letter-spacing:0.04em;margin:14px 0 8px;">Oral — T002</div>
+    ${mkRow('Connaissance des parcours','parcours')}${mkRow('Méthode oral','methode_oral')}`;
+
+  const allPriorities = [...(data.priorites_ecrit||[]), ...(data.priorites_oral||[])];
+  if (allPriorities.length) {
+    html += '<div style="margin-top:14px;"><div style="font-size:12px;color:#aaa;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.04em;">Priorités de révision</div>';
+    allPriorities.forEach(p => { html += `<span class="priority-tag">${CHAPTER_LABELS[p.chapitre]||p.chapitre} — ${p.urgence}</span>`; });
+    html += '</div>';
   }
-  let priorities = '';
-  if (data.priorites && data.priorites.length) {
-    priorities = '<div style="margin-top:14px;"><div style="font-size:12px;color:#aaa;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.04em;">Priorités de révision</div>';
-    data.priorites.forEach(p => {
-      priorities += `<span class="priority-tag">${CHAPTER_LABELS[p.chapitre]||p.chapitre} — ${p.urgence}</span>`;
-    });
-    priorities += '</div>';
-  }
-  card.innerHTML = `<h3>Profil de compétences final</h3>${rows}${priorities}`;
   if (data.commentaire_general) {
-    card.innerHTML += `<div style="margin-top:12px;font-size:13px;color:#666;line-height:1.6;border-top:1px solid #f0efe9;padding-top:12px;">${data.commentaire_general}</div>`;
+    html += `<div style="margin-top:12px;font-size:13px;color:#666;line-height:1.6;border-top:1px solid #f0efe9;padding-top:12px;">${data.commentaire_general}</div>`;
   }
+  card.innerHTML = html;
   messagesEl.appendChild(card);
   messagesEl.scrollTop = messagesEl.scrollHeight;
 
@@ -484,54 +401,67 @@ function showFinalProfile(data) {
   document.getElementById('phase-badge').style.background = '#f0faf5';
   document.getElementById('phase-badge').style.color = '#1d9e75';
   document.getElementById('phase-indicator').textContent = 'Terminé';
-  diagnosticDone = true;
-  sendBtn.disabled = true;
-  inputEl.disabled = true;
+  diagnosticDone = true; sendBtn.disabled = true; inputEl.disabled = true;
   inputEl.placeholder = 'Diagnostic terminé.';
   sendToMake(data);
 }
 
 async function sendToMake(data) {
-  const payload = {
-    matiere: 'Français',
-    date: new Date().toISOString(),
-    couverture: data.couverture || {},
+  const date = new Date().toISOString();
+  const couverture = data.couverture || {};
+
+  const mkChapStr = (ids, priorites) => ids.map(id => {
+    const statut = couverture[id] || 'non';
+    const urgence = (priorites||[]).find(p => p.chapitre === id)?.urgence || 'normale';
+    return id + ':' + statut + ':' + urgence;
+  }).join('|');
+
+  const payloadEcrit = {
+    matiere: 'Français écrit',
+    date,
+    couverture,
     scores: {
       score_1: data.scores?.oeuvres?.score || 0,
-      score_2: data.scores?.parcours?.score || 0,
-      score_3: data.scores?.methode_ecrit?.score || 0,
-      score_4: data.scores?.methode_oral?.score || 0,
-      score_5: 0,
-      domaine_1: 'Oeuvres',
-      domaine_2: 'Parcours',
-      domaine_3: 'Methode ecrit',
-      domaine_4: 'Methode oral',
-      domaine_5: ''
+      score_2: data.scores?.methode_ecrit?.score || 0,
+      score_3: 0, score_4: 0, score_5: 0,
+      domaine_1: 'Oeuvres', domaine_2: 'Methode ecrit', domaine_3: '', domaine_4: '', domaine_5: ''
     },
-    priorites: (data.priorites || []).map(p => (CHAPTER_LABELS[p.chapitre]||p.chapitre) + ' — ' + p.urgence).join(', '),
-    commentaire: data.commentaire_general || '',
+    priorites: (data.priorites_ecrit||[]).map(p => (CHAPTER_LABELS[p.chapitre]||p.chapitre) + ' — ' + p.urgence).join(', '),
+    commentaire: data.commentaire_ecrit || data.commentaire_general || '',
     notation_methode: data.methode_et_style || '',
     json_brut: JSON.stringify(data).substring(0, 1800),
-    chapitres_str: Object.entries(data.couverture || {}).map(([id, statut]) => {
-      const urgence = (data.priorites || []).find(p => p.chapitre === id)?.urgence || 'normale';
-      return id + ':' + statut + ':' + urgence;
-    }).join('|')
+    chapitres_str: mkChapStr(['rimbaud','manon','sarraute','graffigny','dissert','commentaire'], data.priorites_ecrit)
   };
+
+  const payloadOral = {
+    matiere: 'Français oral',
+    date,
+    couverture,
+    scores: {
+      score_1: data.scores?.parcours?.score || 0,
+      score_2: data.scores?.methode_oral?.score || 0,
+      score_3: 0, score_4: 0, score_5: 0,
+      domaine_1: 'Parcours', domaine_2: 'Methode oral', domaine_3: '', domaine_4: '', domaine_5: ''
+    },
+    priorites: (data.priorites_oral||[]).map(p => (CHAPTER_LABELS[p.chapitre]||p.chapitre) + ' — ' + p.urgence).join(', '),
+    commentaire: data.commentaire_oral || data.commentaire_general || '',
+    notation_methode: data.methode_et_style || '',
+    json_brut: JSON.stringify(data).substring(0, 1800),
+    chapitres_str: mkChapStr(['rimbaud','manon','sarraute','graffigny','lineaire','grammaire','entretien'], data.priorites_oral)
+  };
+
   try {
-    await fetch(WEBHOOK_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
+    await fetch(WEBHOOK_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payloadEcrit) });
+    await fetch(WEBHOOK_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payloadOral) });
     const notif = document.createElement('div');
     notif.style.cssText = 'font-size:12px;color:#1d9e75;padding:8px 16px;text-align:center;';
-    notif.textContent = 'Résultats envoyés vers Notion.';
+    notif.textContent = 'Résultats envoyés vers Notion (Français écrit + Français oral).';
     messagesEl.appendChild(notif);
     messagesEl.scrollTop = messagesEl.scrollHeight;
   } catch(e) {
     const notif = document.createElement('div');
     notif.style.cssText = 'font-size:12px;color:#e24b4a;padding:8px 16px;text-align:center;';
-    notif.textContent = 'Envoi vers Notion échoué — résultats sauvegardés localement.';
+    notif.textContent = 'Envoi vers Notion échoué.';
     messagesEl.appendChild(notif);
   }
 }
@@ -540,12 +470,7 @@ async function callAPI(messages) {
   const res = await fetch('https://bac-2026-agents.vercel.app/api/proxy', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 1200,
-      system: SYSTEM_PROMPT,
-      messages
-    })
+    body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1200, system: SYSTEM_PROMPT, messages })
   });
   const data = await res.json();
   if (!res.ok) throw new Error(data.error?.message || 'Erreur API');
@@ -554,23 +479,14 @@ async function callAPI(messages) {
 
 async function sendMessage() {
   if (isLoading || diagnosticDone) return;
-  const text = inputEl.value.trim();
-  if (!text) return;
-  inputEl.value = '';
-  inputEl.style.height = 'auto';
-  addMsg('user', text);
-  conversation.push({ role: 'user', content: text });
-
-  isLoading = true;
-  sendBtn.disabled = true;
-  addTyping();
-
+  const text = inputEl.value.trim(); if (!text) return;
+  inputEl.value = ''; inputEl.style.height = 'auto';
+  addMsg('user', text); conversation.push({ role: 'user', content: text });
+  isLoading = true; sendBtn.disabled = true; addTyping();
   try {
     const reply = await callAPI(conversation);
-    removeTyping();
-    addMsg('agent', reply);
+    removeTyping(); addMsg('agent', reply);
     conversation.push({ role: 'assistant', content: reply });
-
     const json = parseJSON(reply);
     if (json) {
       if (json.phase === 1) {
@@ -578,24 +494,14 @@ async function sendMessage() {
         document.getElementById('phase-badge').textContent = 'Phase 2 — Évaluation';
         document.getElementById('phase-badge').className = 'phase-badge phase-2';
         document.getElementById('phase-indicator').textContent = 'Phase 2 / 2';
-      } else if (json.phase === 2 && json.diagnostic_complet) {
-        showFinalProfile(json);
-      }
+      } else if (json.phase === 2 && json.diagnostic_complet) { showFinalProfile(json); }
     }
-  } catch(err) {
-    removeTyping();
-    addMsg('agent', 'Erreur : ' + err.message);
-  } finally {
-    isLoading = false;
-    if (!diagnosticDone) sendBtn.disabled = false;
-  }
+  } catch(err) { removeTyping(); addMsg('agent', 'Erreur : ' + err.message); }
+  finally { isLoading = false; if (!diagnosticDone) sendBtn.disabled = false; }
 }
 
 async function init() {
-  isLoading = true;
-  sendBtn.disabled = true;
-  inputEl.disabled = true;
-  addTyping();
+  isLoading = true; sendBtn.disabled = true; inputEl.disabled = true; addTyping();
   try {
     const reply = await callAPI([{ role: 'user', content: 'Commençons.' }]);
     removeTyping();
@@ -604,42 +510,28 @@ async function init() {
     addMsg('agent', reply);
     showCoverageUI();
   } catch(err) {
-    removeTyping();
-    addMsg('agent', 'Impossible de démarrer : ' + err.message);
-    inputEl.disabled = false;
-    sendBtn.disabled = false;
-  } finally {
-    isLoading = false;
-  }
+    removeTyping(); addMsg('agent', 'Impossible de démarrer : ' + err.message);
+    inputEl.disabled = false; sendBtn.disabled = false;
+  } finally { isLoading = false; }
 }
 
 async function testWebhook() {
   const testData = {
-    matiere: 'Français',
+    matiere: 'Français écrit',
     date: new Date().toISOString(),
     couverture: {"rimbaud":"oui","manon":"oui","sarraute":"partiel","graffigny":"non","dissert":"partiel","commentaire":"partiel","lineaire":"oui","grammaire":"non","entretien":"non"},
-    scores: { score_1:3, score_2:2, score_3:2, score_4:3, score_5:0 },
-    priorites: "graffigny — critique, grammaire — critique, entretien — haute",
-    commentaire: "Test diagnostic fictif Français",
-    notation_methode: "Test",
+    scores: { score_1:3, score_2:2, score_3:0, score_4:0, score_5:0 },
+    priorites: "graffigny — critique, commentaire — haute",
+    commentaire: "Test Français écrit", notation_methode: "Test",
     json_brut: '{"test":true}',
-    chapitres_str: "rimbaud:oui:normale|manon:oui:normale|sarraute:partiel:normale|graffigny:non:critique|dissert:partiel:normale|commentaire:partiel:normale|lineaire:oui:normale|grammaire:non:critique|entretien:non:haute"
+    chapitres_str: "rimbaud:oui:normale|manon:oui:normale|sarraute:partiel:normale|graffigny:non:critique|dissert:partiel:normale|commentaire:partiel:haute"
   };
-  await fetch(WEBHOOK_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(testData)
-  });
-  alert('Payload test Français envoyé !');
+  await fetch(WEBHOOK_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(testData) });
+  alert('Payload test Français écrit envoyé !');
 }
 
-inputEl.addEventListener('keydown', e => {
-  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
-});
-inputEl.addEventListener('input', () => {
-  inputEl.style.height = 'auto';
-  inputEl.style.height = Math.min(inputEl.scrollHeight, 120) + 'px';
-});
+inputEl.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } });
+inputEl.addEventListener('input', () => { inputEl.style.height = 'auto'; inputEl.style.height = Math.min(inputEl.scrollHeight, 120) + 'px'; });
 
 init();
 </script>
