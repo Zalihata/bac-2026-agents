@@ -144,16 +144,23 @@ const TOTAL_QUESTIONS = 15;
 
 // Coverage chapters for Phase 1
 const COVERAGE_ITEMS = [
-  { id: 'ser_estar', label: 'Ser et Estar' },
-  { id: 'subjonctif', label: 'Subjonctif présent & imparfait' },
-  { id: 'passe', label: 'Passé simple & imparfait' },
-  { id: 'pronoms', label: 'Pronoms personnels (COD/COI)' },
-  { id: 'negatif', label: 'Négation (no, nunca, ni…ni)' },
-  { id: 'prepositions', label: 'Prépositions (por/para, ser/estar)' },
-  { id: 'subordonnees', label: 'Subordonnées & concordance' },
-  { id: 'lexique_theme', label: 'Lexique thématique (mythes, héros)' },
-  { id: 'comprehension_texte', label: 'Compréhension de texte (espagnol)' },
-  { id: 'expression_ecrite', label: 'Expression écrite argumentée' },
+  // Faits de langue
+  { id: 'ser_estar',     label: 'Ser et Estar' },
+  { id: 'subjonctif',    label: 'Subjonctif présent & imparfait' },
+  { id: 'passe',         label: 'Passé simple & imparfait' },
+  { id: 'pronoms',       label: 'Pronoms personnels (COD/COI)' },
+  { id: 'negatif',       label: 'Négation (no, nunca, ni…ni)' },
+  { id: 'prepositions',  label: 'Prépositions (por/para)' },
+  { id: 'subordonnees',  label: 'Subordonnées & concordance des temps' },
+  // Compétences de communication
+  { id: 'comprehension_texte', label: 'Compréhension de texte en espagnol' },
+  { id: 'expression_ecrite',   label: 'Expression écrite argumentée' },
+  // Thématiques culturelles (séquences CNED)
+  { id: 'seq1_mythes',   label: 'Séq. 1 — Figuras míticas, héroes y creación' },
+  { id: 'seq2_migrations', label: 'Séq. 2 — Migraciones (sueño u oportunidad)' },
+  { id: 'seq3_arte',     label: 'Séq. 3 — Arte y poder' },
+  { id: 'seq4_digital',  label: 'Séq. 4 — Ciudadanía y mundos virtuales' },
+  { id: 'seq6_territorio', label: 'Séq. 6 — Latinoamérica, territorio mestizo' },
 ];
 
 // ── STATE ────────────────────────────────────────────────────────────────────
@@ -182,24 +189,31 @@ Tu évalues les connaissances de l'élève en posant exactement ${TOTAL_QUESTION
 5 DOMAINES À ÉVALUER (score 0-5 chacun) :
 - grammaire : ser/estar, subjonctif, pronoms, négation, prépositions, tournure emphatique
 - conjugaison : passé simple, imparfait, subjonctif imparfait, futur, conditionnel
-- lexique : vocabulaire thématique, faux-amis, synonymes, champ lexical
+- lexique : vocabulaire thématique par séquence, faux-amis, synonymes, champ lexical
 - comprehension : lecture de texte en espagnol, inférence, reformulation
-- expression : capacité à rédiger en espagnol, cohérence, connecteurs
+- expression : capacité à rédiger en espagnol sur un thème culturel, cohérence, connecteurs
 
 FORMAT DE TES QUESTIONS :
-- Alterne : traduction FR→ES, complétion de texte, question de cours, mini-texte à comprendre, mini-rédaction courte
-- Pour les questions de grammaire ou conjugaison : donne une consigne claire en français puis attends la réponse en espagnol
-- Pour la compréhension : propose un court extrait en espagnol (3-5 lignes) et pose une question de compréhension
+- Répartis les 15 questions : ~5 sur les faits de langue, ~3 sur la compréhension, ~4 sur les thématiques culturelles (1 question par séquence déclarée "oui" ou "partiel"), ~3 sur l'expression écrite
+- Pour les questions de grammaire ou conjugaison : consigne en français, réponse en espagnol
+- Pour la compréhension : propose un court extrait authentique en espagnol (3-5 lignes) lié aux thèmes étudiés, pose une question de compréhension
+- Pour les thématiques culturelles : demande de résumer un thème, d'expliquer un personnage (Evita, Che Guevara, Pablo Escobar, Don Quijote…), de donner son opinion argumentée en espagnol
+- Pour l'expression : donne une consigne de mini-rédaction (50-80 mots) sur un sujet culturel étudié
 - Corrige toujours la réponse précédente avant de poser la suivante
 - Ne pose qu'UNE question à la fois
 
-POINTS D'ATTENTION IMPORTANTS pour le bac LVB :
-- Maîtrise de ser/estar dans tous les contextes
-- Distinction passé simple / imparfait (prétérit / imperfecto)
-- Emploi du subjonctif après verbes de volonté, doute, emotion
-- Pronoms COD/COI et leur ordre (enclise à l'impératif)
-- Négations complexes : nunca, nadie, ni…ni, tampoco
-- Vocabulaire des thèmes culturels : mythes, héros, figures historiques, cinéma, fiction/réalité
+THÉMATIQUES CULTURELLES DU PROGRAMME CNED (à évaluer si déclarées) :
+- Séq. 1 — Figuras míticas, héroes y creación : mythes, Pablo Escobar, Eva Perón, Che Guevara, Don Quijote, Mafalda, fiction vs réalité
+- Séq. 2 — Migraciones : immigration hispanique, espoir/désillusion, parcours migratoires
+- Séq. 3 — Arte y poder : art comme outil politique, censure, engagement des artistes
+- Séq. 4 — Ciudadanía y mundos virtuales : réseaux sociaux, fracture numérique, citoyenneté digitale
+- Séq. 6 — Latinoamérica, territorio mestizo : métissage culturel, identités, histoire coloniale
+
+POINTS D'ATTENTION pour le bac LVB :
+- L'épreuve combine un texte à comprendre ET une production écrite sur thème culturel
+- Ser/estar, prétérit/imparfait et subjonctif sont les trois pièges grammaticaux les plus fréquents
+- La richesse du vocabulaire thématique est aussi importante que la correction grammaticale
+- Évalue si l'élève peut mobiliser les références culturelles dans sa production écrite
 
 SCORING (JSON à la fin) :
 Après la question ${TOTAL_QUESTIONS}, fournis OBLIGATOIREMENT un bloc JSON structuré de cette forme exacte :
@@ -498,7 +512,7 @@ async function testWebhook() {
   const testData = {
     matiere: 'Espagnol LVB',
     date: new Date().toISOString(),
-    couverture: { ser_estar: 'partiel', subjonctif: 'non', passe: 'partiel', pronoms: 'oui', negatif: 'oui', prepositions: 'partiel', subordonnees: 'non', lexique_theme: 'oui', comprehension_texte: 'partiel', expression_ecrite: 'non' },
+    couverture: { ser_estar: 'partiel', subjonctif: 'non', passe: 'partiel', pronoms: 'oui', negatif: 'oui', prepositions: 'partiel', subordonnees: 'non', comprehension_texte: 'partiel', expression_ecrite: 'non', seq1_mythes: 'oui', seq2_migrations: 'non', seq3_arte: 'partiel', seq4_digital: 'non', seq6_territorio: 'non' },
     scores: { score_1: 3, score_2: 2, score_3: 3, score_4: 4, score_5: 2, domaine_1: 'Grammaire', domaine_2: 'Conjugaison', domaine_3: 'Lexique', domaine_4: 'Compréhension', domaine_5: 'Expression écrite' },
     priorites: 'Subjonctif présent et imparfait, Passé simple irréguliers, Ser vs Estar',
     commentaire: 'Test — payload Espagnol LVB',
