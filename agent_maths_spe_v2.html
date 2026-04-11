@@ -88,7 +88,7 @@ strong { font-weight: 500; }
 <script>
 async function testWebhook() {
   const testData = {
-    matiere: 'Maths spé',
+    matiere: 'Maths',
     date: new Date().toISOString(),
     couverture: {"suites-arith":"oui","suites-geo":"oui","poly2":"partiel","derivation":"non","variations":"non","expo":"non","trigo":"partiel","scalaire":"non","georep":"non","condis":"oui","varialea":"partiel","bernoulli":"non","auto":"oui"},
     scores: { score_1:2, score_2:1, score_3:1, score_4:3, score_5:4 },
@@ -409,7 +409,7 @@ function showFinalProfile(data) {
 async function sendToMake(data) {
   const WEBHOOK = 'https://hook.eu1.make.com/omhd75bqteracqaewathwkzqyr9rm61q';
   const payload = {
-    matiere: 'Maths spé',
+    matiere: 'Maths',
     date: new Date().toISOString(),
     couverture: data.couverture || {},
     scores: {
