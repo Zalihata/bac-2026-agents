@@ -418,7 +418,7 @@ async function sendToMake(data) {
   }).join('|');
 
   const payloadEcrit = {
-    matiere: 'Français écrit',
+    matiere: 'Francais ecrit',
     date,
     couverture,
     scores: {
@@ -435,7 +435,7 @@ async function sendToMake(data) {
   };
 
   const payloadOral = {
-    matiere: 'Français oral',
+    matiere: 'Francais oral',
     date,
     couverture,
     scores: {
@@ -518,7 +518,7 @@ async function init() {
 
 async function testWebhook() {
   const testData = {
-    matiere: 'Français écrit',
+    matiere: 'Francais ecrit',
     date: new Date().toISOString(),
     couverture: {"rimbaud":"oui","manon":"oui","sarraute":"partiel","graffigny":"non","dissert":"partiel","commentaire":"partiel","lineaire":"oui","grammaire":"non","entretien":"non"},
     scores: { score_1:3, score_2:2, score_3:0, score_4:0, score_5:0 },
