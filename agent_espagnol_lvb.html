@@ -379,24 +379,51 @@ async function finalizeDiagnostic(text) {
   let data;
   try { data = JSON.parse(match[1]); } catch(e) { return; }
 
-  // Send to Make webhook
+  sendToMake(data);
+}
+
+async function sendToMake(data) {
+  const s = data.scores || {};
+
+  const prioritesStr = Array.isArray(data.priorites_revision)
+    ? data.priorites_revision.join(', ')
+    : (data.priorites_revision || '');
+
+  // Utiliser les labels lisibles (pas les IDs) pour Notion
+  const labelMap = Object.fromEntries(COVERAGE_ITEMS.map(i => [i.id, i.label]));
+  const chapitresStr = Object.entries(coverageState).map(([id, statut]) => {
+    const label = labelMap[id] || id;
+    return label + ':' + statut + ':normale';
+  }).join('|');
+
+  const payload = {
+    matiere: 'Espagnol LVB',
+    date: new Date().toISOString(),
+    couverture: coverageState,
+    scores: {
+      score_1: s.grammaire     || 0,
+      score_2: s.conjugaison   || 0,
+      score_3: s.lexique       || 0,
+      score_4: s.comprehension || 0,
+      score_5: s.expression    || 0,
+      domaine_1: 'Grammaire',
+      domaine_2: 'Conjugaison',
+      domaine_3: 'Lexique',
+      domaine_4: 'Compréhension',
+      domaine_5: 'Expression écrite'
+    },
+    priorites: prioritesStr,
+    commentaire: data.recommandation || '',
+    notation_methode: (data.points_forts || []).join(', '),
+    json_brut: JSON.stringify(data).substring(0, 1800),
+    chapitres_str: chapitresStr
+  };
+
   try {
     await fetch(WEBHOOK, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        source: 'diagnostic_agent',
-        matiere: 'Espagnol LVB',
-        code_epreuve: 'IP004',
-        date: data.date || new Date().toISOString().split('T')[0],
-        scores: data.scores,
-        points_forts: data.points_forts,
-        points_faibles: data.points_faibles,
-        priorites_revision: data.priorites_revision,
-        recommandation: data.recommandation,
-        couverture: coverageState,
-        raw_json: JSON.stringify(data)
-      })
+      body: JSON.stringify(payload)
     });
     addMessage('system', '✓ Résultats envoyés dans Notion');
   } catch(e) {
@@ -404,7 +431,6 @@ async function finalizeDiagnostic(text) {
   }
 }
 
-// ── API ───────────────────────────────────────────────────────────────────────
 async function callAPI(messages, systemPrompt) {
   const res = await fetch(PROXY, {
     method: 'POST',
@@ -468,7 +494,27 @@ inputEl.addEventListener('input', () => {
   inputEl.style.height = Math.min(inputEl.scrollHeight, 120) + 'px';
 });
 
+async function testWebhook() {
+  const testData = {
+    matiere: 'Espagnol LVB',
+    date: new Date().toISOString(),
+    couverture: { ser_estar: 'partiel', subjonctif: 'non', passe: 'partiel', pronoms: 'oui', negatif: 'oui', prepositions: 'partiel', subordonnees: 'non', lexique_theme: 'oui', comprehension_texte: 'partiel', expression_ecrite: 'non' },
+    scores: { score_1: 3, score_2: 2, score_3: 3, score_4: 4, score_5: 2, domaine_1: 'Grammaire', domaine_2: 'Conjugaison', domaine_3: 'Lexique', domaine_4: 'Compréhension', domaine_5: 'Expression écrite' },
+    priorites: 'Subjonctif présent et imparfait, Passé simple irréguliers, Ser vs Estar',
+    commentaire: 'Test — payload Espagnol LVB',
+    notation_methode: 'Compréhension de texte, Vocabulaire thématique',
+    json_brut: JSON.stringify({ test: true }),
+    chapitres_str: 'Ser et Estar:partiel:normale|Subjonctif présent & imparfait:non:critique|Passé simple & imparfait:partiel:haute|Pronoms personnels (COD/COI):oui:normale'
+  };
+  await fetch(WEBHOOK, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(testData) });
+  alert('Payload test Espagnol LVB envoyé !');
+}
+
+
 init();
 </script>
+
+<button onclick="testWebhook()" style="position:fixed;bottom:20px;left:20px;background:#d5d4ce;color:#888;border:none;padding:6px 12px;border-radius:6px;font-size:11px;cursor:pointer;z-index:999;opacity:0.6;">⚙ Test</button>
+
 </body>
 </html>
