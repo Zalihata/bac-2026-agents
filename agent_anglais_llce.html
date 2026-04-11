@@ -94,10 +94,11 @@ strong { font-weight: 500; }
     </div>
     <div id="scores-section" style="display:none;">
       <div class="domain-label" style="margin-top:8px;">Scores</div>
-      <div class="score-row"><span style="font-size:12px;width:100px;flex-shrink:0;">Expression</span><div class="score-bar-bg"><div class="score-bar" id="sb-expression_orale" style="width:0%"></div></div><span class="score-val" id="sv-expression_orale">—</span></div>
-      <div class="score-row"><span style="font-size:12px;width:100px;flex-shrink:0;">Interaction</span><div class="score-bar-bg"><div class="score-bar" id="sb-interaction_orale" style="width:0%"></div></div><span class="score-val" id="sv-interaction_orale">—</span></div>
-      <div class="score-row"><span style="font-size:12px;width:100px;flex-shrink:0;">Correction</span><div class="score-bar-bg"><div class="score-bar" id="sb-correction_langue" style="width:0%"></div></div><span class="score-val" id="sv-correction_langue">—</span></div>
-      <div class="score-row"><span style="font-size:12px;width:100px;flex-shrink:0;">Richesse</span><div class="score-bar-bg"><div class="score-bar" id="sb-richesse_langue" style="width:0%"></div></div><span class="score-val" id="sv-richesse_langue">—</span></div>
+      <div class="score-row"><span style="font-size:12px;width:130px;flex-shrink:0;">Contenu thématique</span><div class="score-bar-bg"><div class="score-bar" id="sb-contenu" style="width:0%"></div></div><span class="score-val" id="sv-contenu">—</span></div>
+      <div class="score-row"><span style="font-size:12px;width:130px;flex-shrink:0;">Vocabulaire</span><div class="score-bar-bg"><div class="score-bar" id="sb-vocabulaire" style="width:0%"></div></div><span class="score-val" id="sv-vocabulaire">—</span></div>
+      <div class="score-row"><span style="font-size:12px;width:130px;flex-shrink:0;">Grammaire & langue</span><div class="score-bar-bg"><div class="score-bar" id="sb-grammaire" style="width:0%"></div></div><span class="score-val" id="sv-grammaire">—</span></div>
+      <div class="score-row"><span style="font-size:12px;width:130px;flex-shrink:0;">Méthode oral</span><div class="score-bar-bg"><div class="score-bar" id="sb-methode" style="width:0%"></div></div><span class="score-val" id="sv-methode">—</span></div>
+      <div class="score-row"><span style="font-size:12px;width:130px;flex-shrink:0;">Dossier personnel</span><div class="score-bar-bg"><div class="score-bar" id="sb-dossier_score" style="width:0%"></div></div><span class="score-val" id="sv-dossier_score">—</span></div>
     </div>
   </div>
   <div class="main">
@@ -142,11 +143,11 @@ const DOMAIN_GROUPS = [
   { label: 'Dossier personnel', chapters: ['dossier','argumentation'] }
 ];
 
-const SYSTEM_PROMPT = `You are a pedagogical diagnostic agent for the LLCE Anglais (IP020) exam for French Première générale students at the CNED.
+const SYSTEM_PROMPT = `You are a pedagogical diagnostic agent for the LLCE Anglais (IP020) exam for French Premiere generale students at the CNED.
 
-The student is a "candidat libre" — she takes ALL exams as "contrôle continu ponctuel". She has NOT yet started building her personal dossier.
+The student is a "candidat libre" - she takes ALL exams as "controle continu ponctuel". She has NOT yet started building her personal dossier.
 
-EXAM FORMAT (IP020 — Première LLCE):
+EXAM FORMAT (IP020 - Premiere LLCE):
 - Oral exam: 20 minutes WITHOUT preparation time
 - Part 1: Student presents her personal dossier in English (10 minutes max)
 - Part 2: Interaction with examiner in English (10 minutes max)
@@ -158,61 +159,81 @@ DOSSIER PERSONNEL:
 - Must include: at least 1 press article, max 2 other texts, max 2 iconographic documents
 - Common theme linked to one of the two programme thematiques
 - The student must justify her document choices and explain the internal logic of the dossier
-- The dossier itself is NOT graded — only the oral performance is
+- The dossier itself is NOT graded - only the oral performance is
 
 CNED PROGRAMME (Monde contemporain):
-Sequence 1: "Producing and Sharing Knowledge" — digital divide, journalism/interview methodology, society of knowledge
-Other sequences likely include contemporary world themes
+Sequence 1: "Producing and Sharing Knowledge" - digital divide, journalism/interview methodology, society of knowledge
+Other sequences cover contemporary world themes (identity, power, environment, globalisation, etc.)
 
-═══════════════════════════════
-STRUCTURE — 2 PHASES
-═══════════════════════════════
+STRUCTURE - 2 PHASES
 
-PHASE 1 — COVERAGE
+PHASE 1 - COVERAGE
 The student has already filled in a coverage grid. You will receive "Voici ma couverture : ...".
 Generate immediately this JSON then move to phase 2:
+\`\`\`json
 {
   "phase": 1,
   "couverture": {
-    "digital": "oui|partiel|non", "autres": "oui|partiel|non",
-    "expression": "oui|partiel|non", "interaction": "oui|partiel|non",
-    "correction": "oui|partiel|non", "richesse": "oui|partiel|non",
-    "dossier": "oui|partiel|non", "argumentation": "oui|partiel|non"
+    "digital": "oui|partiel|non",
+    "autres": "oui|partiel|non",
+    "expression": "oui|partiel|non",
+    "interaction": "oui|partiel|non",
+    "correction": "oui|partiel|non",
+    "richesse": "oui|partiel|non",
+    "dossier": "oui|partiel|non",
+    "argumentation": "oui|partiel|non"
   }
 }
+\`\`\`
 
-PHASE 2 — EVALUATION
-12 to 15 questions, ONE AT A TIME. Mix of English and French as appropriate.
-Key focus areas:
-1. ORAL EXPRESSION — Ask her to explain a concept, describe a document, give her opinion on a theme studied. Evaluate fluency, structure, cultural references.
-2. INTERACTION — Ask follow-up questions and evaluate her ability to react, reformulate, defend a position.
-3. LANGUAGE QUALITY — Note grammar errors, vocabulary range, pronunciation awareness (ask her to explain how she would pronounce certain words).
-4. DOSSIER METHODOLOGY — Ask her to explain what a dossier is, what documents she might choose, how she would structure her presentation, how she would justify her choices. Since she hasn't started, evaluate her UNDERSTANDING of the methodology.
-5. CONTENT KNOWLEDGE — Test knowledge of the digital divide, society of knowledge, interview types, etc.
+PHASE 2 - EVALUATION
+15 questions, ONE AT A TIME. Organised around 5 revision-oriented domains that tell the student WHAT TO WORK ON:
 
-For oral simulation questions, ask her to write her answer as if she were speaking — this simulates the oral exam.
+DOMAIN 1 - CONTENU THEMATIQUE (Q1-Q4, ~25%)
+Knowledge of the sequences studied: digital divide, society of knowledge, key concepts, cultural references, important examples and case studies. Ask her to explain a theme, a concept, describe a phenomenon, give examples from the sequences she declared.
+
+DOMAIN 2 - VOCABULAIRE THEMATIQUE (Q5-Q7, ~20%)
+Thematic vocabulary: precision, range, collocations. Can she use the right words to talk about the topics? Ask for definitions, synonyms, fill-in-the-blank, vocabulary in context sentences.
+
+DOMAIN 3 - GRAMMAIRE & LANGUE (Q8-Q10, ~20%)
+Grammar accuracy in English: tenses (present perfect vs simple past, conditionals), passive voice, relative clauses, reported speech. Ask targeted grammar exercises based on sequences studied.
+
+DOMAIN 4 - METHODE DE PRESENTATION (Q11-Q12, ~20%)
+Oral presentation skills: can she structure a 10-minute presentation? Ask her to write an introduction for a presentation on one of her themes, use transition phrases, introduce a document. Evaluate structure, linking words, ability to manage time.
+
+DOMAIN 5 - DOSSIER PERSONNEL (Q13-Q15, ~15%)
+Understanding of the dossier methodology: what documents to choose (press article + iconographic + other), how to build thematic coherence, how to justify choices to the examiner. Since she has NOT started, evaluate her UNDERSTANDING of what is expected, not what she has done.
 
 SCORING (1 to 5):
 1 = not mastered, 2 = major gaps, 3 = correct, 4 = good, 5 = excellent
 
-Final JSON:
+RULES:
+- For oral simulation questions, ask her to write as if she were speaking
+- Give constructive feedback after each answer before moving to next question
+- ONE question at a time
+- Mix English and French as appropriate - prefer English for language practice questions
+
+Final JSON after Q15:
+\`\`\`json
 {
   "phase": 2,
   "diagnostic_complet": true,
-  "couverture": { ... },
+  "couverture": {},
   "scores": {
-    "expression_orale": { "score": X, "points_forts": "...", "lacunes": "..." },
-    "interaction_orale": { "score": X, "points_forts": "...", "lacunes": "..." },
-    "correction_langue": { "score": X, "points_forts": "...", "lacunes": "..." },
-    "richesse_langue": { "score": X, "points_forts": "...", "lacunes": "..." }
+    "contenu": 0,
+    "vocabulaire": 0,
+    "grammaire": 0,
+    "methode": 0,
+    "dossier_score": 0
   },
-  "dossier_readiness": "bilan sur sa préparation au dossier et ce qu'elle doit faire",
-  "priorites": [{ "chapitre": "id", "raison": "...", "urgence": "critique|haute|normale" }],
-  "commentaire_general": "...",
-  "niveau_estime": "A2|B1|B1+|B2|B2+"
+  "niveau_estime": "A2|B1|B1+|B2|B2+",
+  "dossier_readiness": "bilan sur la comprehension de la methodologie du dossier et prochaines etapes concretes",
+  "priorites": "liste des priorites de revision en texte libre",
+  "commentaire_general": "bilan global encourage et constructif"
 }
+\`\`\`
 
-STYLE: Welcoming, encouraging. Short welcome in French/English then coverage grid. Simulate an oral exam atmosphere. Give constructive feedback after each answer. Since she hasn't started her dossier, be pedagogical about methodology.`;
+STYLE: Welcoming, encouraging. Simulate an oral exam atmosphere. Give constructive feedback after each answer.`;
 
 let conversation = [];
 let isLoading = false;
@@ -257,29 +278,24 @@ function parseJSON(text) {
 }
 
 const coverageClass = { 'oui': 'studied', 'partiel': 'partial', 'non': 'not-studied' };
-const coverageIcon = { 'oui': 's', 'partiel': 'p', 'non': 'n' };
-const coverageSymbol = { 'oui': '✓', 'partiel': '~', 'non': '✕' };
+const coverageIcon  = { 'oui': 's', 'partiel': 'p', 'non': 'n' };
+const coverageSymbol= { 'oui': '✓', 'partiel': '~', 'non': '✕' };
 
 function updateCoverage(data) {
   if (!data || !data.couverture) return;
   Object.entries(data.couverture).forEach(([ch, val]) => {
     const el = document.getElementById('ch-' + ch);
     if (!el) return;
-    const icon = coverageIcon[val] || 'q';
-    const cls = coverageClass[val] || 'pending';
-    const sym = coverageSymbol[val] || '?';
-    el.className = 'chapter-item ' + cls;
-    el.innerHTML = `<div class="ch-icon ${icon}">${sym}</div>${CHAPTER_LABELS[ch]||ch}`;
+    el.className = 'chapter-item ' + (coverageClass[val] || 'pending');
+    el.innerHTML = `<div class="ch-icon ${coverageIcon[val]||'q'}">${coverageSymbol[val]||'?'}</div>${CHAPTER_LABELS[ch]||ch}`;
   });
 }
 
 function updateScores(scores) {
   if (!scores) return;
   document.getElementById('scores-section').style.display = 'block';
-  const ids = ['expression_orale','interaction_orale','correction_langue','richesse_langue'];
-  ids.forEach(id => {
-    const d = scores[id]; if (!d) return;
-    const s = d.score || 0;
+  ['contenu','vocabulaire','grammaire','methode','dossier_score'].forEach(id => {
+    const s = scores[id] || 0;
     const bar = document.getElementById('sb-' + id);
     const val = document.getElementById('sv-' + id);
     if (!bar || !val) return;
@@ -293,9 +309,7 @@ function showCoverageUI() {
   const container = document.createElement('div');
   container.id = 'coverage-ui';
   container.style.cssText = 'background:#fff;border:1px solid #e5e5e0;border-radius:12px;padding:16px;margin:8px 0;max-width:680px;';
-
-  let html = '<div style="font-size:13px;font-weight:500;margin-bottom:12px;color:#555;">Pour chaque élément, indique ton niveau de préparation :</div>';
-
+  let html = '<div style="font-size:13px;font-weight:500;margin-bottom:12px;color:#555;">Pour chaque element, indique ton niveau de preparation :</div>';
   DOMAIN_GROUPS.forEach(domain => {
     html += `<div style="margin-bottom:12px;"><div style="font-size:11px;font-weight:500;color:#aaa;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">${domain.label}</div>`;
     domain.chapters.forEach(ch => {
@@ -310,8 +324,7 @@ function showCoverageUI() {
     });
     html += '</div>';
   });
-
-  html += `<button onclick="validateCoverage()" style="margin-top:12px;width:100%;background:#065f46;color:#fff;border:none;border-radius:8px;padding:10px;font-size:14px;font-weight:500;cursor:pointer;">Valider mes réponses →</button>`;
+  html += `<button onclick="validateCoverage()" style="margin-top:12px;width:100%;background:#065f46;color:#fff;border:none;border-radius:8px;padding:10px;font-size:14px;font-weight:500;cursor:pointer;">Valider mes reponses →</button>`;
   container.innerHTML = html;
   messagesEl.appendChild(container);
   messagesEl.scrollTop = messagesEl.scrollHeight;
@@ -330,15 +343,14 @@ async function validateCoverage() {
   const missing = CHAPTERS.filter(ch => !coverageSelections[ch]);
   if (missing.length > 0) {
     const btn = document.querySelector('#coverage-ui button[onclick="validateCoverage()"]');
-    btn.textContent = `⚠ ${missing.length} élément(s) non renseigné(s)`;
-    setTimeout(() => btn.textContent = 'Valider mes réponses →', 2000);
+    btn.textContent = `⚠ ${missing.length} element(s) non renseigne(s)`;
+    setTimeout(() => btn.textContent = 'Valider mes reponses →', 2000);
     return;
   }
   document.getElementById('coverage-ui').remove();
   const summary = CHAPTERS.map(ch => `${CHAPTER_LABELS[ch]}: ${coverageSelections[ch]}`).join(', ');
-  addMsg('user', 'Réponses envoyées ✓');
+  addMsg('user', 'Reponses envoyees ✓');
   conversation.push({ role: 'user', content: `Voici ma couverture : ${summary}` });
-
   isLoading = true; sendBtn.disabled = true; addTyping();
   try {
     const reply = await callAPI(conversation);
@@ -358,91 +370,87 @@ async function validateCoverage() {
 }
 
 function showFinalProfile(data) {
-  updateCoverage(data); updateScores(data.scores);
+  updateCoverage(data);
+  updateScores(data.scores);
   const card = document.createElement('div');
   card.className = 'final-card';
   const labels = {
-    expression_orale: 'Expression orale en continu',
-    interaction_orale: 'Interaction orale',
-    correction_langue: 'Correction de la langue',
-    richesse_langue: 'Richesse de la langue'
+    contenu:       'Contenu thematique',
+    vocabulaire:   'Vocabulaire thematique',
+    grammaire:     'Grammaire & langue',
+    methode:       'Methode de presentation',
+    dossier_score: 'Dossier personnel'
   };
   let rows = '';
   if (data.scores) {
     Object.entries(labels).forEach(([k, label]) => {
-      const d = data.scores[k]; if (!d) return;
-      const s = d.score||0; const pct = (s/5)*100;
+      const s = data.scores[k] || 0;
+      const pct = (s/5)*100;
       const cls = s<=2?'bl':s<=3?'bm':'bh';
       rows += `<div class="final-row"><div class="final-label">${label}</div><div class="final-bar-bg"><div class="final-bar ${cls}" style="width:${pct}%"></div></div><div class="final-score">${s}/5</div></div>`;
     });
   }
-  let html = `<h3>Profil de compétences — LLCE Anglais</h3>${rows}`;
-  if (data.niveau_estime) {
-    html += `<div style="margin-top:12px;font-size:13px;"><strong>Niveau estimé :</strong> ${data.niveau_estime}</div>`;
-  }
-  if (data.dossier_readiness) {
-    html += `<div style="margin-top:12px;font-size:13px;color:#666;line-height:1.6;background:#f0faf5;border-radius:8px;padding:12px;"><strong>Dossier personnel :</strong> ${data.dossier_readiness}</div>`;
-  }
-  if (data.priorites && data.priorites.length) {
-    html += '<div style="margin-top:12px;"><div style="font-size:12px;color:#aaa;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.04em;">Priorités</div>';
-    data.priorites.forEach(p => { html += `<span class="priority-tag">${CHAPTER_LABELS[p.chapitre]||p.chapitre} — ${p.urgence}</span>`; });
-    html += '</div>';
-  }
-  if (data.commentaire_general) {
-    html += `<div style="margin-top:12px;font-size:13px;color:#666;line-height:1.6;border-top:1px solid #f0efe9;padding-top:12px;">${data.commentaire_general}</div>`;
-  }
+  let html = `<h3>Profil de competences — LLCE Anglais</h3>${rows}`;
+  if (data.niveau_estime) html += `<div style="margin-top:12px;font-size:13px;"><strong>Niveau estime :</strong> ${data.niveau_estime}</div>`;
+  if (data.dossier_readiness) html += `<div style="margin-top:12px;font-size:13px;color:#666;line-height:1.6;background:#f0faf5;border-radius:8px;padding:12px;"><strong>Dossier personnel :</strong> ${data.dossier_readiness}</div>`;
+  if (data.priorites) html += `<div style="margin-top:12px;font-size:13px;color:#666;border-top:1px solid #f0efe9;padding-top:12px;"><strong>Priorites :</strong> ${data.priorites}</div>`;
+  if (data.commentaire_general) html += `<div style="margin-top:12px;font-size:13px;color:#666;line-height:1.6;border-top:1px solid #f0efe9;padding-top:12px;">${data.commentaire_general}</div>`;
   card.innerHTML = html;
   messagesEl.appendChild(card);
   messagesEl.scrollTop = messagesEl.scrollHeight;
-  document.getElementById('phase-badge').textContent = 'Diagnostic terminé';
+  document.getElementById('phase-badge').textContent = 'Diagnostic termine';
   document.getElementById('phase-badge').style.background = '#f0faf5';
   document.getElementById('phase-badge').style.color = '#1d9e75';
-  document.getElementById('phase-indicator').textContent = 'Terminé';
+  document.getElementById('phase-indicator').textContent = 'Termine';
   diagnosticDone = true; sendBtn.disabled = true; inputEl.disabled = true;
-  inputEl.placeholder = 'Diagnostic terminé.';
+  inputEl.placeholder = 'Diagnostic termine.';
   sendToMake(data);
 }
 
 async function sendToMake(data) {
+  const s = data.scores || {};
   const payload = {
     matiere: 'Anglais LLCE',
     date: new Date().toISOString(),
     couverture: data.couverture || {},
     scores: {
-      score_1: data.scores?.expression_orale?.score || 0,
-      score_2: data.scores?.interaction_orale?.score || 0,
-      score_3: data.scores?.correction_langue?.score || 0,
-      score_4: data.scores?.richesse_langue?.score || 0,
-      score_5: 0,
-      domaine_1: 'Expression orale', domaine_2: 'Interaction', domaine_3: 'Correction', domaine_4: 'Richesse', domaine_5: ''
+      score_1: s.contenu       || 0,
+      score_2: s.vocabulaire   || 0,
+      score_3: s.grammaire     || 0,
+      score_4: s.methode       || 0,
+      score_5: s.dossier_score || 0,
+      domaine_1: 'Contenu thematique',
+      domaine_2: 'Vocabulaire thematique',
+      domaine_3: 'Grammaire & langue',
+      domaine_4: 'Methode de presentation',
+      domaine_5: 'Dossier personnel'
     },
-    priorites: (data.priorites||[]).map(p => (CHAPTER_LABELS[p.chapitre]||p.chapitre) + ' — ' + p.urgence).join(', '),
+    priorites: data.priorites || '',
     commentaire: data.commentaire_general || '',
     notation_methode: data.dossier_readiness || '',
-    json_brut: JSON.stringify(data).substring(0, 1800),
+    json_brut: JSON.stringify(data).substring(0, 1800)
   };
   payload.chapitres_str = [
-  { label: payload.scores.domaine_1, score: payload.scores.score_1 },
-  { label: payload.scores.domaine_2, score: payload.scores.score_2 },
-  { label: payload.scores.domaine_3, score: payload.scores.score_3 },
-  { label: payload.scores.domaine_4, score: payload.scores.score_4 },
-  { label: payload.scores.domaine_5, score: payload.scores.score_5 }
-].filter(d => d.label).map(d => {
-  const statut  = d.score >= 4 ? 'oui' : d.score >= 3 ? 'partiel' : 'non';
-  const urgence = d.score <= 2 ? 'critique' : d.score <= 3 ? 'haute' : 'normale';
-  return d.label + ':' + statut + ':' + urgence;
-}).join('|');
+    { label: payload.scores.domaine_1, score: payload.scores.score_1 },
+    { label: payload.scores.domaine_2, score: payload.scores.score_2 },
+    { label: payload.scores.domaine_3, score: payload.scores.score_3 },
+    { label: payload.scores.domaine_4, score: payload.scores.score_4 },
+    { label: payload.scores.domaine_5, score: payload.scores.score_5 }
+  ].filter(d => d.label).map(d => {
+    const statut  = d.score >= 4 ? 'oui' : d.score >= 3 ? 'partiel' : 'non';
+    const urgence = d.score <= 2 ? 'critique' : d.score <= 3 ? 'haute' : 'normale';
+    return d.label + ':' + statut + ':' + urgence;
+  }).join('|');
   try {
     await fetch(WEBHOOK_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
     const notif = document.createElement('div');
     notif.style.cssText = 'font-size:12px;color:#1d9e75;padding:8px 16px;text-align:center;';
-    notif.textContent = 'Résultats envoyés vers Notion.';
-    messagesEl.appendChild(notif);
-    messagesEl.scrollTop = messagesEl.scrollHeight;
+    notif.textContent = 'Resultats envoyes vers Notion.';
+    messagesEl.appendChild(notif); messagesEl.scrollTop = messagesEl.scrollHeight;
   } catch(e) {
     const notif = document.createElement('div');
     notif.style.cssText = 'font-size:12px;color:#e24b4a;padding:8px 16px;text-align:center;';
-    notif.textContent = 'Envoi vers Notion échoué.';
+    notif.textContent = 'Envoi vers Notion echoue.';
     messagesEl.appendChild(notif);
   }
 }
@@ -491,7 +499,7 @@ async function init() {
     addMsg('agent', reply);
     showCoverageUI();
   } catch(err) {
-    removeTyping(); addMsg('agent', 'Impossible de démarrer : ' + err.message);
+    removeTyping(); addMsg('agent', 'Impossible de demarrer : ' + err.message);
     inputEl.disabled = false; sendBtn.disabled = false;
   } finally { isLoading = false; }
 }
@@ -501,24 +509,32 @@ async function testWebhook() {
     matiere: 'Anglais LLCE',
     date: new Date().toISOString(),
     couverture: {"digital":"oui","autres":"partiel","expression":"partiel","interaction":"partiel","correction":"partiel","richesse":"non","dossier":"non","argumentation":"non"},
-    scores: { score_1:2, score_2:2, score_3:3, score_4:2, score_5:0 },
-    priorites: "dossier — critique, richesse — haute",
-    commentaire: "Test LLCE", notation_methode: "Dossier non commencé",
-    json_brut: '{"test":true}',
-     };
+    scores: {
+      score_1: 2, score_2: 2, score_3: 3, score_4: 2, score_5: 1,
+      domaine_1: 'Contenu thematique',
+      domaine_2: 'Vocabulaire thematique',
+      domaine_3: 'Grammaire & langue',
+      domaine_4: 'Methode de presentation',
+      domaine_5: 'Dossier personnel'
+    },
+    priorites: 'Dossier personnel — critique, Methode de presentation — haute',
+    commentaire: 'Test LLCE',
+    notation_methode: 'Dossier non commence',
+    json_brut: '{"test":true}'
+  };
   testData.chapitres_str = [
-  { label: testData.scores.domaine_1, score: testData.scores.score_1 },
-  { label: testData.scores.domaine_2, score: testData.scores.score_2 },
-  { label: testData.scores.domaine_3, score: testData.scores.score_3 },
-  { label: testData.scores.domaine_4, score: testData.scores.score_4 },
-  { label: testData.scores.domaine_5, score: testData.scores.score_5 }
-].filter(d => d.label).map(d => {
-  const statut  = d.score >= 4 ? 'oui' : d.score >= 3 ? 'partiel' : 'non';
-  const urgence = d.score <= 2 ? 'critique' : d.score <= 3 ? 'haute' : 'normale';
-  return d.label + ':' + statut + ':' + urgence;
-}).join('|');
+    { label: testData.scores.domaine_1, score: testData.scores.score_1 },
+    { label: testData.scores.domaine_2, score: testData.scores.score_2 },
+    { label: testData.scores.domaine_3, score: testData.scores.score_3 },
+    { label: testData.scores.domaine_4, score: testData.scores.score_4 },
+    { label: testData.scores.domaine_5, score: testData.scores.score_5 }
+  ].filter(d => d.label).map(d => {
+    const statut  = d.score >= 4 ? 'oui' : d.score >= 3 ? 'partiel' : 'non';
+    const urgence = d.score <= 2 ? 'critique' : d.score <= 3 ? 'haute' : 'normale';
+    return d.label + ':' + statut + ':' + urgence;
+  }).join('|');
   await fetch(WEBHOOK_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(testData) });
-  alert('Payload test Anglais LLCE envoyé !');
+  alert('Payload test Anglais LLCE envoye !');
 }
 
 inputEl.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } });
