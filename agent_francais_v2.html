@@ -451,20 +451,13 @@ async function sendToMake(data) {
     chapitres_str: mkChapStr(['rimbaud','manon','sarraute','graffigny','lineaire','grammaire','entretien'], data.priorites_oral)
   };
 
-  const sendOne = async (payload) => {
-    try {
-      const res = await fetch(WEBHOOK_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-      console.log('payload', payload.matiere, 'status', res.status);
-      return true;
-    } catch(e) { 
-      console.error('erreur', payload.matiere, e);
-      return false; 
-    }
-  };
+  const ok1 = await fetch('https://hook.eu1.make.com/omhd75bqteracqaewathwkzqyr9rm61q', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payloadEcrit)
+  }).then(r => r.ok).catch(() => false);
 
-  const ok1 = await sendOne(payloadEcrit);
-  await new Promise(resolve => setTimeout(resolve, 5000));
-  const ok2 = await sendOne(payloadOral);
+  const ok2 = await fetch('https://hook.eu1.make.com/c7lcryh31w8sioqatr7swh9ebk9j80kq', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payloadOral)
+  }).then(r => r.ok).catch(() => false);
 
   const notif = document.createElement('div');
   notif.style.cssText = 'font-size:12px;color:#1d9e75;padding:8px 16px;text-align:center;';
