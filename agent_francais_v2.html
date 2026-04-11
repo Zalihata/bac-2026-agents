@@ -467,22 +467,6 @@ async function sendToMake(data) {
   messagesEl.scrollTop = messagesEl.scrollHeight;
 }
 
-  try {
-    await fetch(WEBHOOK_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payloadEcrit) });
-    await fetch(WEBHOOK_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payloadOral) });
-    const notif = document.createElement('div');
-    notif.style.cssText = 'font-size:12px;color:#1d9e75;padding:8px 16px;text-align:center;';
-    notif.textContent = 'Résultats envoyés vers Notion (Français écrit + Français oral).';
-    messagesEl.appendChild(notif);
-    messagesEl.scrollTop = messagesEl.scrollHeight;
-  } catch(e) {
-    const notif = document.createElement('div');
-    notif.style.cssText = 'font-size:12px;color:#e24b4a;padding:8px 16px;text-align:center;';
-    notif.textContent = 'Envoi vers Notion échoué.';
-    messagesEl.appendChild(notif);
-  }
-}
-
 async function callAPI(messages) {
   const res = await fetch('https://bac-2026-agents.vercel.app/api/proxy', {
     method: 'POST',
