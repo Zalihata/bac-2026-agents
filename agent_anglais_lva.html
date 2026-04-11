@@ -77,19 +77,19 @@ strong { font-weight: 500; }
     </div>
     <div>
       <div class="domain-label">Séquences CNED</div>
-      <div class="chapter-item pending" id="ch-seq1"><div class="ch-icon q">?</div>Seq 1 — Citoyenneté & mondes virtuels</div>
-      <div class="chapter-item pending" id="ch-seq2"><div class="ch-icon q">?</div>Seq 2 — Art et pouvoir</div>
-      <div class="chapter-item pending" id="ch-seq3"><div class="ch-icon q">?</div>Seq 3 — Territoire et mémoire</div>
-      <div class="chapter-item pending" id="ch-seq4"><div class="ch-icon q">?</div>Seq 4 — Innovations scientifiques</div>
-      <div class="chapter-item pending" id="ch-seq5"><div class="ch-icon q">?</div>Seq 5 — Fictions et réalités</div>
-      <div class="chapter-item pending" id="ch-seq6"><div class="ch-icon q">?</div>Seq 6 — Espace privé et public</div>
-      <div class="chapter-item pending" id="ch-seq7"><div class="ch-icon q">?</div>Seq 7 — Diversité et inclusion</div>
-      <div class="chapter-item pending" id="ch-seq8"><div class="ch-icon q">?</div>Seq 8 — Identités et échanges</div>
+      <div class="chapter-item pending" id="ch-citoyennete-virtuel"><div class="ch-icon q">?</div>Seq 1 — Citoyenneté & mondes virtuels</div>
+      <div class="chapter-item pending" id="ch-art-pouvoir"><div class="ch-icon q">?</div>Seq 2 — Art et pouvoir</div>
+      <div class="chapter-item pending" id="ch-territoire-memoire"><div class="ch-icon q">?</div>Seq 3 — Territoire et mémoire</div>
+      <div class="chapter-item pending" id="ch-innovations-scientifiques"><div class="ch-icon q">?</div>Seq 4 — Innovations scientifiques</div>
+      <div class="chapter-item pending" id="ch-fictions-realites"><div class="ch-icon q">?</div>Seq 5 — Fictions et réalités</div>
+      <div class="chapter-item pending" id="ch-espace-prive-public"><div class="ch-icon q">?</div>Seq 6 — Espace privé et public</div>
+      <div class="chapter-item pending" id="ch-diversite-inclusion"><div class="ch-icon q">?</div>Seq 7 — Diversité et inclusion</div>
+      <div class="chapter-item pending" id="ch-identites-echanges"><div class="ch-icon q">?</div>Seq 8 — Identités et échanges</div>
     </div>
     <div>
       <div class="domain-label">Compétences</div>
-      <div class="chapter-item pending" id="ch-compecrit"><div class="ch-icon q">?</div>Compréhension écrit</div>
-      <div class="chapter-item pending" id="ch-expecrit"><div class="ch-icon q">?</div>Expression écrite</div>
+      <div class="chapter-item pending" id="ch-comprehension-ecrit"><div class="ch-icon q">?</div>Compréhension écrit</div>
+      <div class="chapter-item pending" id="ch-expression-ecrite"><div class="ch-icon q">?</div>Expression écrite</div>
       <div class="chapter-item pending" id="ch-vocab"><div class="ch-icon q">?</div>Vocabulaire & grammaire</div>
     </div>
     <div id="scores-section" style="display:none;">
@@ -123,25 +123,25 @@ strong { font-weight: 500; }
 <button onclick="testWebhook()" style="position:fixed;bottom:20px;left:20px;background:#d5d4ce;color:#888;border:none;padding:6px 12px;border-radius:6px;font-size:11px;cursor:pointer;z-index:999;opacity:0.6;">⚙ Test</button>
 
 <script>
-const CHAPTERS = ['seq1','seq2','seq3','seq4','seq5','seq6','seq7','seq8','compecrit','expecrit','vocab'];
+const CHAPTERS = ['citoyennete-virtuel','art-pouvoir','territoire-memoire','innovations-scientifiques','fictions-realites','espace-prive-public','diversite-inclusion','identites-echanges','comprehension-ecrit','expression-ecrite','vocab'];
 
 const CHAPTER_LABELS = {
-  'seq1': 'Citoyenneté & mondes virtuels',
-  'seq2': 'Art et pouvoir',
-  'seq3': 'Territoire et mémoire',
-  'seq4': 'Innovations scientifiques et responsabilité',
-  'seq5': 'Fictions et réalités',
-  'seq6': 'Espace privé et espace public',
-  'seq7': 'Diversité et inclusion',
-  'seq8': 'Identités et échanges',
-  'compecrit': 'Compréhension de l\'écrit',
-  'expecrit': 'Expression écrite',
+  'citoyennete-virtuel': 'Citoyenneté & mondes virtuels',
+  'art-pouvoir': 'Art et pouvoir',
+  'territoire-memoire': 'Territoire et mémoire',
+  'innovations-scientifiques': 'Innovations scientifiques et responsabilité',
+  'fictions-realites': 'Fictions et réalités',
+  'espace-prive-public': 'Espace privé et espace public',
+  'diversite-inclusion': 'Diversité et inclusion',
+  'identites-echanges': 'Identités et échanges',
+  'comprehension-ecrit': 'Compréhension de l\'écrit',
+  'expression-ecrite': 'Expression écrite',
   'vocab': 'Vocabulaire & grammaire'
 };
 
 const DOMAIN_GROUPS = [
-  { label: 'Séquences thématiques', chapters: ['seq1','seq2','seq3','seq4','seq5','seq6','seq7','seq8'] },
-  { label: 'Compétences langagières', chapters: ['compecrit','expecrit','vocab'] }
+  { label: 'Séquences thématiques', chapters: ['citoyennete-virtuel','art-pouvoir','territoire-memoire','innovations-scientifiques','fictions-realites','espace-prive-public','diversite-inclusion','identites-echanges'] },
+  { label: 'Compétences langagières', chapters: ['comprehension-ecrit','expression-ecrite','vocab'] }
 ];
 
 const SYSTEM_PROMPT = `You are a pedagogical diagnostic agent for the English LVA (IP003) exam for French Première générale students at the CNED.
@@ -155,14 +155,14 @@ EXAM FORMAT (IP003 — Première):
 - Target level: B2
 
 CNED PROGRAMME — 8 sequences:
-1. seq1 — Citoyenneté et mondes virtuels: "Unsociable Networks?" — social media, nomophobia, digital etiquette
-2. seq2 — Art et pouvoir: "Artivism" — street art, graffiti, Banksy, activism
-3. seq3 — Territoire et mémoire: "Remembering our Heritage"
-4. seq4 — Innovations scientifiques et responsabilité: "Useful and Ethical?"
-5. seq5 — Fictions et réalités: "Fiction and Reality: both sides of the same coin?"
-6. seq6 — Espace privé et espace public: "Where do people socially interact in American cities today?"
-7. seq7 — Diversité et inclusion: "Discrimination Against Women, Social Issues and Impact on Health"
-8. seq8 — Identités et échanges: "Black British"
+1. citoyennete-virtuel — Citoyenneté et mondes virtuels: "Unsociable Networks?" — social media, nomophobia, digital etiquette
+2. art-pouvoir — Art et pouvoir: "Artivism" — street art, graffiti, Banksy, activism
+3. territoire-memoire — Territoire et mémoire: "Remembering our Heritage"
+4. innovations-scientifiques — Innovations scientifiques et responsabilité: "Useful and Ethical?"
+5. fictions-realites — Fictions et réalités: "Fiction and Reality: both sides of the same coin?"
+6. espace-prive-public — Espace privé et espace public: "Where do people socially interact in American cities today?"
+7. diversite-inclusion — Diversité et inclusion: "Discrimination Against Women, Social Issues and Impact on Health"
+8. identites-echanges — Identités et échanges: "Black British"
 
 ═══════════════════════════════
 STRUCTURE — 2 PHASES
@@ -174,10 +174,10 @@ Generate immediately this JSON then move to phase 2:
 {
   "phase": 1,
   "couverture": {
-    "seq1": "oui|partiel|non", "seq2": "oui|partiel|non", "seq3": "oui|partiel|non",
-    "seq4": "oui|partiel|non", "seq5": "oui|partiel|non", "seq6": "oui|partiel|non",
-    "seq7": "oui|partiel|non", "seq8": "oui|partiel|non",
-    "compecrit": "oui|partiel|non", "expecrit": "oui|partiel|non", "vocab": "oui|partiel|non"
+    "citoyennete-virtuel": "oui|partiel|non", "art-pouvoir": "oui|partiel|non", "territoire-memoire": "oui|partiel|non",
+    "innovations-scientifiques": "oui|partiel|non", "fictions-realites": "oui|partiel|non", "espace-prive-public": "oui|partiel|non",
+    "diversite-inclusion": "oui|partiel|non", "identites-echanges": "oui|partiel|non",
+    "comprehension-ecrit": "oui|partiel|non", "expression-ecrite": "oui|partiel|non", "vocab": "oui|partiel|non"
   }
 }
 
@@ -483,12 +483,12 @@ async function testWebhook() {
   const testData = {
     matiere: 'Anglais LVA',
     date: new Date().toISOString(),
-    couverture: {"seq1":"oui","seq2":"oui","seq3":"partiel","seq4":"non","seq5":"non","seq6":"non","seq7":"non","seq8":"non","compecrit":"partiel","expecrit":"partiel","vocab":"partiel"},
+    couverture: {"citoyennete-virtuel":"oui","art-pouvoir":"oui","territoire-memoire":"partiel","innovations-scientifiques":"non","fictions-realites":"non","espace-prive-public":"non","diversite-inclusion":"non","identites-echanges":"non","comprehension-ecrit":"partiel","expression-ecrite":"partiel","vocab":"partiel"},
     scores: { score_1:3, score_2:2, score_3:2, score_4:3, score_5:0 },
-    priorites: "seq4 — critique, seq5 — haute",
+    priorites: "innovations-scientifiques — critique, fictions-realites — haute",
     commentaire: "Test LVA", notation_methode: "B1",
     json_brut: '{"test":true}',
-    chapitres_str: "seq1:oui:normale|seq2:oui:normale|seq3:partiel:normale|seq4:non:critique|seq5:non:haute"
+    chapitres_str: "citoyennete-virtuel:oui:normale|art-pouvoir:oui:normale|territoire-memoire:partiel:normale|innovations-scientifiques:non:critique|fictions-realites:non:haute"
   };
   await fetch(WEBHOOK_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(testData) });
   alert('Payload test Anglais LVA envoyé !');
