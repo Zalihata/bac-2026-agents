@@ -410,17 +410,17 @@ async function sendToMake(data) {
     ? data.priorites_revision.join(', ')
     : (data.priorites_revision || '');
 
-  // Labels lisibles pour Notion
-  const labelMap = Object.fromEntries(COVERAGE_ITEMS.map(i => [i.id, i.label]));
-  // Urgence déduite des priorités de révision (items cités = critique/haute)
-  const prioritesList = prioritesStr.split(',').map(s => s.trim().toLowerCase());
-  const chapitresStr = Object.entries(coverageState).map(([id, statut]) => {
-    const label = labelMap[id] || id;
-    const labelLower = label.toLowerCase();
-    const urgence = prioritesList.some(p => labelLower.includes(p.substring(0, 10)))
-      ? (prioritesList.indexOf(prioritesList.find(p => labelLower.includes(p.substring(0, 10)))) === 0 ? 'critique' : 'haute')
-      : 'normale';
-    return label + ':' + statut + ':' + urgence;
+  // 5 domaines → 5 entrées Chapitres dans Notion (statut et urgence déduits du score)
+  const chapitresStr = [
+    { label: 'Grammaire',            score: s.grammaire          || 0 },
+    { label: 'Conjugaison',          score: s.conjugaison        || 0 },
+    { label: 'Lexique thématique',   score: s.lexique_thematique || 0 },
+    { label: 'Compréhension',        score: s.comprehension      || 0 },
+    { label: 'Expression & culture', score: s.expression_culture || 0 }
+  ].map(d => {
+    const statut  = d.score >= 4 ? 'oui' : d.score >= 3 ? 'partiel' : 'non';
+    const urgence = d.score <= 2 ? 'critique' : d.score <= 3 ? 'haute' : 'normale';
+    return d.label + ':' + statut + ':' + urgence;
   }).join('|');
 
   const payload = {
@@ -530,16 +530,18 @@ async function testWebhook() {
     seq4_digital: 'non', seq6_territorio: 'non'
   };
   const testPriorites = 'Subjonctif présent & imparfait, Passé simple & imparfait, Ser et Estar';
-  // Build chapitres_str from COVERAGE_ITEMS labels — même logique que sendToMake
-  const testLabelMap = Object.fromEntries(COVERAGE_ITEMS.map(i => [i.id, i.label]));
-  const urgenceMap = {
-    subjonctif: 'critique', passe: 'haute', ser_estar: 'haute',
-    seq3_arte: 'normale', seq1_mythes: 'normale'
-  };
-  const testChapitresStr = Object.entries(testCouverture).map(([id, statut]) => {
-    const label = testLabelMap[id] || id;
-    const urgence = urgenceMap[id] || 'normale';
-    return label + ':' + statut + ':' + urgence;
+  // 5 domaines avec scores de test → chapitres_str
+  const testScores = { grammaire: 3, conjugaison: 2, lexique_thematique: 3, comprehension: 4, expression_culture: 2 };
+  const testChapitresStr = [
+    { label: 'Grammaire',            score: testScores.grammaire },
+    { label: 'Conjugaison',          score: testScores.conjugaison },
+    { label: 'Lexique thématique',   score: testScores.lexique_thematique },
+    { label: 'Compréhension',        score: testScores.comprehension },
+    { label: 'Expression & culture', score: testScores.expression_culture }
+  ].map(d => {
+    const statut  = d.score >= 4 ? 'oui' : d.score >= 3 ? 'partiel' : 'non';
+    const urgence = d.score <= 2 ? 'critique' : d.score <= 3 ? 'haute' : 'normale';
+    return d.label + ':' + statut + ':' + urgence;
   }).join('|');
 
   const testData = {
@@ -556,7 +558,7 @@ async function testWebhook() {
     chapitres_str: testChapitresStr
   };
   await fetch(WEBHOOK, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(testData) });
-  alert('Payload test Espagnol LVB envoyé — ' + Object.keys(testCouverture).length + ' chapitres.');
+  alert('Payload test Espagnol LVB envoyé — 5 domaines → Notion.');
 }
 
 
