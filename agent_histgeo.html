@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diagnostic Histoire-Géographie — Première</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f4f5f7; color: #1a1a1a; min-height: 100vh; }
+.app { display: flex; height: 100vh; }
+.sidebar { width: 270px; background: #fff; border-right: 1px solid #e0e2e8; padding: 20px 16px; display: flex; flex-direction: column; gap: 12px; flex-shrink: 0; overflow-y: auto; }
+.sidebar-title { font-size: 11px; font-weight: 500; color: #aaa; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+.phase-badge { font-size: 12px; font-weight: 500; padding: 4px 10px; border-radius: 20px; display: inline-block; }
+.phase-1 { background: #eff6ff; color: #1d4ed8; }
+.phase-2 { background: #fef3e8; color: #b45309; }
+.chapter-item { display: flex; align-items: flex-start; gap: 8px; padding: 6px 8px; border-radius: 6px; font-size: 12px; line-height: 1.4; }
+.chapter-item.studied { background: #f0faf5; }
+.chapter-item.partial { background: #fff8ec; }
+.chapter-item.not-studied { background: #fdf3f3; }
+.chapter-item.pending { background: #f7f6f3; color: #aaa; }
+.ch-icon { width: 16px; height: 16px; border-radius: 3px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 10px; margin-top: 1px; }
+.ch-icon.s { background: #1d9e75; color: #fff; }
+.ch-icon.p { background: #ef9f27; color: #fff; }
+.ch-icon.n { background: #e24b4a; color: #fff; }
+.ch-icon.q { background: #d5d4ce; color: #888; }
+.domain-label { font-size: 11px; color: #aaa; font-weight: 500; margin: 8px 0 4px; text-transform: uppercase; letter-spacing: 0.04em; }
+.score-row { display: flex; align-items: center; gap: 8px; padding: 4px 8px; font-size: 12px; }
+.score-bar-bg { flex: 1; height: 4px; background: #f0efe9; border-radius: 2px; }
+.score-bar { height: 4px; border-radius: 2px; transition: width 0.6s, background 0.6s; background: #d5d4ce; }
+.score-val { font-size: 11px; color: #888; width: 28px; text-align: right; flex-shrink: 0; }
+.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.header { padding: 14px 24px; border-bottom: 1px solid #e0e2e8; background: #fff; display: flex; align-items: center; gap: 12px; }
+.header-icon { width: 36px; height: 36px; background: #eff6ff; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+.header-text h1 { font-size: 15px; font-weight: 500; }
+.header-text p { font-size: 12px; color: #888; margin-top: 1px; }
+.phase-indicator { margin-left: auto; font-size: 12px; color: #888; }
+.messages { flex: 1; overflow-y: auto; padding: 20px 24px; display: flex; flex-direction: column; gap: 14px; }
+.msg { display: flex; gap: 10px; }
+.msg.user { flex-direction: row-reverse; align-self: flex-end; max-width: 600px; }
+.msg.agent { align-self: flex-start; max-width: 680px; }
+.avatar { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 500; flex-shrink: 0; }
+.agent .avatar { background: #eff6ff; color: #1d4ed8; }
+.user .avatar { background: #e3f0e8; color: #2d7a4f; }
+.bubble { padding: 11px 15px; border-radius: 12px; font-size: 14px; line-height: 1.65; }
+.agent .bubble { background: #fff; border: 1px solid #e0e2e8; border-radius: 4px 12px 12px 12px; }
+.user .bubble { background: #1d4ed8; color: #fff; border-radius: 12px 4px 12px 12px; }
+.typing { display: flex; gap: 4px; align-items: center; padding: 4px 0; }
+.dot { width: 6px; height: 6px; border-radius: 50%; background: #bbb; animation: bounce 1.2s infinite; }
+.dot:nth-child(2) { animation-delay: 0.2s; }
+.dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes bounce { 0%,80%,100%{transform:translateY(0)} 40%{transform:translateY(-5px)} }
+.input-area { padding: 14px 24px; border-top: 1px solid #e0e2e8; background: #fff; display: flex; gap: 10px; align-items: flex-end; }
+textarea { flex: 1; border: 1px solid #d5d4ce; border-radius: 8px; padding: 9px 13px; font-size: 14px; font-family: inherit; resize: none; line-height: 1.5; max-height: 120px; min-height: 38px; }
+textarea:focus { outline: none; border-color: #1d4ed8; box-shadow: 0 0 0 2px rgba(29,78,216,0.12); }
+button.send { background: #1d4ed8; color: #fff; border: none; border-radius: 8px; padding: 9px 18px; font-size: 14px; font-weight: 500; cursor: pointer; flex-shrink: 0; height: 38px; }
+button.send:hover { background: #1e3a8a; }
+button.send:disabled { background: #ccc; cursor: not-allowed; }
+.kb-hint { font-size: 11px; color: #bbb; padding-top: 3px; }
+pre { background: #f5f4f0; border-radius: 6px; padding: 8px 12px; font-size: 12px; overflow-x: auto; margin: 6px 0; white-space: pre-wrap; }
+strong { font-weight: 500; }
+.final-card { background: #fff; border: 1px solid #e0e2e8; border-radius: 12px; padding: 20px; }
+.final-card h3 { font-size: 14px; font-weight: 500; margin-bottom: 14px; color: #555; }
+.final-row { display: flex; align-items: center; gap: 10px; margin-bottom: 9px; }
+.final-label { font-size: 13px; width: 220px; flex-shrink: 0; }
+.final-bar-bg { flex: 1; height: 5px; background: #f0efe9; border-radius: 3px; }
+.final-bar { height: 5px; border-radius: 3px; transition: width 0.8s; }
+.bl { background: #e24b4a; } .bm { background: #ef9f27; } .bh { background: #1d9e75; }
+.final-score { font-size: 12px; font-weight: 500; width: 32px; text-align: right; color: #555; }
+.priority-tag { display: inline-block; background: #fdf3f3; color: #a32d2d; font-size: 11px; padding: 3px 8px; border-radius: 4px; margin: 2px; }
+.disc-badge { display: inline-block; font-size: 10px; font-weight: 600; padding: 2px 6px; border-radius: 3px; margin-right: 4px; vertical-align: middle; }
+.disc-hist { background: #fef3e8; color: #92400e; }
+.disc-geo { background: #eff6ff; color: #1e40af; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="sidebar">
+    <div>
+      <div class="sidebar-title">Avancement</div>
+      <span class="phase-badge phase-1" id="phase-badge">Phase 1 — Couverture</span>
+    </div>
+    <div>
+      <div class="domain-label">Géographie</div>
+      <div class="chapter-item pending" id="ch-seq1-metropolisation"><div class="ch-icon q">?</div>Seq 1 — La métropolisation</div>
+      <div class="chapter-item pending" id="ch-seq3-espaces-productifs"><div class="ch-icon q">?</div>Seq 3 — Espaces de production</div>
+      <div class="chapter-item pending" id="ch-seq5-espaces-ruraux"><div class="ch-icon q">?</div>Seq 5 — Espaces ruraux</div>
+      <div class="chapter-item pending" id="ch-seq7-chine"><div class="ch-icon q">?</div>Seq 7 — La Chine</div>
+    </div>
+    <div>
+      <div class="domain-label">Histoire</div>
+      <div class="chapter-item pending" id="ch-seq2-revolutions"><div class="ch-icon q">?</div>Seq 2 — L'Europe & révolutions</div>
+      <div class="chapter-item pending" id="ch-seq4-france-nationalites"><div class="ch-icon q">?</div>Seq 4 — France (1848-1871)</div>
+      <div class="chapter-item pending" id="ch-seq6-troisieme-republique"><div class="ch-icon q">?</div>Seq 6 — La 3e République</div>
+      <div class="chapter-item pending" id="ch-seq8-premiere-guerre"><div class="ch-icon q">?</div>Seq 8 — 1ère Guerre mondiale</div>
+    </div>
+    <div>
+      <div class="domain-label">Méthodologie</div>
+      <div class="chapter-item pending" id="ch-methode-qp"><div class="ch-icon q">?</div>Question problématisée</div>
+      <div class="chapter-item pending" id="ch-methode-ad"><div class="ch-icon q">?</div>Analyse de documents</div>
+      <div class="chapter-item pending" id="ch-methode-pg"><div class="ch-icon q">?</div>Production graphique</div>
+    </div>
+    <div id="scores-section" style="display:none;">
+      <div class="domain-label" style="margin-top:8px;">Scores</div>
+      <div class="score-row"><span style="font-size:12px;width:120px;flex-shrink:0;">Connais. Histoire</span><div class="score-bar-bg"><div class="score-bar" id="sb-hist" style="width:0%"></div></div><span class="score-val" id="sv-hist">—</span></div>
+      <div class="score-row"><span style="font-size:12px;width:120px;flex-shrink:0;">Connais. Géographie</span><div class="score-bar-bg"><div class="score-bar" id="sb-geo" style="width:0%"></div></div><span class="score-val" id="sv-geo">—</span></div>
+      <div class="score-row"><span style="font-size:12px;width:120px;flex-shrink:0;">Méthode écrite</span><div class="score-bar-bg"><div class="score-bar" id="sb-methode" style="width:0%"></div></div><span class="score-val" id="sv-methode">—</span></div>
+      <div class="score-row"><span style="font-size:12px;width:120px;flex-shrink:0;">Rédaction & langue</span><div class="score-bar-bg"><div class="score-bar" id="sb-redaction" style="width:0%"></div></div><span class="score-val" id="sv-redaction">—</span></div>
+    </div>
+  </div>
+  <div class="main">
+    <div class="header">
+      <div class="header-icon">🗺️</div>
+      <div class="header-text">
+        <h1>Diagnostic Histoire-Géographie — Première générale</h1>
+        <p>Épreuve IP001 · Question problématisée + Analyse de doc / Croquis · 2h · Candidat libre</p>
+      </div>
+      <div class="phase-indicator" id="phase-indicator">Phase 1 / 2</div>
+    </div>
+    <div class="messages" id="messages"></div>
+    <div class="input-area">
+      <div style="flex:1;display:flex;flex-direction:column;gap:3px;">
+        <textarea id="input" placeholder="Tape ta réponse ici..." rows="1"></textarea>
+        <div class="kb-hint">Entrée pour envoyer · Maj+Entrée pour sauter une ligne</div>
+      </div>
+      <button class="send" id="send-btn" onclick="sendMessage()">Envoyer</button>
+    </div>
+  </div>
+</div>
+
+<button onclick="testWebhook()" style="position:fixed;bottom:20px;left:20px;background:#d5d4ce;color:#888;border:none;padding:6px 12px;border-radius:6px;font-size:11px;cursor:pointer;z-index:999;opacity:0.6;">⚙ Test</button>
+
+<script>
+const CHAPTERS = [
+  'seq1-metropolisation','seq3-espaces-productifs','seq5-espaces-ruraux','seq7-chine',
+  'seq2-revolutions','seq4-france-nationalites','seq6-troisieme-republique','seq8-premiere-guerre',
+  'methode-qp','methode-ad','methode-pg'
+];
+
+const CHAPTER_LABELS = {
+  'seq1-metropolisation': 'Séq 1 — La métropolisation',
+  'seq3-espaces-productifs': 'Séq 3 — Espaces de production',
+  'seq5-espaces-ruraux': 'Séq 5 — Espaces ruraux',
+  'seq7-chine': 'Séq 7 — La Chine',
+  'seq2-revolutions': 'Séq 2 — L\'Europe face aux révolutions',
+  'seq4-france-nationalites': 'Séq 4 — France dans l\'Europe des nationalités (1848-1871)',
+  'seq6-troisieme-republique': 'Séq 6 — La 3e République avant 1914',
+  'seq8-premiere-guerre': 'Séq 8 — 1ère Guerre mondiale',
+  'methode-qp': 'Question problématisée',
+  'methode-ad': 'Analyse de documents',
+  'methode-pg': 'Production graphique (croquis)'
+};
+
+const DOMAIN_GROUPS = [
+  { label: 'Géographie', chapters: ['seq1-metropolisation','seq3-espaces-productifs','seq5-espaces-ruraux','seq7-chine'] },
+  { label: 'Histoire', chapters: ['seq2-revolutions','seq4-france-nationalites','seq6-troisieme-republique','seq8-premiere-guerre'] },
+  { label: 'Méthodologie', chapters: ['methode-qp','methode-ad','methode-pg'] }
+];
+
+const SYSTEM_PROMPT = `Tu es un agent de diagnostic pédagogique pour l'épreuve ponctuelle d'Histoire-Géographie (IP001) du baccalauréat général, programme Première CNED.
+
+L'élève est une candidate libre non réglementée — elle passe TOUT en évaluation ponctuelle, pas de contrôle continu.
+
+FORMAT DE L'ÉPREUVE IP001 (Première, voie générale) :
+- Durée : 2 heures
+- Partie 1 : Réponse à une question problématisée (10 pts) — texte rédigé d'environ 3 pages, avec introduction, développement structuré (2-3 parties / 2-3 paragraphes chacune), conclusion
+- Partie 2 : Analyse de document(s) OU réalisation d'une production graphique (croquis) (10 pts)
+- Règle alternance : si P1 = histoire → P2 = géographie, et vice versa
+
+PROGRAMME CNED PREMIÈRE — 8 séquences :
+
+GÉOGRAPHIE :
+- seq1-metropolisation — Séq 1 : La métropolisation — un processus mondial différencié
+  • P1 : Les villes à l'échelle mondiale : le poids croissant des métropoles
+  • P2 : Des métropoles inégales et en mutation
+  • P3 : La France : la métropolisation et ses effets
+
+- seq3-espaces-productifs — Séq 3 : Une diversification des espaces et des acteurs de la production
+  • P1 : Les espaces de production dans le monde : une diversité croissante
+  • P2 : Métropolisation, littoralisation des espaces productifs et accroissement des flux
+  • P3 : La France : les systèmes productifs entre valorisation locale et intégration mondiale
+
+- seq5-espaces-ruraux — Séq 5 : Les espaces ruraux : multifonctionnalité ou fragmentation ?
+  • P1 : La fragmentation des espaces ruraux
+  • P2 : Affirmation des fonctions non agricoles et conflits d'usages
+  • P3 : La France : des espaces ruraux multifonctionnels
+
+- seq7-chine — Séq 7 : La Chine : des recompositions spatiales multiples
+  • P1 : Développement et inégalités
+  • P2 : Des ressources et des environnements sous pression
+  • P3 : Recompositions spatiales : urbanisation, littoralisation, espaces ruraux
+
+HISTOIRE :
+- seq2-revolutions — Séq 2 : L'Europe face aux révolutions
+  • P1 : La Révolution française et l'Empire : une nouvelle conception de la nation
+  • P2 : L'Europe entre restauration et révolution (1814-1848)
+
+- seq4-france-nationalites — Séq 4 : La France dans l'Europe des nationalités : politiques et société (1848-1871)
+  • P1 : La difficile entrée dans l'âge démocratique : 2e République et Second Empire
+  • P2 : L'industrialisation et les transformations économiques et sociales en France
+  • P3 : La France et la construction de nouveaux États par la guerre et la diplomatie
+
+- seq6-troisieme-republique — Séq 6 : La 3e République avant 1914 : un régime politique, un empire colonial
+  • P1 : La mise en œuvre du projet républicain
+  • P2 : Permanences et mutations de la société française jusqu'en 1914
+  • P3 : Métropole et colonies
+
+- seq8-premiere-guerre — Séq 8 : La 1ère Guerre mondiale : le "suicide de l'Europe" et la fin des empires européens
+  • P1 : Un embrasement mondial et ses grandes étapes
+  • P2 : Les sociétés en guerre : civils acteurs et victimes
+  • P3 : Sortir de la guerre : la reconstruction d'un ordre des nations démocratiques
+
+MÉTHODE :
+- methode-qp : Question problématisée (introduction avec accroche + problématique + plan, développement 2-3 parties argumentées, conclusion bilan + ouverture)
+- methode-ad : Analyse de document(s) (présentation source, idées directrices, mise en relation avec connaissances, regard critique)
+- methode-pg : Production graphique / croquis (légende organisée TOLE — Titre/Orientation/Légende/Échelle, figurés ponctuels/linéaires/aplats, nomenclature)
+
+═══════════════════════════════
+STRUCTURE — 2 PHASES
+═══════════════════════════════
+
+PHASE 1 — COUVERTURE
+Tu reçois le message "Voici ma couverture : ...".
+Génère immédiatement ce JSON puis passe à la phase 2 :
+{
+  "phase": 1,
+  "couverture": {
+    "seq1-metropolisation": "oui|partiel|non",
+    "seq3-espaces-productifs": "oui|partiel|non",
+    "seq5-espaces-ruraux": "oui|partiel|non",
+    "seq7-chine": "oui|partiel|non",
+    "seq2-revolutions": "oui|partiel|non",
+    "seq4-france-nationalites": "oui|partiel|non",
+    "seq6-troisieme-republique": "oui|partiel|non",
+    "seq8-premiere-guerre": "oui|partiel|non",
+    "methode-qp": "oui|partiel|non",
+    "methode-ad": "oui|partiel|non",
+    "methode-pg": "oui|partiel|non"
+  }
+}
+
+PHASE 2 — ÉVALUATION
+12 à 18 questions, UNE PAR UNE.
+
+Stratégie :
+- Priorité aux séquences "oui" ou "partiel" pour les questions de contenu
+- Varier les types : questions de connaissances (dates, événements, acteurs, notions-clés), questions de compréhension (expliquer un mécanisme, décrire un territoire), questions de méthode (comment structurer une intro, que mettre dans une légende), questions d'application (rédige 2-3 phrases sur..., cite 3 exemples de...)
+- Alterner histoire et géographie
+- Tester aussi la méthode explicitement : "Comment construis-tu l'introduction d'une question problématisée ?", "Que signifie TOLE dans un croquis ?"
+- Ne jamais poser deux questions consécutives sur la même séquence
+- Adapter la difficulté selon les réponses précédentes
+- Évaluer : exactitude des connaissances, maîtrise du vocabulaire disciplinaire, capacité à argumenter, maîtrise méthodo
+
+NOTATION (1 à 5) :
+1 = non maîtrisé, 2 = lacunes importantes, 3 = correct, 4 = bon, 5 = excellent
+
+JSON final :
+{
+  "phase": 2,
+  "diagnostic_complet": true,
+  "couverture": { ... },
+  "scores": {
+    "connaissances_histoire": { "score": X, "points_forts": "...", "lacunes": "..." },
+    "connaissances_geo": { "score": X, "points_forts": "...", "lacunes": "..." },
+    "methode_redaction": { "score": X, "points_forts": "...", "lacunes": "..." },
+    "vocabulaire_disciplinaire": { "score": X, "points_forts": "...", "lacunes": "..." }
+  },
+  "priorites": [{ "chapitre": "id", "raison": "...", "urgence": "critique|haute|normale" }],
+  "commentaire_general": "...",
+  "sequences_fortes": ["id1", "id2"],
+  "sequences_a_retravailler": ["id1", "id2"]
+}
+
+STYLE : Accueillant, direct. Tutoyer. Courte intro (2-3 phrases) puis grille de couverture. Questions courtes et précises. Feedback constructif après chaque réponse (1 phrase max) puis question suivante immédiatement.`;
+
+let conversation = [];
+let isLoading = false;
+let diagnosticDone = false;
+let coverageSelections = {};
+
+const WEBHOOK_URL = 'https://hook.eu1.make.com/omhd75bqteracqaewathwkzqyr9rm61q';
+const messagesEl = document.getElementById('messages');
+const inputEl = document.getElementById('input');
+const sendBtn = document.getElementById('send-btn');
+
+function fmt(text) {
+  return text
+    .replace(/```json([\s\S]*?)```/g, '<pre>$1</pre>')
+    .replace(/```([\s\S]*?)```/g, '<pre>$1</pre>')
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\n/g, '<br>');
+}
+
+function addMsg(role, content) {
+  const d = document.createElement('div');
+  d.className = 'msg ' + role;
+  d.innerHTML = `<div class="avatar">${role==='agent'?'HG':'S'}</div><div class="bubble">${fmt(content)}</div>`;
+  messagesEl.appendChild(d);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+
+function addTyping() {
+  const d = document.createElement('div');
+  d.className = 'msg agent'; d.id = 'typing';
+  d.innerHTML = `<div class="avatar">HG</div><div class="bubble"><div class="typing"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div>`;
+  messagesEl.appendChild(d);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+
+function removeTyping() { const t = document.getElementById('typing'); if(t) t.remove(); }
+
+function parseJSON(text) {
+  const m = text.match(/```json([\s\S]*?)```/);
+  if (!m) return null;
+  try { return JSON.parse(m[1].trim()); } catch { return null; }
+}
+
+const coverageClass = { 'oui': 'studied', 'partiel': 'partial', 'non': 'not-studied' };
+const coverageIcon = { 'oui': 's', 'partiel': 'p', 'non': 'n' };
+const coverageSymbol = { 'oui': '✓', 'partiel': '~', 'non': '✕' };
+
+function updateCoverage(data) {
+  if (!data || !data.couverture) return;
+  Object.entries(data.couverture).forEach(([ch, val]) => {
+    const el = document.getElementById('ch-' + ch);
+    if (!el) return;
+    const icon = coverageIcon[val] || 'q';
+    const cls = coverageClass[val] || 'pending';
+    const sym = coverageSymbol[val] || '?';
+    el.className = 'chapter-item ' + cls;
+    el.innerHTML = `<div class="ch-icon ${icon}">${sym}</div>${CHAPTER_LABELS[ch]||ch}`;
+  });
+}
+
+function updateScores(scores) {
+  if (!scores) return;
+  document.getElementById('scores-section').style.display = 'block';
+  const map = {
+    connaissances_histoire: 'hist',
+    connaissances_geo: 'geo',
+    methode_redaction: 'methode',
+    vocabulaire_disciplinaire: 'redaction'
+  };
+  Object.entries(map).forEach(([key, id]) => {
+    const d = scores[key]; if (!d) return;
+    const s = d.score || 0;
+    const bar = document.getElementById('sb-' + id);
+    const val = document.getElementById('sv-' + id);
+    if (!bar || !val) return;
+    bar.style.width = (s/5*100) + '%';
+    bar.style.background = s<=2 ? '#e24b4a' : s<=3 ? '#ef9f27' : '#1d9e75';
+    val.textContent = s + '/5';
+  });
+}
+
+function showCoverageUI() {
+  const container = document.createElement('div');
+  container.id = 'coverage-ui';
+  container.style.cssText = 'background:#fff;border:1px solid #e0e2e8;border-radius:12px;padding:16px;margin:8px 0;max-width:680px;';
+
+  let html = '<div style="font-size:13px;font-weight:500;margin-bottom:12px;color:#555;">Pour chaque séquence, indique si tu l\'as étudiée :</div>';
+
+  DOMAIN_GROUPS.forEach(domain => {
+    const badgeClass = domain.label === 'Histoire' ? 'disc-hist' : domain.label === 'Géographie' ? 'disc-geo' : '';
+    const badgeText = domain.label === 'Histoire' ? 'HIST' : domain.label === 'Géographie' ? 'GÉO' : 'MÉT';
+    html += `<div style="margin-bottom:12px;">
+      <div style="font-size:11px;font-weight:500;color:#aaa;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">
+        <span class="disc-badge ${badgeClass}">${badgeText}</span>${domain.label}
+      </div>`;
+    domain.chapters.forEach(ch => {
+      html += `<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid #f5f4f0;">
+        <span style="font-size:13px;">${CHAPTER_LABELS[ch]}</span>
+        <div style="display:flex;gap:4px;">
+          <button onclick="setCoverage('${ch}','oui',this)" style="padding:4px 10px;border-radius:5px;border:1px solid #d5d4ce;background:#fff;font-size:12px;cursor:pointer;">Oui</button>
+          <button onclick="setCoverage('${ch}','partiel',this)" style="padding:4px 10px;border-radius:5px;border:1px solid #d5d4ce;background:#fff;font-size:12px;cursor:pointer;">Partiel</button>
+          <button onclick="setCoverage('${ch}','non',this)" style="padding:4px 10px;border-radius:5px;border:1px solid #d5d4ce;background:#fff;font-size:12px;cursor:pointer;">Non</button>
+        </div>
+      </div>`;
+    });
+    html += '</div>';
+  });
+
+  html += `<button onclick="validateCoverage()" style="margin-top:12px;width:100%;background:#1d4ed8;color:#fff;border:none;border-radius:8px;padding:10px;font-size:14px;font-weight:500;cursor:pointer;">Valider mes réponses →</button>`;
+  container.innerHTML = html;
+  messagesEl.appendChild(container);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+
+function setCoverage(ch, val, btn) {
+  coverageSelections[ch] = val;
+  btn.parentElement.querySelectorAll('button').forEach(b => {
+    b.style.background = '#fff'; b.style.color = '#1a1a1a'; b.style.borderColor = '#d5d4ce';
+  });
+  const colors = { oui: '#1d9e75', partiel: '#ef9f27', non: '#e24b4a' };
+  btn.style.background = colors[val]; btn.style.color = '#fff'; btn.style.borderColor = colors[val];
+}
+
+async function validateCoverage() {
+  const missing = CHAPTERS.filter(ch => !coverageSelections[ch]);
+  if (missing.length > 0) {
+    const btn = document.querySelector('#coverage-ui button[onclick="validateCoverage()"]');
+    btn.textContent = `⚠ ${missing.length} élément(s) non renseigné(s)`;
+    setTimeout(() => btn.textContent = 'Valider mes réponses →', 2000);
+    return;
+  }
+  document.getElementById('coverage-ui').remove();
+  const summary = CHAPTERS.map(ch => `${CHAPTER_LABELS[ch]}: ${coverageSelections[ch]}`).join(', ');
+  addMsg('user', 'Réponses envoyées ✓');
+  conversation.push({ role: 'user', content: `Voici ma couverture : ${summary}` });
+
+  isLoading = true; sendBtn.disabled = true; addTyping();
+  try {
+    const reply = await callAPI(conversation);
+    removeTyping(); addMsg('agent', reply);
+    conversation.push({ role: 'assistant', content: reply });
+    const json = parseJSON(reply);
+    if (json && json.phase === 1) {
+      updateCoverage(json);
+      document.getElementById('phase-badge').textContent = 'Phase 2 — Évaluation';
+      document.getElementById('phase-badge').className = 'phase-badge phase-2';
+      document.getElementById('phase-indicator').textContent = 'Phase 2 / 2';
+    } else if (json && json.phase === 2 && json.diagnostic_complet) {
+      showFinalProfile(json);
+    }
+  } catch(err) { removeTyping(); addMsg('agent', 'Erreur : ' + err.message); }
+  finally { isLoading = false; sendBtn.disabled = false; inputEl.disabled = false; inputEl.focus(); }
+}
+
+function showFinalProfile(data) {
+  updateCoverage(data); updateScores(data.scores);
+  const card = document.createElement('div');
+  card.className = 'final-card';
+  const labels = {
+    connaissances_histoire: 'Connaissances historiques',
+    connaissances_geo: 'Connaissances géographiques',
+    methode_redaction: 'Méthode (dissertation / analyse docs)',
+    vocabulaire_disciplinaire: 'Vocabulaire disciplinaire'
+  };
+  let rows = '';
+  if (data.scores) {
+    Object.entries(labels).forEach(([k, label]) => {
+      const d = data.scores[k]; if (!d) return;
+      const s = d.score||0; const pct = (s/5)*100;
+      const cls = s<=2?'bl':s<=3?'bm':'bh';
+      rows += `<div class="final-row"><div class="final-label">${label}</div><div class="final-bar-bg"><div class="final-bar ${cls}" style="width:${pct}%"></div></div><div class="final-score">${s}/5</div></div>`;
+    });
+  }
+  let html = `<h3>Profil de compétences — Histoire-Géographie</h3>${rows}`;
+  if (data.sequences_fortes && data.sequences_fortes.length) {
+    html += '<div style="margin-top:12px;"><div style="font-size:12px;color:#1d9e75;margin-bottom:4px;font-weight:500;">✓ Points forts</div>';
+    data.sequences_fortes.forEach(id => { html += `<span style="display:inline-block;background:#f0faf5;color:#1d6b50;font-size:11px;padding:3px 8px;border-radius:4px;margin:2px;">${CHAPTER_LABELS[id]||id}</span>`; });
+    html += '</div>';
+  }
+  if (data.priorites && data.priorites.length) {
+    html += '<div style="margin-top:10px;"><div style="font-size:12px;color:#aaa;margin-bottom:4px;font-weight:500;text-transform:uppercase;letter-spacing:0.04em;">À retravailler</div>';
+    data.priorites.forEach(p => { html += `<span class="priority-tag">${CHAPTER_LABELS[p.chapitre]||p.chapitre} — ${p.urgence}</span>`; });
+    html += '</div>';
+  }
+  if (data.commentaire_general) {
+    html += `<div style="margin-top:12px;font-size:13px;color:#666;line-height:1.6;border-top:1px solid #f0efe9;padding-top:12px;">${data.commentaire_general}</div>`;
+  }
+  card.innerHTML = html;
+  messagesEl.appendChild(card);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+  document.getElementById('phase-badge').textContent = 'Diagnostic terminé';
+  document.getElementById('phase-badge').style.background = '#f0faf5';
+  document.getElementById('phase-badge').style.color = '#1d9e75';
+  document.getElementById('phase-indicator').textContent = 'Terminé';
+  diagnosticDone = true; sendBtn.disabled = true; inputEl.disabled = true;
+  inputEl.placeholder = 'Diagnostic terminé.';
+  sendToMake(data);
+}
+
+async function sendToMake(data) {
+  const payload = {
+    matiere: 'Histoire-Géographie',
+    date: new Date().toISOString(),
+    couverture: data.couverture || {},
+    scores: {
+      score_1: data.scores?.connaissances_histoire?.score || 0,
+      score_2: data.scores?.connaissances_geo?.score || 0,
+      score_3: data.scores?.methode_redaction?.score || 0,
+      score_4: data.scores?.vocabulaire_disciplinaire?.score || 0,
+      score_5: 0,
+      domaine_1: 'Connaissances Histoire',
+      domaine_2: 'Connaissances Géo',
+      domaine_3: 'Méthode Rédaction',
+      domaine_4: 'Vocabulaire Disciplinaire',
+      domaine_5: ''
+    },
+    priorites: (data.priorites||[]).map(p => (CHAPTER_LABELS[p.chapitre]||p.chapitre) + ' — ' + p.urgence).join(', '),
+    commentaire: data.commentaire_general || '',
+    notation_methode: '',
+    json_brut: JSON.stringify(data).substring(0, 1800),
+    chapitres_str: Object.entries(data.couverture || {}).map(([id, statut]) => {
+      const urgence = (data.priorites||[]).find(p => p.chapitre === id)?.urgence || 'normale';
+      return id + ':' + statut + ':' + urgence;
+    }).join('|')
+  };
+  try {
+    await fetch(WEBHOOK_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+    const notif = document.createElement('div');
+    notif.style.cssText = 'font-size:12px;color:#1d9e75;padding:8px 16px;text-align:center;';
+    notif.textContent = 'Résultats envoyés vers Notion ✓';
+    messagesEl.appendChild(notif);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  } catch(e) {
+    const notif = document.createElement('div');
+    notif.style.cssText = 'font-size:12px;color:#e24b4a;padding:8px 16px;text-align:center;';
+    notif.textContent = 'Envoi vers Notion échoué.';
+    messagesEl.appendChild(notif);
+  }
+}
+
+async function callAPI(messages) {
+  const res = await fetch('https://bac-2026-agents.vercel.app/api/proxy', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1200, system: SYSTEM_PROMPT, messages })
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error?.message || 'Erreur API');
+  return data.content[0].text;
+}
+
+async function sendMessage() {
+  if (isLoading || diagnosticDone) return;
+  const text = inputEl.value.trim(); if (!text) return;
+  inputEl.value = ''; inputEl.style.height = 'auto';
+  addMsg('user', text); conversation.push({ role: 'user', content: text });
+  isLoading = true; sendBtn.disabled = true; addTyping();
+  try {
+    const reply = await callAPI(conversation);
+    removeTyping(); addMsg('agent', reply);
+    conversation.push({ role: 'assistant', content: reply });
+    const json = parseJSON(reply);
+    if (json) {
+      if (json.phase === 1) {
+        updateCoverage(json);
+        document.getElementById('phase-badge').textContent = 'Phase 2 — Évaluation';
+        document.getElementById('phase-badge').className = 'phase-badge phase-2';
+        document.getElementById('phase-indicator').textContent = 'Phase 2 / 2';
+      } else if (json.phase === 2 && json.diagnostic_complet) { showFinalProfile(json); }
+    }
+  } catch(err) { removeTyping(); addMsg('agent', 'Erreur : ' + err.message); }
+  finally { isLoading = false; if (!diagnosticDone) sendBtn.disabled = false; }
+}
+
+async function init() {
+  isLoading = true; sendBtn.disabled = true; inputEl.disabled = true; addTyping();
+  try {
+    const reply = await callAPI([{ role: 'user', content: 'Commençons.' }]);
+    removeTyping();
+    conversation.push({ role: 'user', content: 'Commençons.' });
+    conversation.push({ role: 'assistant', content: reply });
+    addMsg('agent', reply);
+    showCoverageUI();
+  } catch(err) {
+    removeTyping(); addMsg('agent', 'Impossible de démarrer : ' + err.message);
+    inputEl.disabled = false; sendBtn.disabled = false;
+  } finally { isLoading = false; }
+}
+
+async function testWebhook() {
+  const testData = {
+    matiere: 'Histoire-Géographie',
+    date: new Date().toISOString(),
+    couverture: {
+      "seq1-metropolisation":"oui","seq3-espaces-productifs":"oui","seq5-espaces-ruraux":"partiel","seq7-chine":"non",
+      "seq2-revolutions":"oui","seq4-france-nationalites":"partiel","seq6-troisieme-republique":"non","seq8-premiere-guerre":"non",
+      "methode-qp":"partiel","methode-ad":"non","methode-pg":"non"
+    },
+    scores: { score_1:3, score_2:2, score_3:2, score_4:3, score_5:0 },
+    priorites: "seq7-chine — critique, seq8-premiere-guerre — critique, methode-pg — haute",
+    commentaire: "Test Histoire-Géo", notation_methode: "",
+    json_brut: '{"test":true}',
+    chapitres_str: "seq1-metropolisation:oui:normale|seq2-revolutions:oui:normale|seq7-chine:non:critique|seq8-premiere-guerre:non:critique"
+  };
+  await fetch(WEBHOOK_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(testData) });
+  alert('Payload test Histoire-Géo envoyé !');
+}
+
+inputEl.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } });
+inputEl.addEventListener('input', () => { inputEl.style.height = 'auto'; inputEl.style.height = Math.min(inputEl.scrollHeight, 120) + 'px'; });
+
+init();
+</script>
+</body>
+</html>
