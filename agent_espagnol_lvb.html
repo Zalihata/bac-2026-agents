@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diagnostic Espagnol LVB — IP004</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f7f5f2; color: #1a1a1a; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+  /* Header */
+  .header { background: #c0392b; color: white; padding: 10px 16px; display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+  .header-flag { font-size: 20px; }
+  .header-title { font-size: 15px; font-weight: 700; }
+  .header-sub { font-size: 11px; opacity: 0.85; margin-left: auto; }
+  #phase-badge { font-size: 11px; background: rgba(255,255,255,0.2); padding: 3px 8px; border-radius: 10px; }
+
+  /* Layout */
+  .main { display: flex; flex: 1; overflow: hidden; }
+
+  /* Sidebar */
+  .sidebar { width: 200px; background: #fff; border-right: 1px solid #e5e0d8; padding: 14px 12px; overflow-y: auto; flex-shrink: 0; }
+  .sidebar-title { font-size: 11px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 12px; }
+  .domain { margin-bottom: 12px; }
+  .domain-name { font-size: 12px; font-weight: 600; color: #444; margin-bottom: 4px; }
+  .domain-bar { height: 6px; background: #f0ebe3; border-radius: 3px; overflow: hidden; }
+  .domain-fill { height: 100%; background: #c0392b; border-radius: 3px; transition: width .5s; width: 0%; }
+  .domain-score { font-size: 11px; color: #888; margin-top: 2px; }
+  .sidebar-divider { border: none; border-top: 1px solid #f0ebe3; margin: 12px 0; }
+  .progress-label { font-size: 11px; color: #888; margin-bottom: 4px; }
+  .progress-bar { height: 4px; background: #f0ebe3; border-radius: 2px; overflow: hidden; }
+  .progress-fill { height: 100%; background: #e67e22; border-radius: 2px; transition: width .4s; width: 0%; }
+  #q-counter { font-size: 11px; color: #888; margin-top: 4px; }
+
+  /* Chat */
+  .chat-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+  #messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+
+  .msg { max-width: 82%; padding: 10px 13px; border-radius: 12px; font-size: 13.5px; line-height: 1.55; }
+  .msg.agent { background: white; border: 1px solid #e5e0d8; align-self: flex-start; border-bottom-left-radius: 3px; }
+  .msg.user { background: #c0392b; color: white; align-self: flex-end; border-bottom-right-radius: 3px; }
+  .msg.system { background: #fef9f0; border: 1px solid #f5e6c8; align-self: center; font-size: 12px; color: #8a6a2a; text-align: center; max-width: 95%; }
+
+  /* Phase 1 grid */
+  .coverage-grid { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+  .coverage-item { display: flex; align-items: center; gap: 8px; padding: 8px 10px; background: #fafaf9; border: 1px solid #e5e0d8; border-radius: 8px; }
+  .coverage-item-label { flex: 1; font-size: 12.5px; color: #333; }
+  .cov-btn { border: none; padding: 4px 9px; border-radius: 5px; font-size: 11px; font-weight: 600; cursor: pointer; transition: opacity .15s; }
+  .cov-btn:hover { opacity: .8; }
+  .btn-oui { background: #d4edda; color: #1a6b30; }
+  .btn-partiel { background: #fff3cd; color: #856404; }
+  .btn-non { background: #f8d7da; color: #8b1a1a; }
+  .cov-btn.selected { outline: 2px solid #333; }
+  .coverage-start-btn { margin-top: 12px; background: #c0392b; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; align-self: flex-start; }
+  .coverage-start-btn:hover { background: #a93226; }
+  .coverage-start-btn:disabled { opacity: .5; cursor: default; }
+
+  /* Input */
+  .input-area { padding: 12px 16px; background: white; border-top: 1px solid #e5e0d8; display: flex; gap: 8px; flex-shrink: 0; }
+  #input-msg { flex: 1; border: 1.5px solid #d4cfc8; border-radius: 8px; padding: 8px 12px; font-size: 13.5px; resize: none; height: 40px; max-height: 120px; font-family: inherit; outline: none; transition: border-color .2s; }
+  #input-msg:focus { border-color: #c0392b; }
+  #send-btn { background: #c0392b; color: white; border: none; border-radius: 8px; padding: 8px 14px; font-size: 13px; font-weight: 700; cursor: pointer; }
+  #send-btn:disabled { opacity: .45; cursor: default; }
+
+  .typing { display: flex; gap: 4px; align-items: center; padding: 10px 13px; }
+  .typing span { width: 7px; height: 7px; background: #c0392b; border-radius: 50%; animation: bounce .9s infinite; }
+  .typing span:nth-child(2) { animation-delay: .15s; }
+  .typing span:nth-child(3) { animation-delay: .30s; }
+  @keyframes bounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-5px)} }
+
+  #phase-indicator { font-size: 11px; color: #888; padding: 0 16px 6px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <span class="header-flag">🇪🇸</span>
+  <span class="header-title">Diagnostic Espagnol LVB</span>
+  <span id="phase-badge">Phase 1 — Couverture</span>
+  <span class="header-sub">IP004 · Bac 2026</span>
+</div>
+
+<div class="main">
+  <div class="sidebar">
+    <div class="sidebar-title">Domaines</div>
+
+    <div class="domain">
+      <div class="domain-name">Grammaire</div>
+      <div class="domain-bar"><div class="domain-fill" id="bar-grammaire"></div></div>
+      <div class="domain-score" id="score-grammaire">—</div>
+    </div>
+    <div class="domain">
+      <div class="domain-name">Conjugaison</div>
+      <div class="domain-bar"><div class="domain-fill" id="bar-conjugaison"></div></div>
+      <div class="domain-score" id="score-conjugaison">—</div>
+    </div>
+    <div class="domain">
+      <div class="domain-name">Lexique</div>
+      <div class="domain-bar"><div class="domain-fill" id="bar-lexique"></div></div>
+      <div class="domain-score" id="score-lexique">—</div>
+    </div>
+    <div class="domain">
+      <div class="domain-name">Compréhension</div>
+      <div class="domain-bar"><div class="domain-fill" id="bar-comprehension"></div></div>
+      <div class="domain-score" id="score-comprehension">—</div>
+    </div>
+    <div class="domain">
+      <div class="domain-name">Expression écrite</div>
+      <div class="domain-bar"><div class="domain-fill" id="bar-expression"></div></div>
+      <div class="domain-score" id="score-expression">—</div>
+    </div>
+
+    <hr class="sidebar-divider">
+    <div class="progress-label">Progression</div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-counter">0 / 15 questions</div>
+  </div>
+
+  <div class="chat-area">
+    <div id="phase-indicator">Phase 1 — Grille de couverture du programme</div>
+    <div id="messages"></div>
+    <div class="input-area">
+      <textarea id="input-msg" placeholder="Écris ta réponse ici…" rows="1" disabled></textarea>
+      <button id="send-btn" disabled>Envoyer</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── CONFIG ──────────────────────────────────────────────────────────────────
+const PROXY = 'https://bac-2026-agents.vercel.app/api/proxy';
+const WEBHOOK = 'https://hook.eu1.make.com/omhd75bqteracqaewathwkzqyr9rm61q';
+const MODEL = 'claude-sonnet-4-20250514';
+
+const DOMAINS = ['grammaire', 'conjugaison', 'lexique', 'comprehension', 'expression'];
+const DOMAIN_LABELS = {
+  grammaire: 'Grammaire',
+  conjugaison: 'Conjugaison',
+  lexique: 'Lexique',
+  comprehension: 'Compréhension',
+  expression: 'Expression écrite'
+};
+const TOTAL_QUESTIONS = 15;
+
+// Coverage chapters for Phase 1
+const COVERAGE_ITEMS = [
+  { id: 'ser_estar', label: 'Ser et Estar' },
+  { id: 'subjonctif', label: 'Subjonctif présent & imparfait' },
+  { id: 'passe', label: 'Passé simple & imparfait' },
+  { id: 'pronoms', label: 'Pronoms personnels (COD/COI)' },
+  { id: 'negatif', label: 'Négation (no, nunca, ni…ni)' },
+  { id: 'prepositions', label: 'Prépositions (por/para, ser/estar)' },
+  { id: 'subordonnees', label: 'Subordonnées & concordance' },
+  { id: 'lexique_theme', label: 'Lexique thématique (mythes, héros)' },
+  { id: 'comprehension_texte', label: 'Compréhension de texte (espagnol)' },
+  { id: 'expression_ecrite', label: 'Expression écrite argumentée' },
+];
+
+// ── STATE ────────────────────────────────────────────────────────────────────
+let phase = 1;
+let conversation = [];
+let scores = { grammaire: null, conjugaison: null, lexique: null, comprehension: null, expression: null };
+let qCount = 0;
+let diagnosticDone = false;
+let isLoading = false;
+let coverageState = {};
+
+const messagesEl = document.getElementById('messages');
+const inputEl = document.getElementById('input-msg');
+const sendBtn = document.getElementById('send-btn');
+
+// ── SYSTEM PROMPT ────────────────────────────────────────────────────────────
+function buildSystemPrompt(coverageSummary) {
+  return `Tu es un agent de diagnostic pour le bac d'Espagnol LVB (IP004), classe de Première, session 2026 (CNED, candidat libre, évaluation ponctuelle).
+
+PROFIL PROGRAMME (couverture déclarée par l'élève) :
+${coverageSummary}
+
+TON RÔLE :
+Tu évalues les connaissances de l'élève en posant exactement ${TOTAL_QUESTIONS} questions, une à la fois, en espagnol principalement. Tu adaptes la difficulté selon les réponses.
+
+5 DOMAINES À ÉVALUER (score 0-5 chacun) :
+- grammaire : ser/estar, subjonctif, pronoms, négation, prépositions, tournure emphatique
+- conjugaison : passé simple, imparfait, subjonctif imparfait, futur, conditionnel
+- lexique : vocabulaire thématique, faux-amis, synonymes, champ lexical
+- comprehension : lecture de texte en espagnol, inférence, reformulation
+- expression : capacité à rédiger en espagnol, cohérence, connecteurs
+
+FORMAT DE TES QUESTIONS :
+- Alterne : traduction FR→ES, complétion de texte, question de cours, mini-texte à comprendre, mini-rédaction courte
+- Pour les questions de grammaire ou conjugaison : donne une consigne claire en français puis attends la réponse en espagnol
+- Pour la compréhension : propose un court extrait en espagnol (3-5 lignes) et pose une question de compréhension
+- Corrige toujours la réponse précédente avant de poser la suivante
+- Ne pose qu'UNE question à la fois
+
+POINTS D'ATTENTION IMPORTANTS pour le bac LVB :
+- Maîtrise de ser/estar dans tous les contextes
+- Distinction passé simple / imparfait (prétérit / imperfecto)
+- Emploi du subjonctif après verbes de volonté, doute, emotion
+- Pronoms COD/COI et leur ordre (enclise à l'impératif)
+- Négations complexes : nunca, nadie, ni…ni, tampoco
+- Vocabulaire des thèmes culturels : mythes, héros, figures historiques, cinéma, fiction/réalité
+
+SCORING (JSON à la fin) :
+Après la question ${TOTAL_QUESTIONS}, fournis OBLIGATOIREMENT un bloc JSON structuré de cette forme exacte :
+<diagnostic_result>
+{
+  "matiere": "Espagnol LVB",
+  "code_epreuve": "IP004",
+  "date": "${new Date().toISOString().split('T')[0]}",
+  "scores": {
+    "grammaire": X,
+    "conjugaison": X,
+    "lexique": X,
+    "comprehension": X,
+    "expression": X
+  },
+  "points_forts": ["...", "..."],
+  "points_faibles": ["...", "..."],
+  "priorites_revision": ["...", "...", "..."],
+  "recommandation": "..."
+}
+</diagnostic_result>
+
+Commence par souhaiter la bienvenue à l'élève en espagnol, explique brièvement le format (15 questions, 5 domaines), puis pose la première question.`;
+}
+
+// ── PHASE 1 : COVERAGE GRID ──────────────────────────────────────────────────
+function renderCoverageGrid() {
+  addMessage('agent', 'Avant de commencer, indique ce que tu as déjà vu en cours cette année en cochant chaque chapitre :', false, true);
+  const grid = document.createElement('div');
+  grid.className = 'coverage-grid';
+
+  COVERAGE_ITEMS.forEach(item => {
+    coverageState[item.id] = 'non';
+    const row = document.createElement('div');
+    row.className = 'coverage-item';
+    const label = document.createElement('span');
+    label.className = 'coverage-item-label';
+    label.textContent = item.label;
+    row.appendChild(label);
+    ['Oui', 'Partiel', 'Non'].forEach(val => {
+      const btn = document.createElement('button');
+      btn.className = `cov-btn btn-${val.toLowerCase()}`;
+      btn.textContent = val;
+      btn.onclick = () => {
+        coverageState[item.id] = val.toLowerCase();
+        row.querySelectorAll('.cov-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+      };
+      row.appendChild(btn);
+    });
+    grid.appendChild(row);
+  });
+
+  const startBtn = document.createElement('button');
+  startBtn.className = 'coverage-start-btn';
+  startBtn.textContent = 'Démarrer le diagnostic →';
+  startBtn.onclick = () => startPhase2(grid.parentElement);
+  grid.appendChild(startBtn);
+
+  const wrapper = document.getElementById('messages').lastElementChild;
+  wrapper.appendChild(grid);
+}
+
+function startPhase2(gridContainer) {
+  phase = 2;
+  document.getElementById('phase-badge').textContent = 'Phase 2 — Évaluation';
+  document.getElementById('phase-indicator').textContent = 'Phase 2 — Questions de diagnostic';
+  gridContainer.remove();
+
+  const summary = COVERAGE_ITEMS.map(i =>
+    `${i.label} : ${coverageState[i.id] || 'non'}`
+  ).join('\n');
+
+  conversation = [];
+  inputEl.disabled = false;
+  sendBtn.disabled = false;
+  inputEl.focus();
+  launchPhase2(summary);
+}
+
+async function launchPhase2(coverageSummary) {
+  addTyping();
+  try {
+    const sysPrompt = buildSystemPrompt(coverageSummary);
+    const reply = await callAPI([{ role: 'user', content: 'Commence le diagnostic.' }], sysPrompt);
+    removeTyping();
+    conversation.push({ role: 'user', content: 'Commence le diagnostic.' });
+    conversation.push({ role: 'assistant', content: reply });
+    addMessage('agent', reply);
+    updateProgress();
+  } catch(e) {
+    removeTyping();
+    addMessage('agent', 'Impossible de démarrer : ' + e.message);
+  }
+}
+
+// ── PHASE 2 : CONVERSATION ───────────────────────────────────────────────────
+async function sendMessage() {
+  if (isLoading || diagnosticDone) return;
+  const text = inputEl.value.trim();
+  if (!text) return;
+
+  addMessage('user', text);
+  inputEl.value = '';
+  inputEl.style.height = '40px';
+  conversation.push({ role: 'user', content: text });
+  qCount++;
+  updateProgress();
+
+  isLoading = true;
+  sendBtn.disabled = true;
+  addTyping();
+
+  try {
+    const sysPrompt = buildSystemPrompt(Object.entries(coverageState).map(([k,v]) => `${k}: ${v}`).join(', '));
+    const reply = await callAPI(conversation, sysPrompt);
+    removeTyping();
+    conversation.push({ role: 'assistant', content: reply });
+    addMessage('agent', reply);
+
+    // Parse scores from JSON block
+    parseScores(reply);
+
+    if (reply.includes('<diagnostic_result>')) {
+      finalizeDiagnostic(reply);
+    }
+  } catch(e) {
+    removeTyping();
+    addMessage('agent', 'Erreur : ' + e.message);
+  } finally {
+    isLoading = false;
+    if (!diagnosticDone) sendBtn.disabled = false;
+  }
+}
+
+function parseScores(text) {
+  const match = text.match(/<diagnostic_result>([\s\S]*?)<\/diagnostic_result>/);
+  if (!match) return;
+  try {
+    const data = JSON.parse(match[1]);
+    if (data.scores) {
+      Object.entries(data.scores).forEach(([domain, score]) => {
+        if (DOMAINS.includes(domain)) {
+          scores[domain] = score;
+          updateDomainBar(domain, score);
+        }
+      });
+    }
+  } catch(e) {}
+}
+
+function updateDomainBar(domain, score) {
+  const pct = (score / 5) * 100;
+  document.getElementById('bar-' + domain).style.width = pct + '%';
+  document.getElementById('score-' + domain).textContent = score + '/5';
+}
+
+function updateProgress() {
+  const pct = Math.min((qCount / TOTAL_QUESTIONS) * 100, 100);
+  document.getElementById('prog-fill').style.width = pct + '%';
+  document.getElementById('q-counter').textContent = `${Math.min(qCount, TOTAL_QUESTIONS)} / ${TOTAL_QUESTIONS} questions`;
+}
+
+// ── FINALIZE ─────────────────────────────────────────────────────────────────
+async function finalizeDiagnostic(text) {
+  diagnosticDone = true;
+  sendBtn.disabled = true;
+  inputEl.disabled = true;
+  inputEl.placeholder = 'Diagnostic terminé.';
+  document.getElementById('phase-badge').textContent = 'Diagnostic terminé';
+  document.getElementById('phase-badge').style.background = 'rgba(255,255,255,0.25)';
+  document.getElementById('q-counter').textContent = `${TOTAL_QUESTIONS} / ${TOTAL_QUESTIONS} questions ✓`;
+
+  const match = text.match(/<diagnostic_result>([\s\S]*?)<\/diagnostic_result>/);
+  if (!match) return;
+
+  let data;
+  try { data = JSON.parse(match[1]); } catch(e) { return; }
+
+  // Send to Make webhook
+  try {
+    await fetch(WEBHOOK, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        source: 'diagnostic_agent',
+        matiere: 'Espagnol LVB',
+        code_epreuve: 'IP004',
+        date: data.date || new Date().toISOString().split('T')[0],
+        scores: data.scores,
+        points_forts: data.points_forts,
+        points_faibles: data.points_faibles,
+        priorites_revision: data.priorites_revision,
+        recommandation: data.recommandation,
+        couverture: coverageState,
+        raw_json: JSON.stringify(data)
+      })
+    });
+    addMessage('system', '✓ Résultats envoyés dans Notion');
+  } catch(e) {
+    addMessage('system', 'Résultats non envoyés — vérifie la connexion.');
+  }
+}
+
+// ── API ───────────────────────────────────────────────────────────────────────
+async function callAPI(messages, systemPrompt) {
+  const res = await fetch(PROXY, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: MODEL,
+      max_tokens: 1200,
+      system: systemPrompt,
+      messages
+    })
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error?.message || 'Erreur API');
+  return data.content[0].text;
+}
+
+// ── UI HELPERS ────────────────────────────────────────────────────────────────
+function addMessage(type, text, skipScroll, skipFormat) {
+  const div = document.createElement('div');
+  div.className = 'msg ' + type;
+  if (skipFormat) {
+    div.textContent = text;
+  } else {
+    // Minimal markdown: bold, line breaks, remove JSON block
+    let clean = text.replace(/<diagnostic_result>[\s\S]*?<\/diagnostic_result>/g, '').trim();
+    clean = clean.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    clean = clean.replace(/\n/g, '<br>');
+    div.innerHTML = clean;
+  }
+  messagesEl.appendChild(div);
+  if (!skipScroll) messagesEl.scrollTop = messagesEl.scrollHeight;
+  return div;
+}
+
+function addTyping() {
+  const div = document.createElement('div');
+  div.className = 'msg agent';
+  div.id = 'typing-indicator';
+  div.innerHTML = '<div class="typing"><span></span><span></span><span></span></div>';
+  messagesEl.appendChild(div);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+
+function removeTyping() {
+  const t = document.getElementById('typing-indicator');
+  if (t) t.remove();
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+function init() {
+  addMessage('agent', '¡Bienvenida! Je suis ton agent de diagnostic pour l\'Espagnol LVB (IP004).\n\nCommençons par faire le point sur ce que tu as vu en cours cette année.', false, false);
+  renderCoverageGrid();
+}
+
+sendBtn.addEventListener('click', sendMessage);
+inputEl.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+});
+inputEl.addEventListener('input', () => {
+  inputEl.style.height = 'auto';
+  inputEl.style.height = Math.min(inputEl.scrollHeight, 120) + 'px';
+});
+
+init();
+</script>
+</body>
+</html>
