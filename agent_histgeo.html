@@ -219,7 +219,7 @@ STRUCTURE - 2 PHASES
 PHASE 1 - COUVERTURE
 Tu recois "Voici ma couverture : ...".
 Genere immediatement ce JSON puis passe a la phase 2 :
-```json
+\`\`\`json
 {
   "phase": 1,
   "couverture": {
@@ -236,7 +236,7 @@ Genere immediatement ce JSON puis passe a la phase 2 :
     "methode-pg": "oui|partiel|non"
   }
 }
-```
+\`\`\`
 
 PHASE 2 - EVALUATION
 12 a 18 questions, UNE PAR UNE.
@@ -259,7 +259,7 @@ REGLES :
 NOTATION (1 a 5) : 1=non maitrise, 2=lacunes importantes, 3=correct, 4=bon, 5=excellent
 
 JSON final :
-```json
+\`\`\`json
 {
   "phase": 2,
   "diagnostic_complet": true,
@@ -275,7 +275,7 @@ JSON final :
   "sequences_fortes": ["id1"],
   "sequences_a_retravailler": ["id1"]
 }
-```
+\`\`\`
 
 STYLE : Accueillant, direct. Tutoyer. Questions courtes. Feedback 1 phrase max puis question suivante.`;
 
