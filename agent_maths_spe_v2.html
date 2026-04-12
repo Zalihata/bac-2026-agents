@@ -8,13 +8,11 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f7f6f3; color: #1a1a1a; min-height: 100vh; }
 .app { display: flex; height: 100vh; }
-
 .sidebar { width: 270px; background: #fff; border-right: 1px solid #e5e5e0; padding: 20px 16px; display: flex; flex-direction: column; gap: 12px; flex-shrink: 0; overflow-y: auto; }
 .sidebar-title { font-size: 11px; font-weight: 500; color: #aaa; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
 .phase-badge { font-size: 12px; font-weight: 500; padding: 4px 10px; border-radius: 20px; display: inline-block; }
 .phase-1 { background: #e8f4fd; color: #185fa5; }
 .phase-2 { background: #e8f0e4; color: #3b6d11; }
-
 .chapter-item { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 6px; font-size: 12px; }
 .chapter-item.studied { background: #f0faf5; }
 .chapter-item.partial { background: #fff8ec; }
@@ -25,41 +23,32 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .ch-icon.p { background: #ef9f27; color: #fff; }
 .ch-icon.n { background: #e24b4a; color: #fff; }
 .ch-icon.q { background: #d5d4ce; color: #888; }
-
 .domain-section { margin-bottom: 4px; }
 .domain-label { font-size: 11px; color: #aaa; font-weight: 500; margin: 8px 0 4px; text-transform: uppercase; letter-spacing: 0.04em; }
-
 .score-row { display: flex; align-items: center; gap: 8px; padding: 4px 8px; font-size: 12px; }
 .score-bar-bg { flex: 1; height: 4px; background: #f0efe9; border-radius: 2px; }
 .score-bar { height: 4px; border-radius: 2px; transition: width 0.6s, background 0.6s; background: #d5d4ce; }
 .score-val { font-size: 11px; color: #888; width: 28px; text-align: right; flex-shrink: 0; }
-
 .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
 .header { padding: 14px 24px; border-bottom: 1px solid #e5e5e0; background: #fff; display: flex; align-items: center; gap: 12px; }
 .header-text h1 { font-size: 15px; font-weight: 500; }
 .header-text p { font-size: 12px; color: #888; margin-top: 1px; }
 .phase-indicator { margin-left: auto; font-size: 12px; color: #888; }
-
 .messages { flex: 1; overflow-y: auto; padding: 20px 24px; display: flex; flex-direction: column; gap: 14px; }
-
 .msg { display: flex; gap: 10px; }
 .msg.user { flex-direction: row-reverse; align-self: flex-end; max-width: 600px; }
 .msg.agent { align-self: flex-start; max-width: 680px; }
-
 .avatar { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 500; flex-shrink: 0; }
 .agent .avatar { background: #eae8f5; color: #5a4fb0; }
 .user .avatar { background: #e3f0e8; color: #2d7a4f; }
-
 .bubble { padding: 11px 15px; border-radius: 12px; font-size: 14px; line-height: 1.65; }
 .agent .bubble { background: #fff; border: 1px solid #e5e5e0; border-radius: 4px 12px 12px 12px; }
 .user .bubble { background: #5a4fb0; color: #fff; border-radius: 12px 4px 12px 12px; }
-
 .typing { display: flex; gap: 4px; align-items: center; padding: 4px 0; }
 .dot { width: 6px; height: 6px; border-radius: 50%; background: #bbb; animation: bounce 1.2s infinite; }
 .dot:nth-child(2) { animation-delay: 0.2s; }
 .dot:nth-child(3) { animation-delay: 0.4s; }
 @keyframes bounce { 0%,80%,100%{transform:translateY(0)} 40%{transform:translateY(-5px)} }
-
 .input-area { padding: 14px 24px; border-top: 1px solid #e5e5e0; background: #fff; display: flex; gap: 10px; align-items: flex-end; }
 textarea { flex: 1; border: 1px solid #d5d4ce; border-radius: 8px; padding: 9px 13px; font-size: 14px; font-family: inherit; resize: none; line-height: 1.5; max-height: 120px; min-height: 38px; }
 textarea:focus { outline: none; border-color: #5a4fb0; box-shadow: 0 0 0 2px rgba(90,79,176,0.12); }
@@ -67,15 +56,12 @@ button.send { background: #5a4fb0; color: #fff; border: none; border-radius: 8px
 button.send:hover { background: #4b41a0; }
 button.send:disabled { background: #ccc; cursor: not-allowed; }
 .kb-hint { font-size: 11px; color: #bbb; padding-top: 3px; }
-
 pre { background: #f5f4f0; border-radius: 6px; padding: 8px 12px; font-size: 12px; overflow-x: auto; margin: 6px 0; white-space: pre-wrap; }
 strong { font-weight: 500; }
-
 .final-card { background: #fff; border: 1px solid #e5e5e0; border-radius: 12px; padding: 20px; }
 .final-card h3 { font-size: 14px; font-weight: 500; margin-bottom: 14px; color: #555; }
 .final-row { display: flex; align-items: center; gap: 10px; margin-bottom: 9px; }
 .final-label { font-size: 13px; width: 185px; flex-shrink: 0; }
-.final-sub { font-size: 11px; color: #aaa; }
 .final-bar-bg { flex: 1; height: 5px; background: #f0efe9; border-radius: 3px; }
 .final-bar { height: 5px; border-radius: 3px; transition: width 0.8s; }
 .bl { background: #e24b4a; } .bm { background: #ef9f27; } .bh { background: #1d9e75; }
@@ -90,14 +76,12 @@ strong { font-weight: 500; }
       <div class="sidebar-title">Avancement</div>
       <span class="phase-badge phase-1" id="phase-badge">Phase 1 — Couverture</span>
     </div>
-
     <div>
       <div class="domain-label">Algèbre</div>
       <div class="chapter-item pending" id="ch-suites-arith"><div class="ch-icon q">?</div>Suites arithmétiques</div>
       <div class="chapter-item pending" id="ch-suites-geo"><div class="ch-icon q">?</div>Suites géométriques</div>
       <div class="chapter-item pending" id="ch-poly2"><div class="ch-icon q">?</div>Polynômes 2nd degré</div>
     </div>
-
     <div>
       <div class="domain-label">Analyse</div>
       <div class="chapter-item pending" id="ch-derivation"><div class="ch-icon q">?</div>Dérivation</div>
@@ -105,25 +89,21 @@ strong { font-weight: 500; }
       <div class="chapter-item pending" id="ch-expo"><div class="ch-icon q">?</div>Fonction exponentielle</div>
       <div class="chapter-item pending" id="ch-trigo"><div class="ch-icon q">?</div>Trigonométrie</div>
     </div>
-
     <div>
       <div class="domain-label">Géométrie</div>
       <div class="chapter-item pending" id="ch-scalaire"><div class="ch-icon q">?</div>Produit scalaire</div>
       <div class="chapter-item pending" id="ch-georep"><div class="ch-icon q">?</div>Géométrie repérée</div>
     </div>
-
     <div>
       <div class="domain-label">Probabilités-Stats</div>
       <div class="chapter-item pending" id="ch-condis"><div class="ch-icon q">?</div>Probas conditionnelles</div>
       <div class="chapter-item pending" id="ch-varialea"><div class="ch-icon q">?</div>Variables aléatoires</div>
       <div class="chapter-item pending" id="ch-bernoulli"><div class="ch-icon q">?</div>Épreuves de Bernoulli</div>
     </div>
-
     <div>
       <div class="domain-label">Automatismes</div>
       <div class="chapter-item pending" id="ch-auto"><div class="ch-icon q">?</div>Calcul & taux d'évolution</div>
     </div>
-
     <div id="scores-section" style="display:none;">
       <div class="domain-label" style="margin-top:8px;">Scores évaluation</div>
       <div class="score-row"><span style="font-size:12px;width:90px;flex-shrink:0;">Algèbre</span><div class="score-bar-bg"><div class="score-bar" id="sb-algebre" style="width:0%"></div></div><span class="score-val" id="sv-algebre">—</span></div>
@@ -133,7 +113,6 @@ strong { font-weight: 500; }
       <div class="score-row"><span style="font-size:12px;width:90px;flex-shrink:0;">Automatismes</span><div class="score-bar-bg"><div class="score-bar" id="sb-auto" style="width:0%"></div></div><span class="score-val" id="sv-auto">—</span></div>
     </div>
   </div>
-
   <div class="main">
     <div class="header">
       <div class="header-text">
@@ -160,18 +139,18 @@ strong { font-weight: 500; }
 const CHAPTERS = ['suites-arith','suites-geo','poly2','derivation','variations','expo','trigo','scalaire','georep','condis','varialea','bernoulli','auto'];
 
 const CHAPTER_LABELS = {
-  'suites-arith': 'Suites arithmétiques',
-  'suites-geo': 'Suites géométriques',
-  'poly2': 'Polynômes du 2nd degré',
-  'derivation': 'Dérivation',
+  'suites-arith': 'Suites arithmetiques',
+  'suites-geo': 'Suites geometriques',
+  'poly2': 'Polynomes du 2nd degre',
+  'derivation': 'Derivation',
   'variations': 'Variations & optimisation',
   'expo': 'Fonction exponentielle',
-  'trigo': 'Trigonométrie',
+  'trigo': 'Trigonometrie',
   'scalaire': 'Produit scalaire',
-  'georep': 'Géométrie repérée',
+  'georep': 'Geometrie reperee',
   'condis': 'Probas conditionnelles',
-  'varialea': 'Variables aléatoires',
-  'bernoulli': 'Épreuves de Bernoulli',
+  'varialea': 'Variables aleatoires',
+  'bernoulli': 'Epreuves de Bernoulli',
   'auto': 'Automatismes'
 };
 
@@ -183,33 +162,31 @@ const DOMAIN_GROUPS = [
   { label: 'Automatismes', chapters: ['auto'] }
 ];
 
-const SYSTEM_PROMPT = `Tu es un agent de diagnostic pédagogique pour les mathématiques spécialité de Première générale (programme officiel français, BO 2025, épreuve anticipée session 2026).
+const SYSTEM_PROMPT = `Tu es un agent de diagnostic pedagogique pour les mathematiques specialite de Premiere generale (programme officiel francais, BO 2025, epreuve anticipee session 2026).
 
-L'élève est candidate libre au bac — elle passe TOUT en ponctuel, pas de contrôle continu. L'objectif est de produire un profil complet pour alimenter son rétro-planning personnalisé.
+L'eleve est candidate libre au bac - elle passe TOUT en ponctuel, pas de controle continu. L'objectif est de produire un profil complet pour alimenter son retro-planning personnalise.
 
-═══════════════════════════════
 STRUCTURE EN 2 PHASES OBLIGATOIRE
-═══════════════════════════════
 
-PHASE 1 — COUVERTURE DU PROGRAMME (déclaratif)
-L'élève a déjà renseigné sa couverture via une interface interactive. Tu recevras un message du type "Voici ma couverture : Suites arithmétiques: oui, ...". Analyse ces données et génère immédiatement le JSON de phase 1 puis passe en phase 2.
+PHASE 1 - COUVERTURE DU PROGRAMME (declaratif)
+L'eleve a deja renseigne sa couverture via une interface interactive. Tu recevras un message du type "Voici ma couverture : Suites arithmetiques: oui, ...". Analyse ces donnees et genere immediatement le JSON de phase 1 puis passe en phase 2.
 
 Les chapitres sont :
-- suites-arith : Suites arithmétiques
-- suites-geo : Suites géométriques
-- poly2 : Polynômes du 2nd degré
-- derivation : Dérivation
+- suites-arith : Suites arithmetiques
+- suites-geo : Suites geometriques
+- poly2 : Polynomes du 2nd degre
+- derivation : Derivation
 - variations : Variations, extremums, optimisation
 - expo : Fonction exponentielle
-- trigo : Trigonométrie
+- trigo : Trigonometrie
 - scalaire : Produit scalaire
-- georep : Géométrie repérée
-- condis : Probabilités conditionnelles et indépendance
-- varialea : Variables aléatoires
-- bernoulli : Épreuves de Bernoulli
+- georep : Geometrie reperee
+- condis : Probabilites conditionnelles et independance
+- varialea : Variables aleatoires
+- bernoulli : Epreuves de Bernoulli
 - auto : Automatismes
 
-À la réception de la couverture, génère ce JSON dans un bloc \`\`\`json ... \`\`\` :
+A la reception de la couverture, genere ce JSON dans un bloc \`\`\`json ... \`\`\` :
 {
   "phase": 1,
   "couverture": {
@@ -217,62 +194,53 @@ Les chapitres sont :
     ...
   }
 }
-Puis enchaîne immédiatement avec la Phase 2.
+Puis enchaine immediatement avec la Phase 2.
 
-PHASE 2 — ÉVALUATION (objectif)
-Tu poses entre 12 et 18 questions de maths, UNE À LA FOIS.
+PHASE 2 - EVALUATION (objectif)
+Tu poses entre 12 et 18 questions de maths, UNE A LA FOIS.
 
-Stratégie de sélection des questions :
-- Priorité aux chapitres déclarés "oui" ou "partiel" — on évalue ce qu'elle connaît
-- Pour les chapitres "non", pose quand même 1-2 questions de base pour détecter d'éventuelles bases de seconde
-- Varie les domaines — ne reste pas bloquée sur un seul
-- Varie les types de questions : calcul direct, démonstration, application concrète, vrai/faux avec justification, erreur à corriger
-- Ne pose jamais deux questions consécutives sur le même chapitre
-- Varie le niveau de difficulté : commence par une question accessible, monte progressivement
-- Si elle a déjà répondu à une question similaire dans cette session, change d'angle d'attaque
-- Adapte la difficulté selon les réponses précédentes
+5 DOMAINES ORIENTES REVISION :
 
-Tu évalues chaque réponse sur :
-a) La justesse mathématique du résultat
-b) La qualité des justifications et de la rédaction
-c) La maîtrise de la notation formelle (PA(B), fractions vs ÷, parenthèses, etc.)
+1. ALGEBRE (~20%) - Suites arithmetiques et geometriques, polynomes 2nd degre. Questions de calcul et de demonstration : "Calcule la somme des 20 premiers termes d'une suite arithmetique de premier terme 3 et de raison 5." / "Resous x^2 - 5x + 6 = 0."
 
-Points d'attention identifiés sur un devoir récent :
-- Justifications insuffisantes : bon résultat mais pas d'explication
-- Notation : PA(B) vs P(B|A), signe ÷ à éviter, parenthèses manquantes
-- Probas totales : point faible avéré
-- Ne jamais écrire = entre deux expressions inégales
+2. ANALYSE (~25%) - Derivation, variations, optimisation, exponentielle, trigonometrie. Calculer une derivee, dresser un tableau de variations, resoudre une inegalite. "Derive f(x) = 3x^2 - 2x + 1." / "Determine les extremums de f sur [-2, 3]."
 
-SCORING PAR DOMAINE (1 à 5) :
-- 1 : notions non maîtrisées
-- 2 : comprend les concepts, erreurs fréquentes
-- 3 : niveau correct, quelques lacunes
-- 4 : bonne maîtrise, erreurs mineures
-- 5 : très bonne maîtrise, justifications complètes
+3. GEOMETRIE (~20%) - Produit scalaire, geometrie reperee. Calculer un produit scalaire, determiner une equation de droite, de cercle. "Calcule le produit scalaire de u(3,2) et v(-1,4)." / "Donne l'equation du cercle de centre A(1,-2) et de rayon 3."
 
-À la fin de la phase 2 (après 12-18 questions), génère le profil final dans un bloc \`\`\`json ... \`\`\` :
+4. PROBABILITES-STATS (~25%) - Probas conditionnelles, variables aleatoires, Bernoulli. "Calcule P(A|B) sachant que P(A inter B) = 0,12 et P(B) = 0,4." / "Definir une variable aleatoire de Bernoulli."
+
+5. AUTOMATISMES (~10%) - Calculs rapides, taux d'evolution, pourcentages, fractions, puissances. "Un article coute 80€. On applique une remise de 15% puis une hausse de 10%. Quel est le prix final ?"
+
+REGLES :
+- Priorite aux chapitres declares oui ou partiel
+- Pour les chapitres non, pose 1-2 questions de base pour detecter les bases de seconde
+- Ne jamais deux questions consecutives sur le meme chapitre
+- Adapter la difficulte selon les reponses
+- Points d'attention : justifications insuffisantes, notation PA(B) vs P(B|A), signe / a eviter, parentheses manquantes, ne jamais ecrire = entre deux expressions inegales
+
+NOTATION (1 a 5) :
+1 = notions non maitrisees, 2 = comprend, erreurs frequentes, 3 = niveau correct, quelques lacunes, 4 = bonne maitrise, 5 = tres bonne maitrise
+
+JSON final apres 12-18 questions :
+\`\`\`json
 {
   "phase": 2,
   "diagnostic_complet": true,
-  "couverture": { /* reprendre les données phase 1 */ },
+  "couverture": {},
   "scores": {
-    "algebre": { "score": X, "chapitres": ["suites-arith","suites-geo","poly2"], "points_forts": "...", "lacunes": "..." },
-    "analyse": { "score": X, "chapitres": ["derivation","variations","expo","trigo"], "points_forts": "...", "lacunes": "..." },
-    "geometrie": { "score": X, "chapitres": ["scalaire","georep"], "points_forts": "...", "lacunes": "..." },
-    "probas": { "score": X, "chapitres": ["condis","varialea","bernoulli"], "points_forts": "...", "lacunes": "..." },
-    "automatismes": { "score": X, "chapitres": ["auto"], "points_forts": "...", "lacunes": "..." }
+    "algebre": { "score": 0, "chapitres": ["suites-arith","suites-geo","poly2"], "points_forts": "...", "lacunes": "..." },
+    "analyse": { "score": 0, "chapitres": ["derivation","variations","expo","trigo"], "points_forts": "...", "lacunes": "..." },
+    "geometrie": { "score": 0, "chapitres": ["scalaire","georep"], "points_forts": "...", "lacunes": "..." },
+    "probas": { "score": 0, "chapitres": ["condis","varialea","bernoulli"], "points_forts": "...", "lacunes": "..." },
+    "automatismes": { "score": 0, "chapitres": ["auto"], "points_forts": "...", "lacunes": "..." }
   },
-  "priorites": [
-    { "chapitre": "id-chapitre", "raison": "non étudié|niveau faible|...", "urgence": "critique|haute|normale" }
-  ],
+  "priorites": [{ "chapitre": "id", "raison": "...", "urgence": "critique|haute|normale" }],
   "commentaire_general": "...",
-  "notation_et_methode": "bilan sur la qualité de rédaction et notation"
+  "notation_et_methode": "bilan sur la qualite de redaction et notation"
 }
+\`\`\`
 
-STYLE :
-- Ton bienveillant et direct
-- Phase 2 : une question à la fois, feedback bref après chaque réponse, indice pédagogique si elle bloque
-- Commence par un message d'accueil très court (2-3 phrases) qui explique qu'elle va d'abord cocher les chapitres étudiés, puis répondre à des questions`;
+STYLE : bienveillant, direct. Commence par un message d'accueil tres court (2-3 phrases).`;
 
 let conversation = [];
 let isLoading = false;
@@ -316,7 +284,7 @@ function parseJSON(text) {
   try { return JSON.parse(m[1].trim()); } catch { return null; }
 }
 
-const coverageMap = { 'oui': 's', 'partiel': 'p', 'non': 'n' };
+const coverageMap   = { 'oui': 's', 'partiel': 'p', 'non': 'n' };
 const coverageClass = { 'oui': 'studied', 'partiel': 'partial', 'non': 'not-studied' };
 
 function updateCoverage(data) {
@@ -325,26 +293,22 @@ function updateCoverage(data) {
     const el = document.getElementById('ch-' + ch);
     if (!el) return;
     const icon = coverageMap[val] || 'q';
-    const cls = coverageClass[val] || 'pending';
-    el.className = 'chapter-item ' + cls;
-    const name = CHAPTER_LABELS[ch] || ch;
-    el.innerHTML = `<div class="ch-icon ${icon}">${icon==='s'?'✓':icon==='p'?'~':'✕'}</div>${name}`;
+    el.className = 'chapter-item ' + (coverageClass[val] || 'pending');
+    el.innerHTML = `<div class="ch-icon ${icon}">${icon==='s'?'✓':icon==='p'?'~':'✕'}</div>${CHAPTER_LABELS[ch]||ch}`;
   });
 }
 
 function updateScores(scores) {
   if (!scores) return;
   document.getElementById('scores-section').style.display = 'block';
-  const map = { algebre: 'algebre', analyse: 'analyse', geometrie: 'geometrie', probas: 'probas', automatismes: 'auto' };
+  const map = { algebre:'algebre', analyse:'analyse', geometrie:'geometrie', probas:'probas', automatismes:'auto' };
   Object.entries(map).forEach(([key, id]) => {
-    const d = scores[key];
-    if (!d) return;
+    const d = scores[key]; if (!d) return;
     const s = d.score || 0;
-    const pct = (s/5)*100;
     const bar = document.getElementById('sb-' + id);
     const val = document.getElementById('sv-' + id);
     if (!bar || !val) return;
-    bar.style.width = pct + '%';
+    bar.style.width = (s/5*100) + '%';
     bar.style.background = s<=2 ? '#e24b4a' : s<=3 ? '#ef9f27' : '#1d9e75';
     val.textContent = s + '/5';
   });
@@ -354,12 +318,9 @@ function showCoverageUI() {
   const container = document.createElement('div');
   container.id = 'coverage-ui';
   container.style.cssText = 'background:#fff;border:1px solid #e5e5e0;border-radius:12px;padding:16px;margin:8px 0;max-width:680px;';
-
-  let html = '<div style="font-size:13px;font-weight:500;margin-bottom:12px;color:#555;">Pour chaque chapitre, indique si tu l\'as étudié :</div>';
-
+  let html = '<div style="font-size:13px;font-weight:500;margin-bottom:12px;color:#555;">Pour chaque chapitre, indique si tu l\'as etudie :</div>';
   DOMAIN_GROUPS.forEach(domain => {
-    html += `<div style="margin-bottom:12px;">
-      <div style="font-size:11px;font-weight:500;color:#aaa;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">${domain.label}</div>`;
+    html += `<div style="margin-bottom:12px;"><div style="font-size:11px;font-weight:500;color:#aaa;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">${domain.label}</div>`;
     domain.chapters.forEach(ch => {
       html += `<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid #f5f4f0;">
         <span style="font-size:13px;">${CHAPTER_LABELS[ch]}</span>
@@ -372,9 +333,7 @@ function showCoverageUI() {
     });
     html += '</div>';
   });
-
-  html += `<button onclick="validateCoverage()" style="margin-top:12px;width:100%;background:#5a4fb0;color:#fff;border:none;border-radius:8px;padding:10px;font-size:14px;font-weight:500;cursor:pointer;">Valider mes réponses →</button>`;
-
+  html += `<button onclick="validateCoverage()" style="margin-top:12px;width:100%;background:#5a4fb0;color:#fff;border:none;border-radius:8px;padding:10px;font-size:14px;font-weight:500;cursor:pointer;">Valider mes reponses →</button>`;
   container.innerHTML = html;
   messagesEl.appendChild(container);
   messagesEl.scrollTop = messagesEl.scrollHeight;
@@ -382,154 +341,115 @@ function showCoverageUI() {
 
 function setCoverage(ch, val, btn) {
   coverageSelections[ch] = val;
-  const btns = btn.parentElement.querySelectorAll('button');
-  btns.forEach(b => {
-    b.style.background = '#fff';
-    b.style.color = '#1a1a1a';
-    b.style.borderColor = '#d5d4ce';
-  });
-  const colors = { oui: '#1d9e75', partiel: '#ef9f27', non: '#e24b4a' };
-  btn.style.background = colors[val];
-  btn.style.color = '#fff';
-  btn.style.borderColor = colors[val];
+  btn.parentElement.querySelectorAll('button').forEach(b => { b.style.background='#fff'; b.style.color='#1a1a1a'; b.style.borderColor='#d5d4ce'; });
+  const colors = { oui:'#1d9e75', partiel:'#ef9f27', non:'#e24b4a' };
+  btn.style.background = colors[val]; btn.style.color = '#fff'; btn.style.borderColor = colors[val];
 }
 
 async function validateCoverage() {
   const missing = CHAPTERS.filter(ch => !coverageSelections[ch]);
   if (missing.length > 0) {
     const btn = document.querySelector('#coverage-ui button[onclick="validateCoverage()"]');
-    btn.textContent = `⚠ ${missing.length} chapitre(s) non renseigné(s)`;
-    setTimeout(() => btn.textContent = 'Valider mes réponses →', 2000);
+    btn.textContent = `⚠ ${missing.length} chapitre(s) non renseigne(s)`;
+    setTimeout(() => btn.textContent = 'Valider mes reponses →', 2000);
     return;
   }
-
   document.getElementById('coverage-ui').remove();
-
   const summary = CHAPTERS.map(ch => `${CHAPTER_LABELS[ch]}: ${coverageSelections[ch]}`).join(', ');
-  const userMsg = `Voici ma couverture : ${summary}`;
-
-  addMsg('user', 'Réponses envoyées ✓');
-  conversation.push({ role: 'user', content: userMsg });
-
-  isLoading = true;
-  sendBtn.disabled = true;
-  addTyping();
-
+  addMsg('user', 'Reponses envoyees ✓');
+  conversation.push({ role: 'user', content: `Voici ma couverture : ${summary}` });
+  isLoading = true; sendBtn.disabled = true; addTyping();
   try {
     const reply = await callAPI(conversation);
-    removeTyping();
-    addMsg('agent', reply);
+    removeTyping(); addMsg('agent', reply);
     conversation.push({ role: 'assistant', content: reply });
-
     const json = parseJSON(reply);
     if (json && json.phase === 1) {
       updateCoverage(json);
-      document.getElementById('phase-badge').textContent = 'Phase 2 — Évaluation';
+      document.getElementById('phase-badge').textContent = 'Phase 2 — Evaluation';
       document.getElementById('phase-badge').className = 'phase-badge phase-2';
       document.getElementById('phase-indicator').textContent = 'Phase 2 / 2';
-    } else if (json && json.phase === 2 && json.diagnostic_complet) {
-      showFinalProfile(json);
-    }
-  } catch(err) {
-    removeTyping();
-    addMsg('agent', 'Erreur : ' + err.message);
-  } finally {
-    isLoading = false;
-    sendBtn.disabled = false;
-    inputEl.disabled = false;
-    inputEl.focus();
-  }
+    } else if (json && json.phase === 2 && json.diagnostic_complet) { showFinalProfile(json); }
+  } catch(err) { removeTyping(); addMsg('agent', 'Erreur : ' + err.message); }
+  finally { isLoading = false; sendBtn.disabled = false; inputEl.disabled = false; inputEl.focus(); }
 }
 
 function showFinalProfile(data) {
-  updateCoverage(data);
-  updateScores(data.scores);
-
+  updateCoverage(data); updateScores(data.scores);
   const card = document.createElement('div');
   card.className = 'final-card';
-  const labels = { algebre:'Algèbre', analyse:'Analyse', geometrie:'Géométrie', probas:'Probabilités-Stats', automatismes:'Automatismes' };
+  const labels = { algebre:'Algebre', analyse:'Analyse', geometrie:'Geometrie', probas:'Probabilites-Stats', automatismes:'Automatismes' };
   let rows = '';
   if (data.scores) {
     Object.entries(labels).forEach(([k, label]) => {
-      const d = data.scores[k];
-      if (!d) return;
-      const s = d.score||0;
-      const pct = (s/5)*100;
+      const d = data.scores[k]; if (!d) return;
+      const s = d.score||0; const pct = (s/5)*100;
       const cls = s<=2?'bl':s<=3?'bm':'bh';
-      rows += `<div class="final-row">
-        <div class="final-label">${label}</div>
-        <div class="final-bar-bg"><div class="final-bar ${cls}" style="width:${pct}%"></div></div>
-        <div class="final-score">${s}/5</div>
-      </div>`;
+      rows += `<div class="final-row"><div class="final-label">${label}</div><div class="final-bar-bg"><div class="final-bar ${cls}" style="width:${pct}%"></div></div><div class="final-score">${s}/5</div></div>`;
     });
   }
   let priorities = '';
   if (data.priorites && data.priorites.length) {
-    priorities = '<div style="margin-top:14px;"><div style="font-size:12px;color:#aaa;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.04em;">Priorités de révision</div>';
-    data.priorites.forEach(p => {
-      priorities += `<span class="priority-tag">${p.chapitre} — ${p.urgence}</span>`;
-    });
+    priorities = '<div style="margin-top:14px;"><div style="font-size:12px;color:#aaa;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.04em;">Priorites de revision</div>';
+    data.priorites.forEach(p => { priorities += `<span class="priority-tag">${p.chapitre} — ${p.urgence}</span>`; });
     priorities += '</div>';
   }
-  card.innerHTML = `<h3>Profil de compétences final</h3>${rows}${priorities}`;
-  if (data.commentaire_general) {
-    card.innerHTML += `<div style="margin-top:12px;font-size:13px;color:#666;line-height:1.6;border-top:1px solid #f0efe9;padding-top:12px;">${data.commentaire_general}</div>`;
-  }
+  card.innerHTML = `<h3>Profil de competences final</h3>${rows}${priorities}`;
+  if (data.commentaire_general) card.innerHTML += `<div style="margin-top:12px;font-size:13px;color:#666;line-height:1.6;border-top:1px solid #f0efe9;padding-top:12px;">${data.commentaire_general}</div>`;
   messagesEl.appendChild(card);
   messagesEl.scrollTop = messagesEl.scrollHeight;
-
-  document.getElementById('phase-badge').textContent = 'Diagnostic terminé';
+  document.getElementById('phase-badge').textContent = 'Diagnostic termine';
   document.getElementById('phase-badge').style.background = '#f0faf5';
   document.getElementById('phase-badge').style.color = '#1d9e75';
-  document.getElementById('phase-indicator').textContent = 'Terminé';
-  diagnosticDone = true;
-  sendBtn.disabled = true;
-  inputEl.disabled = true;
-  inputEl.placeholder = 'Diagnostic terminé.';
+  document.getElementById('phase-indicator').textContent = 'Termine';
+  diagnosticDone = true; sendBtn.disabled = true; inputEl.disabled = true;
+  inputEl.placeholder = 'Diagnostic termine.';
   sendToMake(data);
 }
 
 async function sendToMake(data) {
   const payload = {
-    matiere: 'Maths',
+    matiere: 'Maths spe',
     date: new Date().toISOString(),
     couverture: data.couverture || {},
     scores: {
-      score_1: data.scores?.algebre?.score || 0,
-      score_2: data.scores?.analyse?.score || 0,
-      score_3: data.scores?.geometrie?.score || 0,
-      score_4: data.scores?.probas?.score || 0,
+      score_1: data.scores?.algebre?.score      || 0,
+      score_2: data.scores?.analyse?.score      || 0,
+      score_3: data.scores?.geometrie?.score    || 0,
+      score_4: data.scores?.probas?.score       || 0,
       score_5: data.scores?.automatismes?.score || 0,
-      domaine_1: 'Algèbre',
+      domaine_1: 'Algebre',
       domaine_2: 'Analyse',
-      domaine_3: 'Géométrie',
-      domaine_4: 'Probabilités-Stats',
+      domaine_3: 'Geometrie',
+      domaine_4: 'Probabilites-Stats',
       domaine_5: 'Automatismes'
     },
-    priorites: (data.priorites || []).map(p => p.chapitre + ' — ' + p.urgence).join(', '),
+    priorites: (data.priorites||[]).map(p => p.chapitre + ' — ' + p.urgence).join(', '),
     commentaire: data.commentaire_general || '',
     notation_methode: data.notation_et_methode || '',
-    json_brut: JSON.stringify(data).substring(0, 1900),
-    chapitres_str: Object.entries(data.couverture || {}).map(([id, statut]) => {
-      const urgence = (data.priorites || []).find(p => p.chapitre === id)?.urgence || 'normale';
-      return id + ':' + statut + ':' + urgence;
-    }).join('|')
+    json_brut: JSON.stringify(data).substring(0, 1900)
   };
+  payload.chapitres_str = [
+    { label: payload.scores.domaine_1, score: payload.scores.score_1 },
+    { label: payload.scores.domaine_2, score: payload.scores.score_2 },
+    { label: payload.scores.domaine_3, score: payload.scores.score_3 },
+    { label: payload.scores.domaine_4, score: payload.scores.score_4 },
+    { label: payload.scores.domaine_5, score: payload.scores.score_5 }
+  ].filter(d => d.label).map(d => {
+    const statut  = d.score >= 4 ? 'oui' : d.score >= 3 ? 'partiel' : 'non';
+    const urgence = d.score <= 2 ? 'critique' : d.score <= 3 ? 'haute' : 'normale';
+    return d.label + ':' + statut + ':' + urgence;
+  }).join('|');
   try {
-    await fetch(WEBHOOK_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
+    await fetch(WEBHOOK_URL, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) });
     const notif = document.createElement('div');
     notif.style.cssText = 'font-size:12px;color:#1d9e75;padding:8px 16px;text-align:center;';
-    notif.textContent = 'Résultats envoyés vers Notion.';
-    messagesEl.appendChild(notif);
-    messagesEl.scrollTop = messagesEl.scrollHeight;
+    notif.textContent = 'Resultats envoyes vers Notion.';
+    messagesEl.appendChild(notif); messagesEl.scrollTop = messagesEl.scrollHeight;
   } catch(e) {
     const notif = document.createElement('div');
     notif.style.cssText = 'font-size:12px;color:#e24b4a;padding:8px 16px;text-align:center;';
-    notif.textContent = 'Envoi vers Notion échoué — résultats sauvegardés localement.';
+    notif.textContent = 'Envoi vers Notion echoue.';
     messagesEl.appendChild(notif);
   }
 }
@@ -538,12 +458,7 @@ async function callAPI(messages) {
   const res = await fetch('https://bac-2026-agents.vercel.app/api/proxy', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 1200,
-      system: SYSTEM_PROMPT,
-      messages
-    })
+    body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1200, system: SYSTEM_PROMPT, messages })
   });
   const data = await res.json();
   if (!res.ok) throw new Error(data.error?.message || 'Erreur API');
@@ -552,48 +467,29 @@ async function callAPI(messages) {
 
 async function sendMessage() {
   if (isLoading || diagnosticDone) return;
-  const text = inputEl.value.trim();
-  if (!text) return;
-  inputEl.value = '';
-  inputEl.style.height = 'auto';
-  addMsg('user', text);
-  conversation.push({ role: 'user', content: text });
-
-  isLoading = true;
-  sendBtn.disabled = true;
-  addTyping();
-
+  const text = inputEl.value.trim(); if (!text) return;
+  inputEl.value = ''; inputEl.style.height = 'auto';
+  addMsg('user', text); conversation.push({ role: 'user', content: text });
+  isLoading = true; sendBtn.disabled = true; addTyping();
   try {
     const reply = await callAPI(conversation);
-    removeTyping();
-    addMsg('agent', reply);
+    removeTyping(); addMsg('agent', reply);
     conversation.push({ role: 'assistant', content: reply });
-
     const json = parseJSON(reply);
     if (json) {
       if (json.phase === 1) {
         updateCoverage(json);
-        document.getElementById('phase-badge').textContent = 'Phase 2 — Évaluation';
+        document.getElementById('phase-badge').textContent = 'Phase 2 — Evaluation';
         document.getElementById('phase-badge').className = 'phase-badge phase-2';
         document.getElementById('phase-indicator').textContent = 'Phase 2 / 2';
-      } else if (json.phase === 2 && json.diagnostic_complet) {
-        showFinalProfile(json);
-      }
+      } else if (json.phase === 2 && json.diagnostic_complet) { showFinalProfile(json); }
     }
-  } catch(err) {
-    removeTyping();
-    addMsg('agent', 'Erreur : ' + err.message);
-  } finally {
-    isLoading = false;
-    if (!diagnosticDone) sendBtn.disabled = false;
-  }
+  } catch(err) { removeTyping(); addMsg('agent', 'Erreur : ' + err.message); }
+  finally { isLoading = false; if (!diagnosticDone) sendBtn.disabled = false; }
 }
 
 async function init() {
-  isLoading = true;
-  sendBtn.disabled = true;
-  inputEl.disabled = true;
-  addTyping();
+  isLoading = true; sendBtn.disabled = true; inputEl.disabled = true; addTyping();
   try {
     const reply = await callAPI([{ role: 'user', content: 'Commençons.' }]);
     removeTyping();
@@ -602,46 +498,49 @@ async function init() {
     addMsg('agent', reply);
     showCoverageUI();
   } catch(err) {
-    removeTyping();
-    addMsg('agent', 'Impossible de démarrer : ' + err.message);
-    inputEl.disabled = false;
-    sendBtn.disabled = false;
-  } finally {
-    isLoading = false;
-  }
+    removeTyping(); addMsg('agent', 'Impossible de demarrer : ' + err.message);
+    inputEl.disabled = false; sendBtn.disabled = false;
+  } finally { isLoading = false; }
 }
 
 async function testWebhook() {
   const testData = {
-    matiere: 'Maths',
+    matiere: 'Maths spe',
     date: new Date().toISOString(),
     couverture: {"suites-arith":"oui","suites-geo":"oui","poly2":"partiel","derivation":"non","variations":"non","expo":"non","trigo":"partiel","scalaire":"non","georep":"non","condis":"oui","varialea":"partiel","bernoulli":"non","auto":"oui"},
-    scores: { score_1:2, score_2:1, score_3:1, score_4:3, score_5:4 },
-    priorites: "derivation — critique, variations — critique, poly2 — haute",
-    commentaire: "Test diagnostic fictif",
-    notation_methode: "Test",
-    json_brut: '{"test":true}',
-    chapitres_str: "suites-arith:oui:normale|suites-geo:oui:normale|poly2:partiel:haute|derivation:non:critique|variations:non:critique|expo:non:normale|trigo:partiel:normale|scalaire:non:normale|georep:non:normale|condis:oui:normale|varialea:partiel:normale|bernoulli:non:normale|auto:oui:normale"
+    scores: {
+      score_1: 2, score_2: 1, score_3: 1, score_4: 3, score_5: 4,
+      domaine_1: 'Algebre',
+      domaine_2: 'Analyse',
+      domaine_3: 'Geometrie',
+      domaine_4: 'Probabilites-Stats',
+      domaine_5: 'Automatismes'
+    },
+    priorites: 'Derivation — critique, Variations — critique, Polynomes 2nd degre — haute',
+    commentaire: 'Test diagnostic fictif',
+    notation_methode: 'Test',
+    json_brut: '{"test":true}'
   };
-  await fetch(WEBHOOK_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(testData)
-  });
-  alert('Payload test envoyé !');
+  testData.chapitres_str = [
+    { label: testData.scores.domaine_1, score: testData.scores.score_1 },
+    { label: testData.scores.domaine_2, score: testData.scores.score_2 },
+    { label: testData.scores.domaine_3, score: testData.scores.score_3 },
+    { label: testData.scores.domaine_4, score: testData.scores.score_4 },
+    { label: testData.scores.domaine_5, score: testData.scores.score_5 }
+  ].filter(d => d.label).map(d => {
+    const statut  = d.score >= 4 ? 'oui' : d.score >= 3 ? 'partiel' : 'non';
+    const urgence = d.score <= 2 ? 'critique' : d.score <= 3 ? 'haute' : 'normale';
+    return d.label + ':' + statut + ':' + urgence;
+  }).join('|');
+  await fetch(WEBHOOK_URL, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(testData) });
+  alert('Payload test Maths envoye !');
 }
 
-inputEl.addEventListener('keydown', e => {
-  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
-});
-inputEl.addEventListener('input', () => {
-  inputEl.style.height = 'auto';
-  inputEl.style.height = Math.min(inputEl.scrollHeight, 120) + 'px';
-});
+inputEl.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } });
+inputEl.addEventListener('input', () => { inputEl.style.height = 'auto'; inputEl.style.height = Math.min(inputEl.scrollHeight, 120) + 'px'; });
 
 init();
 
-// — Voice input —
 let recognition = null;
 let isListening = false;
 
@@ -651,39 +550,21 @@ function toggleMic() {
     alert('La reconnaissance vocale n\'est disponible que sur Chrome ou Edge.');
     return;
   }
-  if (isListening) {
-    recognition.stop();
-    return;
-  }
+  if (isListening) { recognition.stop(); return; }
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   recognition = new SR();
   recognition.lang = 'fr-FR';
   recognition.interimResults = true;
   recognition.continuous = false;
-
-  recognition.onstart = () => {
-    isListening = true;
-    micBtn.textContent = '⏹';
-    micBtn.style.borderColor = '#e24b4a';
-    micBtn.style.color = '#e24b4a';
-  };
+  recognition.onstart = () => { isListening = true; micBtn.textContent = '⏹'; micBtn.style.borderColor = '#e24b4a'; micBtn.style.color = '#e24b4a'; };
   recognition.onresult = (e) => {
     const transcript = Array.from(e.results).map(r => r[0].transcript).join('');
     inputEl.value = transcript;
     inputEl.style.height = 'auto';
     inputEl.style.height = Math.min(inputEl.scrollHeight, 120) + 'px';
   };
-  recognition.onend = () => {
-    isListening = false;
-    micBtn.textContent = '🎤';
-    micBtn.style.borderColor = '#d5d4ce';
-    micBtn.style.color = 'inherit';
-  };
-  recognition.onerror = () => {
-    isListening = false;
-    micBtn.textContent = '🎤';
-    micBtn.style.borderColor = '#d5d4ce';
-  };
+  recognition.onend = () => { isListening = false; micBtn.textContent = '🎤'; micBtn.style.borderColor = '#d5d4ce'; micBtn.style.color = 'inherit'; };
+  recognition.onerror = () => { isListening = false; micBtn.textContent = '🎤'; micBtn.style.borderColor = '#d5d4ce'; };
   recognition.start();
 }
 </script>
