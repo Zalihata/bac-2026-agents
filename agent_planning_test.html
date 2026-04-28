@@ -220,23 +220,7 @@
 <div id="s-demarrage" class="screen">
   <div class="header" id="dm-header"></div>
 
-  <!-- ÉTAPE 1 : créneau + énergie (toujours visible) -->
-  <div class="section-label">Tu travailles quand ?</div>
-  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:12px 0 20px;">
-    <div class="energy-btn" data-slot="matin"  onclick="selSlot(this)" style="padding:12px 8px;">
-      <span class="eicon" style="font-size:22px;">🌤</span><span class="elabel">Matin</span>
-      <div style="font-size:10px;color:var(--muted-light);margin-top:2px;">jusqu'à 3h</div>
-    </div>
-    <div class="energy-btn" data-slot="aprem"  onclick="selSlot(this)" style="padding:12px 8px;">
-      <span class="eicon" style="font-size:22px;">☀️</span><span class="elabel">Après-midi</span>
-      <div style="font-size:10px;color:var(--muted-light);margin-top:2px;">jusqu'à 3h</div>
-    </div>
-    <div class="energy-btn" data-slot="soir"   onclick="selSlot(this)" style="padding:12px 8px;">
-      <span class="eicon" style="font-size:22px;">🌙</span><span class="elabel">Soir</span>
-      <div style="font-size:10px;color:var(--muted-light);margin-top:2px;">jusqu'à 2h</div>
-    </div>
-  </div>
-
+  <!-- ÉTAPE 1 : énergie uniquement (le créneau vient des dispos hebdo) -->
   <div class="section-label">Comment tu te sens ?</div>
   <div class="energy-grid">
     <div class="energy-btn" data-val="Épuisée"  onclick="selE(this)"><span class="eicon">😴</span><span class="elabel">Épuisée</span></div>
@@ -258,7 +242,24 @@
   <div class="gap-8">
     <button class="text-link" onclick="showRevision()">🔄 Réviser mon planning</button>
     <a class="text-link" href="https://www.notion.so/40ab4b67fae749fbb8685c3076322523" target="_blank">📅 Voir mon planning dans Notion →</a>
+    <button class="text-link" onclick="showDispos()" style="color:var(--muted);font-size:13px;">⚙️ Définir ou modifier mes disponibilités de la semaine</button>
     <button class="btn btn-primary mt-8" onclick="showFin()">J'ai terminé une session ✓</button>
+  </div>
+</div>
+
+<!-- DISPONIBILITÉS HEBDOMADAIRES -->
+<div id="s-dispos" class="screen">
+  <div style="display:flex;align-items:center;gap:12px;padding:20px 0 24px;">
+    <button class="btn btn-ghost btn-sm" onclick="saveDispos()" style="width:auto;">← Retour</button>
+    <h2>Mes disponibilités</h2>
+  </div>
+  <p style="color:var(--muted);margin-bottom:20px;font-size:14px;">Ces créneaux définissent ton budget de travail chaque jour. Le planning est calculé sur cette base.</p>
+  <table class="dispo-table">
+    <thead><tr><th style="text-align:left;">Jour</th><th>Matin<br><span style="font-weight:400;color:var(--muted-light);font-size:10px;">jusqu'à 3h</span></th><th>Après-midi<br><span style="font-weight:400;color:var(--muted-light);font-size:10px;">jusqu'à 3h</span></th><th>Soir<br><span style="font-weight:400;color:var(--muted-light);font-size:10px;">jusqu'à 2h</span></th></tr></thead>
+    <tbody id="dispos-edit-body"></tbody>
+  </table>
+  <div class="gap-8" style="margin-top:24px;">
+    <button class="btn btn-primary" onclick="saveDispos()">Enregistrer →</button>
   </div>
 </div>
 
@@ -358,17 +359,10 @@ function getDayBudget(dispos, jourKey, energy){
   const cut=ENERGY_CUT[energy]??0;
   return slots.reduce((sum,s)=>sum+Math.max(0,(SLOT_TIMES[s]||0)-cut),0)||180;
 }
-// Budget du créneau actuel selon sélection explicite ou heure système
+// Budget du jour selon les dispos hebdo déclarées + énergie
 function getTodayBudget(energy){
-  // Si créneau sélectionné explicitement → utilise-le
-  if(_selSlot){
-    const cut=ENERGY_CUT[energy]??0;
-    const slots=_selSlot.split('+');
-    return slots.reduce((sum,s)=>sum+Math.max(0,(SLOT_TIMES[s]||0)-cut),0);
-  }
-  // Fallback : déduit du jour + heure
-  const dow=new Date().getDay();
-  const jourKey=DAYS_ORDER[(dow+6)%7];
+  const dow=new Date().getDay(); // 0=dim
+  const jourKey=DAYS_ORDER[(dow+6)%7]; // conversion vers lundi=0
   return getDayBudget(S.dispos,jourKey,energy);
 }
 
@@ -923,8 +917,8 @@ function renderWeek(sessions){
 
 // DÉMARRAGE (Niveau 2 — cache-first + adaptation)
 async function loadDemarrage(){
-  _selE='';_extra=[];_checked=[];
-  document.querySelectorAll('.energy-btn,[data-slot]').forEach(b=>b.classList.remove('selected'));
+  _selSlot='';_selE='';_extra=[];_checked=[];_rescheduleItems=[];
+  document.querySelectorAll('.energy-btn').forEach(b=>b.classList.remove('selected'));
   document.getElementById('dm-adapt').innerHTML='';
 
   const cachedS=S.getCache('plan')||[],cachedM=S.getCache('mat')||[],cachedP=S.getCache('paused')||[];
@@ -965,14 +959,19 @@ function buildUI(sessions,matieres,paused){
   _all=sessions;_today=sessions.filter(s=>s.date===todayStr()&&s.statut!=='Fait');_paused=paused||[];
   buildHeader(matieres);
   // Re-rend si les deux sont déjà sélectionnés (ex: refresh en arrière-plan)
-  if(_selSlot&&_selE){renderSessionsWithEnergy(_today,sessions,_paused,_selE);document.getElementById('dm-program')?.style.setProperty('display','block');}
+  if(_selE){renderSessionsWithEnergy(_today,sessions,_paused,_selE);document.getElementById('dm-program')?.style.setProperty('display','block');}
   renderWeek(sessions);
 }
 
 function buildHeader(matieres){
   const today=new Date();
   const next=matieres.filter(m=>m.dateEpreuve&&daysTo(m.dateEpreuve)>=0).sort((a,b)=>a.dateEpreuve.localeCompare(b.dateEpreuve))[0];
-  document.getElementById('dm-header').innerHTML=`<div class="greeting">Bonjour ${S.name} ! 👋</div><div class="sub">${JOURS[today.getDay()]} ${today.getDate()} ${MOIS[today.getMonth()]}</div>${next?`<span class="countdown">J-${daysTo(next.dateEpreuve)} · ${next.nom}</span>`:''}`;
+  // Affiche les créneaux du jour depuis les dispos
+  const jourKey=DAYS_ORDER[(today.getDay()+6)%7];
+  const SLOT_LABELS_FR={matin:'matin',aprem:'après-midi',soir:'soir'};
+  const todaySlots=(S.dispos?.[jourKey]||[]).map(s=>SLOT_LABELS_FR[s]||s).join(' + ');
+  const slotsHtml=todaySlots?`<span style="font-size:12px;color:var(--muted);margin-top:4px;display:block;">🕐 Créneaux du jour : ${todaySlots}</span>`:'';
+  document.getElementById('dm-header').innerHTML=`<div class="greeting">Bonjour ${S.name} ! 👋</div><div class="sub">${JOURS[today.getDay()]} ${today.getDate()} ${MOIS[today.getMonth()]}</div>${next?`<span class="countdown">J-${daysTo(next.dateEpreuve)} · ${next.nom}</span>`:''}${slotsHtml}`;
 }
 
 // NIVEAU 2 — Adaptation quotidienne basée sur les check-ins récents
@@ -1023,8 +1022,8 @@ function selE(el){
 }
 
 function maybeShowProgram(){
-  // N'affiche le programme que si créneau ET énergie sont sélectionnés
-  if(!_selSlot||!_selE)return;
+  // S'affiche dès que l'énergie est sélectionnée (le créneau a un défaut auto)
+  if(!_selE)return;
   const prog=document.getElementById('dm-program');
   if(prog)prog.style.display='block';
   renderSessionsWithEnergy(_today,_all,_paused,_selE);
@@ -1043,6 +1042,41 @@ function showFin(){
 
 function tglS(i,id){const item=document.getElementById('ci-'+i),box=document.getElementById('cb-'+i);if(item.classList.contains('checked')){item.classList.remove('checked');box.textContent='';_checked=_checked.filter(x=>x!==id);}else{item.classList.add('checked');box.textContent='✓';box.classList.add('pop');setTimeout(()=>box.classList.remove('pop'),300);_checked.push(id);}}
 function selR(el){document.querySelectorAll('.ressenti-btn').forEach(b=>b.classList.remove('selected'));el.classList.add('selected');_selR=el.dataset.val;}
+
+function showDispos(){
+  _from=document.querySelector('.screen.active')?.id||'s-demarrage';
+  // Construit la grille avec les valeurs actuelles
+  const tbody=document.getElementById('dispos-edit-body');
+  const current=S.dispos||{};
+  tbody.innerHTML='';
+  DAYS_ORDER.forEach(j=>{
+    const cap=j.charAt(0).toUpperCase()+j.slice(1);
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td class="day-label">${cap}</td>`+
+      ['matin','aprem','soir'].map(s=>{
+        const checked=(current[j]||[]).includes(s);
+        return `<td><div class="dispo-check ${checked?'checked':''}" id="de-${j}-${s}" onclick="tglDE('${j}','${s}')">${checked?'✓':''}</div></td>`;
+      }).join('');
+    tbody.appendChild(tr);
+  });
+  showScreen('s-dispos');
+}
+
+function tglDE(j,s){
+  const el=document.getElementById(`de-${j}-${s}`);
+  const d=S.dispos||{};
+  if(!d[j])d[j]=[];
+  if(d[j].includes(s)){d[j]=d[j].filter(x=>x!==s);el.classList.remove('checked');el.textContent='';}
+  else{d[j].push(s);el.classList.add('checked');el.textContent='✓';}
+  S.dispos=d;
+}
+
+function saveDispos(){
+  // Sauvegarde et retourne à l'écran précédent
+  showScreen(_from||'s-demarrage');
+  // Recalcule le budget si on était sur le démarrage
+  if(_selE)renderSessionsWithEnergy(_today,_all,_paused,_selE);
+}
 
 function showRescheduleStep(unchecked){
   _rescheduleItems=unchecked.map(s=>({...s,yes:true}));
