@@ -382,6 +382,17 @@ function getTodayBudget(energy){
   return getDayBudget(S.dispos,jourKey,energy);
 }
 
+// Migration automatique TEST → production (s'exécute une seule fois au 1er lancement)
+(function(){
+  if(!localStorage.getItem('bac_name')&&localStorage.getItem('bac_test_name')){
+    ['name','dispos','setup','plan_ok','last_global'].forEach(k=>{
+      const v=localStorage.getItem('bac_test_'+k);
+      if(v!==null)localStorage.setItem('bac_'+k,v);
+    });
+    console.log('✅ Données TEST migrées vers production');
+  }
+})();
+
 const S={
   get name(){return localStorage.getItem('bac_name')||'';},
   set name(v){localStorage.setItem('bac_name',v);},
