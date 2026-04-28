@@ -409,7 +409,7 @@ async function getMatieres(force=false){
   if(!force){const c=S.getCache('mat');if(c)return c;}
   const d=await nCall('get_matieres',{database_id:DB.matieres});
   const m=(d.results||[]).map(p=>({
-    id:p.id,nom:p.properties['Matiere']?.title?.[0]?.plain_text||'',
+    id:(()=>{const s=(p.id||'').replace(/-/g,'');return s.length===32?`${s.slice(0,8)}-${s.slice(8,12)}-${s.slice(12,16)}-${s.slice(16,20)}-${s.slice(20)}`:p.id;})(),nom:p.properties['Matiere']?.title?.[0]?.plain_text||'',
     coeff:parseInt(p.properties['Coefficient']?.rich_text?.[0]?.plain_text||'1'),
     dateEpreuve:p.properties['Date épreuve']?.date?.start||'',
     statut:p.properties['Statut diagnostic']?.select?.name||''
@@ -417,8 +417,8 @@ async function getMatieres(force=false){
   S.setCache('mat',m,24*3600*1000);return m;
 }
 
-async function getDiagnostics(){
-  const c=S.getCache('diag');if(c)return c;
+async function getDiagnostics(force=false){
+  const c=!force&&S.getCache('diag');if(c)return c;
   const d=await nCall('get_diagnostics',{database_id:DB.diagnostics});
   const diags=(d.results||[]).map(p=>({
     id:p.id,matiereIds:(p.properties['Matiere']?.relation||[]).map(r=>r.id),
@@ -444,17 +444,19 @@ function parseSessions(data){
   }));
 }
 
-async function getChapitres(){
-  const c=S.getCache('chap');if(c)return c;
+async function getChapitres(force=false){
+  const c=!force&&S.getCache('chap');if(c)return c;
   const d=await nCall('get_chapitres',{database_id:DB.chapitres});
+  // Normalise un UUID (avec ou sans tirets) en format standard avec tirets
+  function normId(id){if(!id)return'';const s=id.replace(/-/g,'');if(s.length!==32)return id;return`${s.slice(0,8)}-${s.slice(8,12)}-${s.slice(12,16)}-${s.slice(16,20)}-${s.slice(20)}`;}
   const chaps=(d.results||[]).map(p=>({
     id:p.id,
     nom:p.properties['Chapitre']?.rich_text?.[0]?.plain_text||p.properties['Chapitre']?.title?.[0]?.plain_text||'',
     urgence:p.properties['Urgence']?.select?.name||'normale',
     couverture:p.properties['Couverture']?.select?.name||p.properties['Couverture']?.rich_text?.[0]?.plain_text||'',
-    matiereId:(p.properties['Matiere']?.relation||[])[0]?.id||''
+    matiereId:normId((p.properties['Matiere']?.relation||[])[0]?.id||'')
   })).filter(c=>c.nom&&c.matiereId);
-  // Groupe par matiereId
+  // Groupe par matiereId normalisé
   const chapMap={};
   chaps.forEach(ch=>{
     if(!chapMap[ch.matiereId])chapMap[ch.matiereId]=[];
@@ -678,6 +680,17 @@ function buildPlanningAlgo(matWithScores,dispos,chapMap){
       }
     });
   };
+  // Cap : max 2 sessions par matière par jour (hors rappels)
+  const _dmc={};
+  sessions.sort((a,b)=>a.date.localeCompare(b.date)).forEach(s=>{
+    if(s.type==='Rappel relecture')return;
+    const k=s.date+'__'+s.matiere;
+    _dmc[k]=(_dmc[k]||0)+1;
+    if(_dmc[k]>2){
+      let nd=addDays(s.date,1);
+      for(let t=0;t<30;t++){const nk=nd+'__'+s.matiere;if((_dmc[nk]||0)<2){_dmc[nk]=(_dmc[nk]||0)+1;s.date=nd;break;}nd=addDays(nd,1);}
+    }
+  });
   return sessions.sort((a,b)=>a.date.localeCompare(b.date));
 }
 
@@ -685,8 +698,10 @@ async function generateFlow(){
   showScreen('s-generating');
   const step=n=>{for(let i=1;i<=4;i++){const el=document.getElementById('gs-'+i);if(el)el.className='gen-step'+(i<n?' done':i===n?' active':'');}};
   try{
+    // Efface tous les caches avant génération pour utiliser les données fraîches
+    S.clearCache('diag');S.clearCache('chap');S.clearCache('mat');
     step(1);
-    const [matieres,diagnostics,chapMap]=await Promise.all([getMatieres(true),getDiagnostics(),getChapitres()]);
+    const [matieres,diagnostics,chapMap]=await Promise.all([getMatieres(true),getDiagnostics(true),getChapitres(true)]);
     step(2);
     const diagMap={};
     diagnostics.forEach(d=>d.matiereIds.forEach(mid=>{if(!diagMap[mid]||d.date>diagMap[mid].date)diagMap[mid]=d;}));
