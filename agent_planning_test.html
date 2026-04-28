@@ -219,6 +219,8 @@
 
 <div id="s-demarrage" class="screen">
   <div class="header" id="dm-header"></div>
+
+  <!-- ÉTAPE 1 : énergie (toujours visible) -->
   <div class="section-label">Comment tu te sens ?</div>
   <div class="energy-grid">
     <div class="energy-btn" data-val="Épuisée"  onclick="selE(this)"><span class="eicon">😴</span><span class="elabel">Épuisée</span></div>
@@ -226,11 +228,15 @@
     <div class="energy-btn" data-val="Bonne"    onclick="selE(this)"><span class="eicon">🙂</span><span class="elabel">Bonne</span></div>
     <div class="energy-btn" data-val="En forme" onclick="selE(this)"><span class="eicon">💪</span><span class="elabel">En forme</span></div>
   </div>
-  <div id="dm-adapt"></div>
-  <div class="section-label">Ton programme aujourd'hui</div>
-  <div id="dm-sessions"></div>
+
+  <!-- ÉTAPE 2 : sessions adaptées à l'énergie (visible après sélection) -->
+  <div id="dm-program" style="display:none;">
+    <div id="dm-adapt"></div>
+    <div class="section-label">Ton programme d'aujourd'hui</div>
+    <div id="dm-sessions"></div>
   <div class="section-label">Cette semaine</div>
   <div id="dm-week"></div>
+  </div><!-- /dm-program -->
   <div id="dm-enc" class="encouragement" style="display:none;"><p id="dm-enc-txt" class="enc-thinking">...</p></div>
   <hr>
   <div class="gap-8">
@@ -325,6 +331,22 @@ const JOURS=['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
 const JOURS_SH=['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
 const MOIS=['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
 const DAYS_ORDER=['lundi','mardi','mercredi','jeudi','vendredi','samedi','dimanche'];
+const SLOT_TIMES={matin:180,aprem:180,soir:120}; // durée max par créneau (énergie 100%)
+const ENERGY_CUT={'Épuisée':60,'Moyenne':40,'Bonne':20,'En forme':0}; // -Xmin/créneau
+const JOUR_IDX_MAP={lundi:1,mardi:2,mercredi:3,jeudi:4,vendredi:5,samedi:6,dimanche:0};
+
+// Budget journalier en minutes selon les créneaux disponibles et l'énergie
+function getDayBudget(dispos, jourKey, energy){
+  const slots=dispos?.[jourKey]||[];
+  const cut=ENERGY_CUT[energy]??0;
+  return slots.reduce((sum,s)=>sum+Math.max(0,(SLOT_TIMES[s]||0)-cut),0)||180;
+}
+// Budget du jour actuel selon énergie déclarée
+function getTodayBudget(energy){
+  const dow=new Date().getDay(); // 0=dim
+  const jourKey=DAYS_ORDER[(dow+6)%7]; // 0=lundi
+  return getDayBudget(S.dispos,jourKey,energy);
+}
 
 const S={
   get name(){return localStorage.getItem('bac_test_name')||'';},
@@ -344,7 +366,7 @@ const S={
   clearCache(k){localStorage.removeItem('bac_test_c_'+k);}
 };
 
-let _today=[],_extra=[],_paused=[],_reserveItems=[],_selE='',_selR='',_checked=[],_from='s-demarrage',_all=[],_revChanges=[];
+let _today=[],_extra=[],_paused=[],_overdue=[],_reserveItems=[],_selE='',_selR='',_checked=[],_rescheduleItems=[],_from='s-demarrage',_all=[],_revChanges=[];
 let dispoState={};
 
 function todayStr(){return new Date().toISOString().split('T')[0];}
@@ -501,11 +523,19 @@ function buildPlanningAlgo(matWithScores,dispos){
   if(availDoW.size===0)[0,1,2,3,4,5,6].forEach(d=>availDoW.add(d));
   const usage={};
   function getU(d){if(!usage[d])usage[d]={min:0,subjects:new Set(),subMin:{}};return usage[d];}
+  // Budget par jour basé sur les créneaux déclarés (pas d'énergie au moment de la génération → En forme)
+  const jourBudgets={};
+  DAYS_ORDER.forEach(j=>{jourBudgets[JOUR_IDX_MAP[j]]=getDayBudget(dispos,j,'En forme');});
+
   function nextSlot(from,duree,mat,maxAhead=120){
     let d=new Date(from+'T00:00:00');
     for(let i=0;i<maxAhead;i++){
       const iso=d.toISOString().split('T')[0];
-      if(availDoW.has(d.getDay())){const u=getU(iso);if((u.subjects.has(mat)||u.subjects.size<2)&&(u.min+duree<=180)&&((u.subMin[mat]||0)+duree<=150))return iso;}
+      if(availDoW.has(d.getDay())){
+        const u=getU(iso);
+        const dayMax=jourBudgets[d.getDay()]||180;
+        if((u.subjects.has(mat)||u.subjects.size<2)&&(u.min+duree<=dayMax)&&((u.subMin[mat]||0)+duree<=150))return iso;
+      }
       d.setDate(d.getDate()+1);
     }
     return null;
@@ -613,7 +643,37 @@ async function generateFlow(){
   }
 }
 // RENDER SESSIONS
-function renderSessions(sessions,allSessions,paused){
+function renderSessionsWithEnergy(todaySess,allSess,paused,energy){
+  const rappels=todaySess.filter(s=>s.type==='Rappel relecture');
+  const todayNormal=todaySess.filter(s=>s.type!=='Rappel relecture');
+  const urgOrd={critique:0,haute:1,normale:2};
+
+  // Budget du jour selon créneaux déclarés et énergie choisie
+  const budget=getTodayBudget(energy);
+
+  // Pool combiné : en retard (priorité) + aujourd'hui, triés par criticité puis durée
+  const pool=[..._overdue,...todayNormal]
+    .sort((a,b)=>(urgOrd[a.urgence]||2)-(urgOrd[b.urgence]||2)||a.duree-b.duree);
+
+  // Sélection greedy dans la limite du budget
+  let cumTime=0;
+  const filteredPool=[];
+  for(const s of pool){
+    if(cumTime+s.duree<=budget){filteredPool.push(s);cumTime+=s.duree;}
+  }
+
+  const filteredOverdue=filteredPool.filter(s=>_overdue.find(o=>o.id===s.id));
+  const filteredToday=filteredPool.filter(s=>todayNormal.find(t=>t.id===s.id));
+
+  // Message discret sur la charge du jour
+  const totalMin=filteredPool.reduce((s,x)=>s+x.duree,0);
+  const budgetInfo=totalMin>0?`${totalMin}min sur ${budget}min disponibles`:'';
+  document.getElementById('dm-adapt').dataset.budget=budgetInfo;
+
+  renderSessions([...filteredToday,...rappels],allSess,paused,energy,filteredOverdue,budgetInfo);
+}
+
+function renderSessions(sessions,allSessions,paused,energy,overdueToShow,budgetInfo){
   const el=document.getElementById('dm-sessions');
 
   if(!sessions.length){
@@ -640,11 +700,32 @@ function renderSessions(sessions,allSessions,paused){
     return;
   }
 
+  // Section "De ces derniers jours" — sessions en retard, ton neutre
+  let html='';
+  // Info charge journalière discrète (seulement si sessions chargées)
+  if(budgetInfo&&sessions.length){
+    html+=`<div style="font-size:11px;color:var(--muted-light);text-align:right;margin-bottom:4px;">⏱ ${budgetInfo}</div>`;
+  }
+  if(overdueToShow&&overdueToShow.length){
+    html+=`<div style="margin-bottom:16px;">
+      <div style="font-size:11px;font-weight:600;color:var(--muted-light);letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px;">📎 De ces derniers jours</div>
+      ${overdueToShow.map(s=>{
+        const p=s.titre.split(' — '),mat=p[0],dom=p.slice(1).join(' — '),urg=urgCls(s.urgence);
+        const showDom=dom&&dom!==mat&&dom.length>2;
+        return `<div class="card session-card ${urg}" style="opacity:.85;">
+          <div class="smat">${mat}</div>
+          ${showDom?`<div class="sdom">${dom}</div>`:''}
+          <div class="smeta"><span class="badge ${urg}">${s.urgence}</span><span class="badge">${s.duree}min</span><span class="badge">${s.type}</span></div>
+        </div>`;
+      }).join('')}
+    </div>`;
+  }
+
   // Sessions du jour — sépare rappels et sessions normales
   const normales=sessions.filter(s=>s.type!=='Rappel relecture');
   const rappels=sessions.filter(s=>s.type==='Rappel relecture');
 
-  let html=normales.map(s=>{
+  let htmlToday=normales.map(s=>{
     const p=s.titre.split(' — '),mat=p[0],dom=p.slice(1).join(' — '),urg=urgCls(s.urgence);
     const typeBadge=s.type==='Fiche'?'fiche':'';
     const showDom=dom&&dom!==mat&&dom.length>2;
@@ -671,7 +752,7 @@ function renderSessions(sessions,allSessions,paused){
     html+=`</div>`;
   }
 
-  el.innerHTML=html;
+  el.innerHTML=html+htmlToday+(rappelHtml||'');
 
   // Section "Adapter" — sessions alternatives
   const altSessions=allSessions
@@ -814,7 +895,11 @@ async function refreshAll(){
     return;
   }
 
-  _all=sessions;_today=sessions.filter(s=>s.date===todayStr()&&s.statut!=='Fait');_paused=paused;
+  _all=sessions;
+  _today=sessions.filter(s=>s.date===todayStr()&&s.statut!=='Fait');
+  // Sessions en retard : date < aujourd'hui, max 3 jours, on exclut les Rappel relecture
+  _overdue=sessions.filter(s=>s.date<todayStr()&&s.statut!=='Fait'&&s.type!=='Rappel relecture'&&daysTo(s.date)>=-3);
+  _paused=paused;
   buildUI(sessions,matieres,paused);
   loadLevel2Adaptation(checkins,sessions);
   loadEnc();
@@ -822,7 +907,12 @@ async function refreshAll(){
 
 function buildUI(sessions,matieres,paused){
   _all=sessions;_today=sessions.filter(s=>s.date===todayStr()&&s.statut!=='Fait');_paused=paused||[];
-  buildHeader(matieres);renderSessions(_today,sessions,_paused);renderWeek(sessions);
+  buildHeader(matieres);
+  // Ne rend pas les sessions tant qu'énergie non sélectionnée
+  if(_selE){renderSessionsWithEnergy(_today,sessions,_paused,_selE);}
+  renderWeek(sessions);
+  // Si énergie déjà sélectionnée (refresh), affiche le programme
+  if(_selE){const p=document.getElementById('dm-program');if(p)p.style.display='block';}
 }
 
 function buildHeader(matieres){
@@ -863,13 +953,22 @@ function loadEnc(){
   .catch(()=>{t.className='';t.textContent='✨ Chaque session compte — lance-toi !';});
 }
 
-function selE(el){document.querySelectorAll('.energy-btn').forEach(b=>b.classList.remove('selected'));el.classList.add('selected');_selE=el.dataset.val;}
+function selE(el){
+  document.querySelectorAll('.energy-btn').forEach(b=>b.classList.remove('selected'));
+  el.classList.add('selected');
+  _selE=el.dataset.val;
+  // Affiche et adapte le programme selon l'énergie
+  const prog=document.getElementById('dm-program');
+  if(prog)prog.style.display='block';
+  renderSessionsWithEnergy(_today,_all,_paused,_selE);
+}
 
 // FIN
 function showFin(){
-  showScreen('s-fin');_selR='';_checked=[];
+  showScreen('s-fin');_selR='';_checked=[];_rescheduleItems=[];
   document.querySelectorAll('.ressenti-btn').forEach(b=>b.classList.remove('selected'));
-  const allToday=[..._today,..._extra.map(id=>_all.find(s=>s.id===id)).filter(Boolean)];
+  // Inclut les sessions en retard dans ce qu'elle peut cocher
+  const allToday=[..._overdue,..._today,..._extra.map(id=>_all.find(s=>s.id===id)).filter(Boolean)];
   const c=document.getElementById('fin-sessions');
   if(!allToday.length){c.innerHTML='<div style="color:var(--muted);font-size:14px;text-align:center;padding:12px;">Aucune session sélectionnée pour aujourd\'hui.</div>';return;}
   c.innerHTML=allToday.map((s,i)=>{const p=s.titre.split(' — ');return `<div class="check-item" id="ci-${i}" onclick="tglS(${i},'${s.id}')"><div class="check-box" id="cb-${i}"></div><div class="cinfo"><div class="cname">${p[0]}${s.bonus?' ✨':''}</div><div class="cdetail">${p.slice(1).join(' — ')||''}${p.length>1?' · ':''}${s.duree}min · ${s.type}</div></div></div>`;}).join('');
@@ -878,12 +977,54 @@ function showFin(){
 function tglS(i,id){const item=document.getElementById('ci-'+i),box=document.getElementById('cb-'+i);if(item.classList.contains('checked')){item.classList.remove('checked');box.textContent='';_checked=_checked.filter(x=>x!==id);}else{item.classList.add('checked');box.textContent='✓';box.classList.add('pop');setTimeout(()=>box.classList.remove('pop'),300);_checked.push(id);}}
 function selR(el){document.querySelectorAll('.ressenti-btn').forEach(b=>b.classList.remove('selected'));el.classList.add('selected');_selR=el.dataset.val;}
 
+function showRescheduleStep(unchecked){
+  _rescheduleItems=unchecked.map(s=>({...s,yes:true}));
+  const container=document.getElementById('fin-sessions');
+  container.innerHTML=`<div>
+    <p style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:12px;">Ces sessions n'ont pas été cochées — les déplacer à demain ?</p>
+    ${_rescheduleItems.map((s,i)=>{
+      const p=s.titre.split(' — ');
+      return `<div class="check-item checked" id="rs-${i}" onclick="tglReschedule(${i})">
+        <div class="check-box" id="rsb-${i}">✓</div>
+        <div class="cinfo"><div class="cname">${p[0]}</div>
+        <div class="cdetail">${p.slice(1).join(' — ')||''} · Déplacé à demain</div></div>
+      </div>`;
+    }).join('')}
+    <p style="font-size:12px;color:var(--muted);margin-top:12px;">Décoche ce que tu ne veux pas déplacer.</p>
+  </div>`;
+  // Change le bouton principal
+  const btn=document.querySelector('#s-fin .btn-primary');
+  if(btn){btn.textContent='Confirmer →';btn.onclick=saveFin;}
+}
+
+function tglReschedule(i){
+  _rescheduleItems[i].yes=!_rescheduleItems[i].yes;
+  const item=document.getElementById('rs-'+i),box=document.getElementById('rsb-'+i);
+  if(_rescheduleItems[i].yes){item.classList.add('checked');box.textContent='✓';}
+  else{item.classList.remove('checked');box.textContent='';}
+}
+
 async function saveFin(){
   if(!_selR){alert('Comment tu te sens ?');return;}
+  // Vérifie s'il y a des sessions non cochées → mini-rescheduling
+  const allToday=[..._overdue,..._today,..._extra.map(id=>_all.find(s=>s.id===id)).filter(Boolean)];
+  const unchecked=allToday.filter(s=>!_checked.includes(s.id)&&s.type!=='Rappel relecture');
+  if(unchecked.length>0&&_rescheduleItems.length===0){
+    showRescheduleStep(unchecked);
+    return;
+  }
+  // Applique le rescheduling validé
+  const toReschedule=_rescheduleItems.filter(r=>r.yes);
   const blocage=document.getElementById('fin-blocage').value.trim();
   showScreen('s-loading');setMsg('Enregistrement...');
   try{
     await Promise.all(_checked.map(id=>markDone(id)));
+    // Déplace les sessions non faites à demain si validé
+    if(toReschedule.length>0){
+      const tomorrow=addDays(todayStr(),1);
+      await Promise.all(toReschedule.map(r=>nCall('update_session',{page_id:r.id,new_date:tomorrow})));
+      S.clearCache('plan');
+    }
     S.setTodayDone([...new Set([...S.todayDone(),..._checked])]);
     const h=new Date().getHours(),moment=h<13?'Matin':h<18?'Après-midi':'Soir';
     saveCheckin({label:`${S.name} · ${fmtFR(todayStr())} · ${moment}`,date:todayStr(),moment,energie:_selE||'Moyenne',sessions_faites:_checked.length,ressenti:_selR,blocage:blocage||''});
