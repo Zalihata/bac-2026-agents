@@ -2,11 +2,7 @@ const NOTION_API = 'https://api.notion.com/v1';
 const NOTION_VERSION = '2022-06-28';
 
 function notionHeaders(token) {
-  return {
-    'Authorization': `Bearer ${token}`,
-    'Content-Type': 'application/json',
-    'Notion-Version': NOTION_VERSION
-  };
+  return { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json', 'Notion-Version': NOTION_VERSION };
 }
 
 export default async function handler(req, res) {
@@ -21,128 +17,123 @@ export default async function handler(req, res) {
   const { action, ...payload } = req.body || {};
 
   try {
+    if (action === 'get_matieres') {
+      const r = await fetch(`${NOTION_API}/databases/${payload.database_id}/query`, {
+        method: 'POST', headers: notionHeaders(token),
+        body: JSON.stringify({ sorts: [{ property: 'Date épreuve', direction: 'ascending' }] })
+      });
+      return res.status(r.status).json(await r.json());
+    }
 
-    // ── LECTURE ──────────────────────────────────────────────
-
-    // Lire tous les diagnostics
     if (action === 'get_diagnostics') {
       const r = await fetch(`${NOTION_API}/databases/${payload.database_id}/query`, {
-        method: 'POST',
-        headers: notionHeaders(token),
+        method: 'POST', headers: notionHeaders(token),
         body: JSON.stringify({ sorts: [{ property: 'Date', direction: 'descending' }] })
       });
       return res.status(r.status).json(await r.json());
     }
 
-    // Lire le planning (sessions à faire)
+    // Planning actif — exclut En pause, Annulé, Fait
     if (action === 'get_planning') {
       const r = await fetch(`${NOTION_API}/databases/${payload.database_id}/query`, {
-        method: 'POST',
-        headers: notionHeaders(token),
+        method: 'POST', headers: notionHeaders(token),
         body: JSON.stringify({
-          filter: {
-            and: [
-              { property: 'Statut', select: { does_not_equal: 'Annulé' } },
-              { property: 'Statut', select: { does_not_equal: 'Fait' } }
-            ]
-          },
+          filter: { and: [
+            { property: 'Statut', select: { does_not_equal: 'Annulé' } },
+            { property: 'Statut', select: { does_not_equal: 'Fait' } },
+            { property: 'Statut', select: { does_not_equal: 'En pause' } }
+          ]},
           sorts: [{ property: 'Date', direction: 'ascending' }]
         })
       });
       return res.status(r.status).json(await r.json());
     }
 
-    // Lire les matières avec scores
-    if (action === 'get_matieres') {
+    // Sessions optionnelles en attente (score 3)
+    if (action === 'get_paused_sessions') {
       const r = await fetch(`${NOTION_API}/databases/${payload.database_id}/query`, {
-        method: 'POST',
-        headers: notionHeaders(token),
-        body: JSON.stringify({ sorts: [{ property: 'Date épreuve', direction: 'ascending' }] })
-      });
-      return res.status(r.status).json(await r.json());
-    }
-
-    // Lire les check-ins (base Énergie)
-    if (action === 'get_checkins') {
-      const r = await fetch(`${NOTION_API}/databases/${payload.database_id}/query`, {
-        method: 'POST',
-        headers: notionHeaders(token),
+        method: 'POST', headers: notionHeaders(token),
         body: JSON.stringify({
-          sorts: [{ property: 'Jour', direction: 'descending' }],
-          page_size: payload.limit || 14
+          filter: { property: 'Statut', select: { equals: 'En pause' } },
+          sorts: [{ property: 'Date', direction: 'ascending' }]
         })
       });
       return res.status(r.status).json(await r.json());
     }
 
-    // Lire une page Notion (contenu)
-    if (action === 'get_page') {
-      const r = await fetch(`${NOTION_API}/pages/${payload.page_id}`, {
-        headers: notionHeaders(token)
+    if (action === 'get_checkins') {
+      const r = await fetch(`${NOTION_API}/databases/${payload.database_id}/query`, {
+        method: 'POST', headers: notionHeaders(token),
+        body: JSON.stringify({ sorts: [{ property: 'Jour', direction: 'descending' }], page_size: payload.limit || 14 })
       });
       return res.status(r.status).json(await r.json());
     }
 
-    // ── ÉCRITURE ─────────────────────────────────────────────
-
-    // Créer un check-in (base Énergie)
     if (action === 'create_checkin') {
-      const body = {
-        parent: { database_id: payload.database_id },
-        properties: {
-          'Date': { title: [{ text: { content: payload.label } }] },
-          'Jour': { date: { start: payload.date } },
-          'Moment': { select: { name: payload.moment } },
-          'Energie': { select: { name: payload.energie } },
-          'Sessions faites': { number: payload.sessions_faites || 0 },
-          'Ressenti': { select: { name: payload.ressenti } },
-          ...(payload.blocage ? { 'Blocage': { rich_text: [{ text: { content: payload.blocage } }] } } : {})
-        }
-      };
       const r = await fetch(`${NOTION_API}/pages`, {
-        method: 'POST',
-        headers: notionHeaders(token),
-        body: JSON.stringify(body)
-      });
-      return res.status(r.status).json(await r.json());
-    }
-
-    // Mettre à jour le statut d'une session planning
-    if (action === 'update_session') {
-      const body = {
-        properties: {
-          'Statut': { select: { name: payload.statut } },
-          ...(payload.completee_le ? { 'Complétée le': { date: { start: payload.completee_le } } } : {})
-        }
-      };
-      const r = await fetch(`${NOTION_API}/pages/${payload.page_id}`, {
-        method: 'PATCH',
-        headers: notionHeaders(token),
-        body: JSON.stringify(body)
-      });
-      return res.status(r.status).json(await r.json());
-    }
-
-    // Créer des sessions dans le planning
-    if (action === 'create_sessions') {
-      const results = [];
-      for (const session of payload.sessions) {
-        const body = {
+        method: 'POST', headers: notionHeaders(token),
+        body: JSON.stringify({
           parent: { database_id: payload.database_id },
           properties: {
-            'Session': { title: [{ text: { content: session.titre } }] },
-            'Date': { date: { start: session.date } },
-            'Durée (min)': { number: session.duree },
-            'Type': { select: { name: session.type } },
-            'Statut': { select: { name: 'À faire' } },
-            'Urgence': { select: { name: session.urgence } },
-            ...(session.notes ? { 'Notes': { rich_text: [{ text: { content: session.notes } }] } } : {})
+            'Date': { title: [{ text: { content: payload.label } }] },
+            'Jour': { date: { start: payload.date } },
+            'Moment': { select: { name: payload.moment } },
+            'Energie': { select: { name: payload.energie } },
+            'Sessions faites': { number: payload.sessions_faites || 0 },
+            'Ressenti': { select: { name: payload.ressenti } },
+            ...(payload.blocage ? { 'Blocage': { rich_text: [{ text: { content: payload.blocage } }] } } : {})
           }
-        };
+        })
+      });
+      return res.status(r.status).json(await r.json());
+    }
+
+    if (action === 'update_session') {
+      const props = {};
+      if (payload.statut)      props['Statut'] = { select: { name: payload.statut } };
+      if (payload.completee_le) props['Complétée le'] = { date: { start: payload.completee_le } };
+      if (payload.new_date)    props['Date'] = { date: { start: payload.new_date } };
+      const r = await fetch(`${NOTION_API}/pages/${payload.page_id}`, {
+        method: 'PATCH', headers: notionHeaders(token),
+        body: JSON.stringify({ properties: props })
+      });
+      return res.status(r.status).json(await r.json());
+    }
+
+    // Révision hebdo — met à jour dates et statuts en batch
+    if (action === 'reschedule_sessions') {
+      const results = [];
+      for (const c of payload.changes) {
+        const props = {};
+        if (c.new_date) props['Date']   = { date: { start: c.new_date } };
+        if (c.statut)   props['Statut'] = { select: { name: c.statut } };
+        const r = await fetch(`${NOTION_API}/pages/${c.page_id}`, {
+          method: 'PATCH', headers: notionHeaders(token),
+          body: JSON.stringify({ properties: props })
+        });
+        results.push(await r.json());
+      }
+      return res.status(200).json({ updated: results.length, results });
+    }
+
+    if (action === 'create_sessions') {
+      const results = [];
+      for (const s of payload.sessions) {
         const r = await fetch(`${NOTION_API}/pages`, {
-          method: 'POST',
-          headers: notionHeaders(token),
-          body: JSON.stringify(body)
+          method: 'POST', headers: notionHeaders(token),
+          body: JSON.stringify({
+            parent: { database_id: payload.database_id },
+            properties: {
+              'Session':   { title: [{ text: { content: s.titre } }] },
+              'Date':      { date: { start: s.date } },
+              'Duree min': { number: s.duree },
+              'Type':      { select: { name: s.type } },
+              'Statut':    { select: { name: s.statut || 'À faire' } },
+              'Urgence':   { select: { name: s.urgence || 'normale' } },
+              'Optionnel': { checkbox: s.optionnel || false },
+              ...(s.notes ? { 'Notes': { rich_text: [{ text: { content: s.notes } }] } } : {})
+            }
+          })
         });
         results.push(await r.json());
       }
