@@ -220,7 +220,23 @@
 <div id="s-demarrage" class="screen">
   <div class="header" id="dm-header"></div>
 
-  <!-- ÉTAPE 1 : énergie (toujours visible) -->
+  <!-- ÉTAPE 1 : créneau + énergie (toujours visible) -->
+  <div class="section-label">Tu travailles quand ?</div>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:12px 0 20px;">
+    <div class="energy-btn" data-slot="matin"  onclick="selSlot(this)" style="padding:12px 8px;">
+      <span class="eicon" style="font-size:22px;">🌤</span><span class="elabel">Matin</span>
+      <div style="font-size:10px;color:var(--muted-light);margin-top:2px;">jusqu'à 3h</div>
+    </div>
+    <div class="energy-btn" data-slot="aprem"  onclick="selSlot(this)" style="padding:12px 8px;">
+      <span class="eicon" style="font-size:22px;">☀️</span><span class="elabel">Après-midi</span>
+      <div style="font-size:10px;color:var(--muted-light);margin-top:2px;">jusqu'à 3h</div>
+    </div>
+    <div class="energy-btn" data-slot="soir"   onclick="selSlot(this)" style="padding:12px 8px;">
+      <span class="eicon" style="font-size:22px;">🌙</span><span class="elabel">Soir</span>
+      <div style="font-size:10px;color:var(--muted-light);margin-top:2px;">jusqu'à 2h</div>
+    </div>
+  </div>
+
   <div class="section-label">Comment tu te sens ?</div>
   <div class="energy-grid">
     <div class="energy-btn" data-val="Épuisée"  onclick="selE(this)"><span class="eicon">😴</span><span class="elabel">Épuisée</span></div>
@@ -325,7 +341,8 @@ const DB={
   diagnostics: '33d1933a964480c18154f84faf7e472e',
   planning:    '40ab4b67fae749fbb8685c3076322523',
   energie:     'bd7fed70834d420c80bff4a0e1d8935e',
-  reserve:     'd3bd575c61cc4305bcab3ccbe5b319f9'
+  reserve:     'd3bd575c61cc4305bcab3ccbe5b319f9',
+  chapitres:   '33d1933a964480498a39cfcde00b1385'
 };
 const JOURS=['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
 const JOURS_SH=['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
@@ -341,10 +358,17 @@ function getDayBudget(dispos, jourKey, energy){
   const cut=ENERGY_CUT[energy]??0;
   return slots.reduce((sum,s)=>sum+Math.max(0,(SLOT_TIMES[s]||0)-cut),0)||180;
 }
-// Budget du jour actuel selon énergie déclarée
+// Budget du créneau actuel selon sélection explicite ou heure système
 function getTodayBudget(energy){
-  const dow=new Date().getDay(); // 0=dim
-  const jourKey=DAYS_ORDER[(dow+6)%7]; // 0=lundi
+  // Si créneau sélectionné explicitement → utilise-le
+  if(_selSlot){
+    const cut=ENERGY_CUT[energy]??0;
+    const slots=_selSlot.split('+');
+    return slots.reduce((sum,s)=>sum+Math.max(0,(SLOT_TIMES[s]||0)-cut),0);
+  }
+  // Fallback : déduit du jour + heure
+  const dow=new Date().getDay();
+  const jourKey=DAYS_ORDER[(dow+6)%7];
   return getDayBudget(S.dispos,jourKey,energy);
 }
 
@@ -366,7 +390,7 @@ const S={
   clearCache(k){localStorage.removeItem('bac_test_c_'+k);}
 };
 
-let _today=[],_extra=[],_paused=[],_overdue=[],_reserveItems=[],_selE='',_selR='',_checked=[],_rescheduleItems=[],_from='s-demarrage',_all=[],_revChanges=[];
+let _today=[],_extra=[],_paused=[],_overdue=[],_reserveItems=[],_selSlot='',_selE='',_selR='',_checked=[],_rescheduleItems=[],_from='s-demarrage',_all=[],_revChanges=[];
 let dispoState={};
 
 function todayStr(){return new Date().toISOString().split('T')[0];}
@@ -422,6 +446,26 @@ function parseSessions(data){
     optionnel:p.properties['Optionnel']?.checkbox||false,
     notes:p.properties['Notes']?.rich_text?.[0]?.plain_text||''
   }));
+}
+
+async function getChapitres(){
+  const c=S.getCache('chap');if(c)return c;
+  const d=await nCall('get_chapitres',{database_id:DB.chapitres});
+  const chaps=(d.results||[]).map(p=>({
+    id:p.id,
+    nom:p.properties['Chapitre']?.rich_text?.[0]?.plain_text||p.properties['Chapitre']?.title?.[0]?.plain_text||'',
+    urgence:p.properties['Urgence']?.select?.name||'normale',
+    couverture:p.properties['Couverture']?.select?.name||p.properties['Couverture']?.rich_text?.[0]?.plain_text||'',
+    matiereId:(p.properties['Matiere']?.relation||[])[0]?.id||''
+  })).filter(c=>c.nom&&c.matiereId);
+  // Groupe par matiereId
+  const chapMap={};
+  chaps.forEach(ch=>{
+    if(!chapMap[ch.matiereId])chapMap[ch.matiereId]=[];
+    chapMap[ch.matiereId].push({nom:ch.nom,urgence:ch.urgence,couverture:ch.couverture});
+  });
+  S.setCache('chap',chapMap,24*3600*1000);
+  return chapMap;
 }
 
 async function getPlanning(force=false){
@@ -517,7 +561,7 @@ function submitDispos(){if(!Object.values(dispoState).some(v=>v.length>0)){alert
 
 function addDays(iso,n){const d=new Date(iso+'T00:00:00');d.setDate(d.getDate()+n);return d.toISOString().split('T')[0];}
 
-function buildPlanningAlgo(matWithScores,dispos){
+function buildPlanningAlgo(matWithScores,dispos,chapMap){
   const JOUR_IDX={lundi:1,mardi:2,mercredi:3,jeudi:4,vendredi:5,samedi:6,dimanche:0};
   const availDoW=new Set(Object.entries(dispos||{}).filter(([,v])=>v.length>0).map(([j])=>JOUR_IDX[j]));
   if(availDoW.size===0)[0,1,2,3,4,5,6].forEach(d=>availDoW.add(d));
@@ -574,7 +618,19 @@ function buildPlanningAlgo(matWithScores,dispos){
     if(moy>=4)return;
     const jours=daysTo(m.dateEpreuve);
     const urg=moy<=1.5?'critique':moy<=2.5?'haute':'normale';
-    const doms=parseDoms(m.prio,m.nom);
+    // Utilise les Chapitres Notion si disponibles — sinon fallback sur parseDoms
+    let doms;
+    if(chapMap&&chapMap[m.id]&&chapMap[m.id].length>0){
+      // Trie par urgence (critique d'abord) puis prend les non-couverts en priorité
+      const urgOrdChap={critique:0,haute:1,normale:2};
+      doms=chapMap[m.id]
+        .filter(ch=>ch.couverture!=='oui') // exclut les chapitres déjà couverts
+        .sort((a,b)=>(urgOrdChap[a.urgence]||2)-(urgOrdChap[b.urgence]||2))
+        .map(ch=>ch.nom);
+      if(!doms.length)doms=[m.nom]; // tous couverts → pas de session
+    }else{
+      doms=parseDoms(m.prio,m.nom);
+    }
     if(moy>=3){
       const d1=nextSlot(start,60,m.nom);
       add(m.nom,doms[0]||'Révision générale',d1,60,'Révision','normale');
@@ -616,7 +672,7 @@ async function generateFlow(){
   const step=n=>{for(let i=1;i<=4;i++){const el=document.getElementById('gs-'+i);if(el)el.className='gen-step'+(i<n?' done':i===n?' active':'');}};
   try{
     step(1);
-    const [matieres,diagnostics]=await Promise.all([getMatieres(true),getDiagnostics()]);
+    const [matieres,diagnostics,chapMap]=await Promise.all([getMatieres(true),getDiagnostics(),getChapitres()]);
     step(2);
     const diagMap={};
     diagnostics.forEach(d=>d.matiereIds.forEach(mid=>{if(!diagMap[mid]||d.date>diagMap[mid].date)diagMap[mid]=d;}));
@@ -627,7 +683,7 @@ async function generateFlow(){
       return{...m,moy,score_p:((m.coeff*(5-moy)*60)/Math.max(j,1))/charge,prio,jours:j,scores};
     }).sort((a,b)=>b.score_p-a.score_p);
     step(3);
-    const sessions=buildPlanningAlgo(matWithScores,S.dispos||{});
+    const sessions=buildPlanningAlgo(matWithScores,S.dispos||{},chapMap||{});
     if(!sessions.length)throw new Error('Aucune session — vérifie tes disponibilités dans les paramètres');
     console.log('📋 '+sessions.length+' sessions construites algorithmiquement');
     step(4);
@@ -868,7 +924,7 @@ function renderWeek(sessions){
 // DÉMARRAGE (Niveau 2 — cache-first + adaptation)
 async function loadDemarrage(){
   _selE='';_extra=[];_checked=[];
-  document.querySelectorAll('.energy-btn').forEach(b=>b.classList.remove('selected'));
+  document.querySelectorAll('.energy-btn,[data-slot]').forEach(b=>b.classList.remove('selected'));
   document.getElementById('dm-adapt').innerHTML='';
 
   const cachedS=S.getCache('plan')||[],cachedM=S.getCache('mat')||[],cachedP=S.getCache('paused')||[];
@@ -908,11 +964,9 @@ async function refreshAll(){
 function buildUI(sessions,matieres,paused){
   _all=sessions;_today=sessions.filter(s=>s.date===todayStr()&&s.statut!=='Fait');_paused=paused||[];
   buildHeader(matieres);
-  // Ne rend pas les sessions tant qu'énergie non sélectionnée
-  if(_selE){renderSessionsWithEnergy(_today,sessions,_paused,_selE);}
+  // Re-rend si les deux sont déjà sélectionnés (ex: refresh en arrière-plan)
+  if(_selSlot&&_selE){renderSessionsWithEnergy(_today,sessions,_paused,_selE);document.getElementById('dm-program')?.style.setProperty('display','block');}
   renderWeek(sessions);
-  // Si énergie déjà sélectionnée (refresh), affiche le programme
-  if(_selE){const p=document.getElementById('dm-program');if(p)p.style.display='block';}
 }
 
 function buildHeader(matieres){
@@ -953,11 +1007,24 @@ function loadEnc(){
   .catch(()=>{t.className='';t.textContent='✨ Chaque session compte — lance-toi !';});
 }
 
+function selSlot(el){
+  // Sélection multiple possible (matin+soir par ex.)
+  el.classList.toggle('selected');
+  const slots=Array.from(document.querySelectorAll('[data-slot].selected')).map(b=>b.dataset.slot);
+  _selSlot=slots.length>0?slots.join('+'):'';
+  maybeShowProgram();
+}
+
 function selE(el){
-  document.querySelectorAll('.energy-btn').forEach(b=>b.classList.remove('selected'));
+  document.querySelectorAll('.energy-btn,[data-slot]').forEach(b=>b.classList.remove('selected'));
   el.classList.add('selected');
   _selE=el.dataset.val;
-  // Affiche et adapte le programme selon l'énergie
+  maybeShowProgram();
+}
+
+function maybeShowProgram(){
+  // N'affiche le programme que si créneau ET énergie sont sélectionnés
+  if(!_selSlot||!_selE)return;
   const prog=document.getElementById('dm-program');
   if(prog)prog.style.display='block';
   renderSessionsWithEnergy(_today,_all,_paused,_selE);
@@ -1026,7 +1093,9 @@ async function saveFin(){
       S.clearCache('plan');
     }
     S.setTodayDone([...new Set([...S.todayDone(),..._checked])]);
-    const h=new Date().getHours(),moment=h<13?'Matin':h<18?'Après-midi':'Soir';
+    const SLOT_LABELS={'matin':'Matin','aprem':'Après-midi','soir':'Soir'};
+    const h=new Date().getHours();
+    const moment=_selSlot?SLOT_LABELS[_selSlot.split('+')[0]]||(h<13?'Matin':h<18?'Après-midi':'Soir'):(h<13?'Matin':h<18?'Après-midi':'Soir');
     saveCheckin({label:`${S.name} · ${fmtFR(todayStr())} · ${moment}`,date:todayStr(),moment,energie:_selE||'Moyenne',sessions_faites:_checked.length,ressenti:_selR,blocage:blocage||''});
     showScreen('s-result');
     const allToday=[..._today,..._extra.map(id=>_all.find(s=>s.id===id)).filter(Boolean)];
