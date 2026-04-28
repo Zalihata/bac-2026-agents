@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Fix Histoire-Géo relations</title>
+<style>
+  body { font-family: system-ui; padding: 24px; background: #f7f4ef; color: #1c1917; max-width: 600px; margin: 0 auto; }
+  h2 { margin-bottom: 8px; }
+  .log { background: #fff; border: 1px solid #e5dfd5; border-radius: 8px; padding: 16px; margin-top: 16px; font-family: monospace; font-size: 13px; min-height: 100px; white-space: pre-wrap; }
+  .ok  { color: #16a34a; }
+  .err { color: #dc2626; }
+  button { background: #c2860a; color: #fff; border: none; border-radius: 8px; padding: 12px 24px; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 16px; }
+  button:disabled { opacity: .5; }
+</style>
+</head>
+<body>
+<h2>🔧 Correctif — Relations Histoire-Géo</h2>
+<p>Ce script corrige les relations manquantes entre le diagnostic Histoire-Géo, ses chapitres et la matière "Histoire-Géographie" dans Notion.</p>
+<button id="btn" onclick="runFix()">Lancer le correctif</button>
+<div class="log" id="log">En attente...</div>
+
+<script>
+const PROXY = 'https://bac-2026-agents.vercel.app/api/notion';
+
+// IDs connus
+const MATIERE_HG_ID    = '33d1933a964480 44920ecc3ae8036266'.replace(/ /g,'');
+const DIAGNOSTIC_HG_ID = '3501933a964481ea9998e77cb440f9d5';
+
+// Chapitres liés au diagnostic Histoire-Geo (sans matière)
+const CHAPITRES_HG = [
+  '3501933a964481469c23f2a95c16ed0a', // Connaissances Histoire
+  '3501933a964481b2a9d0f0d73ad4abeb', // Connaissances Géographie
+  '3501933a964481be96f9c63e3dfda6d6', // Vocabulaire disciplinaire
+  '3501933a9644815a874ef4e688500b4a', // Methode ecrite
+  '3501933a9644818a8711dddab555c2b4', // Compréhension
+];
+
+function log(msg, ok) {
+  const el = document.getElementById('log');
+  el.innerHTML += `<span class="${ok===false?'err':'ok'}">${msg}</span>\n`;
+}
+
+async function patch(page_id, matiereId) {
+  const r = await fetch(PROXY, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      action: 'patch_page',
+      page_id,
+      properties: {
+        'Matiere': { relation: [{ id: matiereId }] }
+      }
+    })
+  });
+  const d = await r.json();
+  if (d.object === 'error') throw new Error(d.message);
+  return d;
+}
+
+async function runFix() {
+  document.getElementById('btn').disabled = true;
+  document.getElementById('log').innerHTML = '';
+  
+  try {
+    log('→ Correction du diagnostic "Histoire-Geo — 18/04/2026"...');
+    await patch(DIAGNOSTIC_HG_ID, MATIERE_HG_ID);
+    log('  ✓ Diagnostic lié à "Histoire-Géographie"');
+
+    for (const chapId of CHAPITRES_HG) {
+      log(`→ Correction du chapitre ${chapId.slice(0,8)}...`);
+      try {
+        await patch(chapId, MATIERE_HG_ID);
+        log(`  ✓ Chapitre lié`);
+      } catch(e) {
+        log(`  ⚠ ${e.message} (chapitre peut-être déjà lié)`, false);
+      }
+    }
+
+    log('\n✅ Correctif terminé. Retourne dans l\'agent de planning et fais un ?reset pour régénérer le planning avec Histoire-Géo.');
+  } catch(e) {
+    log(`❌ Erreur : ${e.message}`, false);
+    document.getElementById('btn').disabled = false;
+  }
+}
+</script>
+</body>
+</html>
