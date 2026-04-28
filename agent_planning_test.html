@@ -205,15 +205,16 @@
 <div id="s-generating" class="screen">
   <div class="gen-center">
     <span style="font-size:48px;">✨</span>
-    <h2 style="text-align:center;">Je prépare ton planning...</h2>
+    <h2 style="text-align:center;">Création de ton planning de révisions</h2>
     <div class="spinner" style="margin:8px 0;"></div>
+    <p style="color:var(--muted);font-size:12px;text-align:center;margin-top:4px;">Cette étape n'a lieu qu'une seule fois —<br>chaque matin tu arrives directement sur ton programme.</p>
     <div class="gap-8" style="width:100%;max-width:300px;margin-top:8px;">
       <div class="gen-step" id="gs-1">Chargement de tes diagnostics</div>
       <div class="gen-step" id="gs-2">Analyse des priorités et impasses</div>
       <div class="gen-step" id="gs-3">Génération du planning avec fiches</div>
       <div class="gen-step" id="gs-4">Enregistrement dans Notion</div>
     </div>
-    <p style="color:var(--muted);font-size:13px;margin-top:12px;text-align:center;">Ça prend environ 30 secondes...</p>
+    <p style="color:var(--muted);font-size:13px;margin-top:12px;text-align:center;">Cette étape n'a lieu qu'une seule fois.<br>Chaque matin, tu arrives directement sur ton programme du jour.</p>
   </div>
 </div>
 
@@ -232,9 +233,11 @@
   <!-- ÉTAPE 2 : sessions adaptées à l'énergie (visible après sélection) -->
   <div id="dm-program" style="display:none;">
     <div id="dm-adapt"></div>
-    <div class="section-label">Ton programme d'aujourd'hui</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+      <div class="section-label" style="margin-bottom:0;">Ton programme d'aujourd'hui</div>
+      <a href="https://www.notion.so/40ab4b67fae749fbb8685c3076322523" target="_blank" style="font-size:11px;color:var(--muted);text-decoration:none;">✅ Cocher dans Notion →</a>
+    </div>
     <div id="dm-sessions"></div>
-  <div class="section-label">Cette semaine</div>
   <div id="dm-week"></div>
   </div><!-- /dm-program -->
   <div id="dm-enc" class="encouragement" style="display:none;"><p id="dm-enc-txt" class="enc-thinking">...</p></div>
@@ -243,7 +246,7 @@
     <button class="text-link" onclick="showRevision()">🔄 Réviser mon planning</button>
     <a class="text-link" href="https://www.notion.so/40ab4b67fae749fbb8685c3076322523" target="_blank">📅 Voir mon planning dans Notion →</a>
     <button class="text-link" onclick="showDispos()" style="color:var(--muted);font-size:13px;">⚙️ Définir ou modifier mes disponibilités de la semaine</button>
-    <button class="btn btn-primary mt-8" onclick="showFin()">J'ai terminé une session ✓</button>
+    <button class="btn btn-primary mt-8" onclick="showFin()">Bilan de fin de journée →</button>
   </div>
 </div>
 
@@ -435,7 +438,7 @@ function parseSessions(data){
     date:p.properties['Date']?.date?.start||'',
     duree:p.properties['Duree min']?.number||60,
     type:p.properties['Type']?.select?.name||'',
-    statut:p.properties['Statut']?.select?.name||'À faire',
+    statut:p.properties['Fait']?.checkbox===true?'Fait':(p.properties['Statut']?.select?.name||'À faire'),
     urgence:p.properties['Urgence']?.select?.name||'normale',
     optionnel:p.properties['Optionnel']?.checkbox||false,
     notes:p.properties['Notes']?.rich_text?.[0]?.plain_text||''
@@ -606,33 +609,49 @@ function buildPlanningAlgo(matWithScores,dispos,chapMap){
     return unique.length>0?unique.slice(0,4):[nom];
   }
   const start=todayStr();
+  // ── ROUND-ROBIN : collecte toutes les tâches puis alterne entre matières ──
+  const _taskQueues = {}; // matiereNom → [{dom, type, jours, urg, moy, m}]
   matWithScores.forEach(m=>{
     if(!m.dateEpreuve)return;
     const moy=m.moy||2.5;
     if(moy>=4)return;
     const jours=daysTo(m.dateEpreuve);
     const urg=moy<=1.5?'critique':moy<=2.5?'haute':'normale';
-    // Utilise les Chapitres Notion si disponibles — sinon fallback sur parseDoms
     let doms;
     if(chapMap&&chapMap[m.id]&&chapMap[m.id].length>0){
-      // Trie par urgence (critique d'abord) puis prend les non-couverts en priorité
-      const urgOrdChap={critique:0,haute:1,normale:2};
-      doms=chapMap[m.id]
-        .filter(ch=>ch.couverture!=='oui') // exclut les chapitres déjà couverts
-        .sort((a,b)=>(urgOrdChap[a.urgence]||2)-(urgOrdChap[b.urgence]||2))
-        .map(ch=>ch.nom);
-      if(!doms.length)doms=[m.nom]; // tous couverts → pas de session
+      const urgOrdC={critique:0,haute:1,normale:2};
+      doms=chapMap[m.id].filter(ch=>ch.couverture!=='oui').sort((a,b)=>(urgOrdC[a.urgence]||2)-(urgOrdC[b.urgence]||2)).map(ch=>ch.nom);
+      if(!doms.length)doms=[m.nom];
     }else{
       doms=parseDoms(m.prio,m.nom);
     }
+    _taskQueues[m.nom]=[];
     if(moy>=3){
-      const d1=nextSlot(start,60,m.nom);
-      add(m.nom,doms[0]||'Révision générale',d1,60,'Révision','normale');
-      if(d1){const d2=nextSlot(addDays(d1,2),45,m.nom);add(m.nom,'Fiche de synthèse',d2,45,'Fiche',urg,'reserve',true,'Crée une fiche papier sur ce chapitre');}
+      _taskQueues[m.nom].push({m,moy,urg,jours,dom:doms[0]||'Révision générale',type:'score3'});
     }else{
       const maxD=jours<10?1:jours<20?2:jours<35?3:4;
-      doms.slice(0,Math.min(maxD,doms.length)).forEach((dom,domIdx)=>{
-        // Chaque domaine démarre après la dernière session planifiée pour ce sujet
+      doms.slice(0,Math.min(maxD,doms.length)).forEach(dom=>{
+        _taskQueues[m.nom].push({m,moy,urg,jours,dom,type:'full'});
+      });
+      if(jours>3)_taskQueues[m.nom].push({m,moy,urg,jours,dom:'Révision finale',type:'final'});
+    }
+  });
+  // Ordre des matières par score de priorité (décroissant)
+  const _matOrder=matWithScores.filter(m=>_taskQueues[m.nom]&&_taskQueues[m.nom].length).map(m=>m.nom);
+  // Round-robin : une tâche par matière par tour
+  let _hasMore=true, _safetyRR=0;
+  while(_hasMore&&_safetyRR++<200){
+    _hasMore=false;
+    _matOrder.forEach(nom=>{
+      const q=_taskQueues[nom];
+      if(!q||!q.length)return;
+      _hasMore=true;
+      const {m,moy,urg,jours,dom,type}=q.shift();
+      if(type==='score3'){
+        const d1=nextSlot(start,60,m.nom);
+        add(m.nom,dom,d1,60,'Révision','normale');
+        if(d1){const d2=nextSlot(addDays(d1,2),45,m.nom);add(m.nom,'Fiche de synthèse',d2,45,'Fiche',urg,'reserve',true,'Optionnel — crée une fiche papier si tu veux consolider');}
+      }else if(type==='full'){
         const domFrom=subLastDate[m.nom]?addDays(subLastDate[m.nom],1):start;
         const cD=nextSlot(domFrom,moy<=1.5?90:60,m.nom);
         if(!cD||daysTo(m.dateEpreuve)<=3)return;
@@ -644,20 +663,22 @@ function buildPlanningAlgo(matWithScores,dispos,chapMap){
             if(jours>7){
               const fD=nextSlot(addDays(eD,1),45,m.nom);
               if(fD){
-                add(m.nom,dom,fD,45,'Fiche',urg,'À faire',false,'Crée ta fiche papier sur ce chapitre');
+                add(m.nom,dom,fD,45,'Fiche',urg,'À faire',false,'Crée ta fiche papier');
                 const ro=jours<20?3:5;
                 const r1=nextSlot(addDays(fD,ro),15,m.nom);
-                if(r1&&daysTo(m.dateEpreuve)>3)add(m.nom,`Relis ta fiche — ${dom}`,r1,15,'Rappel relecture','normale','À faire',false,'15 min — relis seulement');
-                if(jours>12){const r2=nextSlot(addDays(fD,jours<20?8:10),15,m.nom);if(r2&&daysTo(m.dateEpreuve)>3)add(m.nom,`Relis ta fiche — ${dom}`,r2,15,'Rappel relecture','normale','À faire',false,'15 min — relis seulement');}
-                if(jours>20){const r3=nextSlot(addDays(fD,17),15,m.nom);if(r3&&daysTo(m.dateEpreuve)>3)add(m.nom,`Relis ta fiche — ${dom}`,r3,15,'Rappel relecture','normale','À faire',false,'15 min — relis seulement');}
+                if(r1&&daysTo(m.dateEpreuve)>3)add(m.nom,`Relis — ${dom}`,r1,15,'Rappel relecture','normale');
+                if(jours>12){const r2=nextSlot(addDays(fD,jours<20?8:10),15,m.nom);if(r2&&daysTo(m.dateEpreuve)>3)add(m.nom,`Relis — ${dom}`,r2,15,'Rappel relecture','normale');}
+                if(jours>20){const r3=nextSlot(addDays(fD,17),15,m.nom);if(r3&&daysTo(m.dateEpreuve)>3)add(m.nom,`Relis — ${dom}`,r3,15,'Rappel relecture','normale');}
               }
             }
           }
         }
-      });
-      if(jours>3){const rD=nextSlot(addDays(m.dateEpreuve,-3),45,m.nom);if(rD&&rD<m.dateEpreuve)add(m.nom,'Révision finale',rD,45,'Révision','critique','À faire',false,'Révision légère avant l\'épreuve');}
-    }
-  });
+      }else if(type==='final'){
+        const rD=nextSlot(addDays(m.dateEpreuve,-3),45,m.nom);
+        if(rD&&rD<m.dateEpreuve)add(m.nom,'Révision finale',rD,45,'Révision','critique','À faire',false,'Révision légère avant l\'épreuve');
+      }
+    });
+  };
   return sessions.sort((a,b)=>a.date.localeCompare(b.date));
 }
 
@@ -897,15 +918,11 @@ function addExtra(id){
 }
 
 function renderWeek(sessions){
-  const today=new Date(),todayISO=todayStr(),done=S.todayDone();
+  const today=new Date(),todayISO=todayStr();
   const dayOfWeek=today.getDay(),diffToMon=dayOfWeek===0?-6:1-dayOfWeek;
   const dates=[];for(let i=0;i<7;i++){const d=new Date(today);d.setDate(today.getDate()+diffToMon+i);dates.push(d);}
-  const weekStart=dates[0].toISOString().split('T')[0],weekEnd=dates[6].toISOString().split('T')[0];
-  const weekSess=sessions.filter(s=>s.date>=weekStart&&s.date<=weekEnd&&s.type!=='Rappel relecture');
-
-  let html=`<div class="progress-label"><span>${done.length} faite${done.length>1?'s':''} aujourd'hui</span><span>${weekSess.length} cette semaine</span></div>
-    <div class="progress-bar"><div class="progress-fill" style="width:${weekSess.length>0?Math.round(done.length/Math.max(weekSess.length,1)*100):0}%"></div></div>
-    <div class="week-days">`;
+  // Juste les dots — compact, pas de barre de progression
+  let html='<div class="week-days">';
   dates.forEach(d=>{
     const iso=d.toISOString().split('T')[0],isToday=iso===todayISO;
     const ds=sessions.filter(s=>s.date===iso&&s.type!=='Rappel relecture');
