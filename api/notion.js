@@ -140,6 +140,40 @@ export default async function handler(req, res) {
       return res.status(200).json({ created: results.length, results });
     }
 
+    // Lire les activités optionnelles (réserve)
+    if (action === 'get_reserve') {
+      const r = await fetch(`${NOTION_API}/databases/${payload.database_id}/query`, {
+        method: 'POST', headers: notionHeaders(token),
+        body: JSON.stringify({
+          filter: { property: 'Statut', select: { equals: 'Disponible' } },
+          sorts: [{ property: 'Urgence', direction: 'ascending' }]
+        })
+      });
+      return res.status(r.status).json(await r.json());
+    }
+
+    // Créer une activité dans la réserve
+    if (action === 'create_reserve_item') {
+      const s = payload.item;
+      const r = await fetch(`${NOTION_API}/pages`, {
+        method: 'POST', headers: notionHeaders(token),
+        body: JSON.stringify({
+          parent: { database_id: payload.database_id },
+          properties: {
+            'Activité': { title: [{ text: { content: s.titre || s.nom || 'Activité' } }] },
+            'Matière':  { rich_text: [{ text: { content: s.matiere || '' } }] },
+            'Domaine':  { rich_text: [{ text: { content: s.domaine || '' } }] },
+            'Durée min':{ number: s.duree || 45 },
+            'Type':     { select: { name: s.type || 'Fiche' } },
+            'Urgence':  { select: { name: s.urgence || 'normale' } },
+            'Statut':   { select: { name: 'Disponible' } },
+            ...(s.notes ? { 'Notes': { rich_text: [{ text: { content: s.notes } }] } } : {})
+          }
+        })
+      });
+      return res.status(r.status).json(await r.json());
+    }
+
     return res.status(400).json({ error: `Unknown action: ${action}` });
 
   } catch (err) {
