@@ -131,6 +131,7 @@ export default async function handler(req, res) {
               'Statut':    { select: { name: s.statut || 'À faire' } },
               'Urgence':   { select: { name: s.urgence || 'normale' } },
               'Optionnel': { checkbox: s.optionnel || false },
+              ...(s.matiere ? { 'Matière': { select: { name: s.matiere } } } : {}),
               ...(s.notes ? { 'Notes': { rich_text: [{ text: { content: s.notes } }] } } : {})
             }
           })
