@@ -175,7 +175,34 @@ export default async function handler(req, res) {
       return res.status(r.status).json(await r.json());
     }
 
-    return res.status(400).json({ error: `Unknown action: ${action}` });
+    // Tous les chapitres avec leur matière et urgence
+    if (action === 'get_chapitres') {
+      const r = await fetch(`${NOTION_API}/databases/${payload.database_id}/query`, {
+        method: 'POST', headers: notionHeaders(token),
+        body: JSON.stringify({
+          sorts: [{ property: 'Urgence', direction: 'ascending' }],
+          page_size: 100
+        })
+      });
+      return res.status(r.status).json(await r.json());
+    }
+
+        // Action générique pour patcher n'importe quelle propriété d'une page
+    // Utile pour corriger des relations manquantes
+    if (action === 'patch_page') {
+      const body = { properties: {} };
+      // payload.properties est un objet { nomProp: valeur_notion_api }
+      if (payload.properties) {
+        Object.assign(body.properties, payload.properties);
+      }
+      const r = await fetch(`${NOTION_API}/pages/${payload.page_id}`, {
+        method: 'PATCH', headers: notionHeaders(token),
+        body: JSON.stringify(body)
+      });
+      return res.status(r.status).json(await r.json());
+    }
+
+        return res.status(400).json({ error: `Unknown action: ${action}` });
 
   } catch (err) {
     console.error('Notion proxy error:', err);
