@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diagnostic Enseignement Scientifique — Première</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f4f6f4; color: #1a1a1a; min-height: 100vh; }
+.app { display: flex; height: 100vh; }
+.sidebar { width: 270px; background: #fff; border-right: 1px solid #d8e4d8; padding: 20px 16px; display: flex; flex-direction: column; gap: 12px; flex-shrink: 0; overflow-y: auto; }
+.sidebar-title { font-size: 11px; font-weight: 500; color: #aaa; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+.phase-badge { font-size: 12px; font-weight: 500; padding: 4px 10px; border-radius: 20px; display: inline-block; }
+.phase-1 { background: #eaf4ea; color: #2d6a2d; }
+.phase-2 { background: #fef3e8; color: #b45309; }
+.chapter-item { display: flex; align-items: flex-start; gap: 8px; padding: 6px 8px; border-radius: 6px; font-size: 12px; line-height: 1.4; }
+.chapter-item.studied { background: #f0faf5; }
+.chapter-item.partial { background: #fff8ec; }
+.chapter-item.not-studied { background: #fdf3f3; }
+.chapter-item.pending { background: #f4f6f4; color: #aaa; }
+.ch-icon { width: 16px; height: 16px; border-radius: 3px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 10px; margin-top: 1px; }
+.ch-icon.s { background: #1d9e75; color: #fff; }
+.ch-icon.p { background: #ef9f27; color: #fff; }
+.ch-icon.n { background: #e24b4a; color: #fff; }
+.ch-icon.q { background: #d5d4ce; color: #888; }
+.domain-label { font-size: 11px; color: #aaa; font-weight: 500; margin: 8px 0 4px; text-transform: uppercase; letter-spacing: 0.04em; }
+.score-row { display: flex; align-items: center; gap: 8px; padding: 4px 8px; font-size: 12px; }
+.score-bar-bg { flex: 1; height: 4px; background: #e8ece8; border-radius: 2px; }
+.score-bar { height: 4px; border-radius: 2px; transition: width 0.6s, background 0.6s; background: #d5d4ce; }
+.score-val { font-size: 11px; color: #888; width: 28px; text-align: right; flex-shrink: 0; }
+.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.header { padding: 14px 24px; border-bottom: 1px solid #d8e4d8; background: #fff; display: flex; align-items: center; gap: 12px; }
+.header-icon { width: 36px; height: 36px; background: #eaf4ea; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+.header-text h1 { font-size: 15px; font-weight: 500; }
+.header-text p { font-size: 12px; color: #888; margin-top: 1px; }
+.phase-indicator { margin-left: auto; font-size: 12px; color: #888; }
+.messages { flex: 1; overflow-y: auto; padding: 20px 24px; display: flex; flex-direction: column; gap: 14px; }
+.msg { display: flex; gap: 10px; }
+.msg.user { flex-direction: row-reverse; align-self: flex-end; max-width: 600px; }
+.msg.agent { align-self: flex-start; max-width: 680px; }
+.avatar { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 500; flex-shrink: 0; }
+.agent .avatar { background: #eaf4ea; color: #2d6a2d; }
+.user .avatar { background: #e3f0e8; color: #2d7a4f; }
+.bubble { padding: 11px 15px; border-radius: 12px; font-size: 14px; line-height: 1.65; }
+.agent .bubble { background: #fff; border: 1px solid #d8e4d8; border-radius: 4px 12px 12px 12px; }
+.user .bubble { background: #3a7d3a; color: #fff; border-radius: 12px 4px 12px 12px; }
+.typing { display: flex; gap: 4px; align-items: center; padding: 4px 0; }
+.dot { width: 6px; height: 6px; border-radius: 50%; background: #bbb; animation: bounce 1.2s infinite; }
+.dot:nth-child(2) { animation-delay: 0.2s; }
+.dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes bounce { 0%,80%,100%{transform:translateY(0)} 40%{transform:translateY(-5px)} }
+.input-area { padding: 14px 24px; border-top: 1px solid #d8e4d8; background: #fff; display: flex; gap: 10px; align-items: flex-end; }
+textarea { flex: 1; border: 1px solid #d5d4ce; border-radius: 8px; padding: 9px 13px; font-size: 14px; font-family: inherit; resize: none; line-height: 1.5; max-height: 120px; min-height: 38px; }
+textarea:focus { outline: none; border-color: #3a7d3a; box-shadow: 0 0 0 2px rgba(58,125,58,0.12); }
+button.send { background: #3a7d3a; color: #fff; border: none; border-radius: 8px; padding: 9px 18px; font-size: 14px; font-weight: 500; cursor: pointer; flex-shrink: 0; height: 38px; }
+button.send:hover { background: #2d6a2d; }
+button.send:disabled { background: #ccc; cursor: not-allowed; }
+.kb-hint { font-size: 11px; color: #bbb; padding-top: 3px; }
+pre { background: #f5f4f0; border-radius: 6px; padding: 8px 12px; font-size: 12px; overflow-x: auto; margin: 6px 0; white-space: pre-wrap; }
+strong { font-weight: 500; }
+.final-card { background: #fff; border: 1px solid #d8e4d8; border-radius: 12px; padding: 20px; }
+.final-card h3 { font-size: 14px; font-weight: 500; margin-bottom: 14px; color: #555; }
+.final-row { display: flex; align-items: center; gap: 10px; margin-bottom: 9px; }
+.final-label { font-size: 13px; width: 220px; flex-shrink: 0; }
+.final-bar-bg { flex: 1; height: 5px; background: #e8ece8; border-radius: 3px; }
+.final-bar { height: 5px; border-radius: 3px; transition: width 0.8s; }
+.bl { background: #e24b4a; } .bm { background: #ef9f27; } .bh { background: #1d9e75; }
+.final-score { font-size: 12px; font-weight: 500; width: 32px; text-align: right; color: #555; }
+.priority-tag { display: inline-block; background: #fdf3f3; color: #a32d2d; font-size: 11px; padding: 3px 8px; border-radius: 4px; margin: 2px; }
+.disc-badge { display: inline-block; font-size: 10px; font-weight: 600; padding: 2px 6px; border-radius: 3px; margin-right: 4px; vertical-align: middle; }
+.disc-pc { background: #eff6ff; color: #1e40af; }
+.disc-svt { background: #eaf4ea; color: #2d6a2d; }
+.disc-met { background: #fef3e8; color: #92400e; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="sidebar">
+    <div>
+      <div class="sidebar-title">Avancement</div>
+      <span class="phase-badge phase-1" id="phase-badge">Phase 1 — Couverture</span>
+    </div>
+    <div>
+      <div class="domain-label">Séq 1 — La Terre dans l'Univers</div>
+      <div class="chapter-item pending" id="ch-seq1-pc"><div class="ch-icon q">?</div>PC — Distances, modèles géo/héliocentrique</div>
+      <div class="chapter-item pending" id="ch-seq1-svt"><div class="ch-icon q">?</div>SVT — Chronologie Terre, 4,5 Ga</div>
+    </div>
+    <div>
+      <div class="domain-label">Séq 2 — Une longue histoire de la matière</div>
+      <div class="chapter-item pending" id="ch-seq2-pc"><div class="ch-icon q">?</div>PC — Éléments chimiques & cristaux</div>
+      <div class="chapter-item pending" id="ch-seq2-svt"><div class="ch-icon q">?</div>SVT — Cellule vivante</div>
+    </div>
+    <div>
+      <div class="domain-label">Séq 3 — Le Soleil, source d'énergie</div>
+      <div class="chapter-item pending" id="ch-seq3-pc"><div class="ch-icon q">?</div>PC — Rayonnement solaire & bilan radiatif</div>
+      <div class="chapter-item pending" id="ch-seq3-svt"><div class="ch-icon q">?</div>SVT — Photosynthèse & énergies</div>
+    </div>
+    <div>
+      <div class="domain-label">Séq 4 — Son, musique & audition</div>
+      <div class="chapter-item pending" id="ch-seq4-pc"><div class="ch-icon q">?</div>PC — Son, numérisation, compression</div>
+      <div class="chapter-item pending" id="ch-seq4-svt"><div class="ch-icon q">?</div>SVT — Oreille, traitement sonore, santé auditive</div>
+    </div>
+    <div id="scores-section" style="display:none;">
+      <div class="domain-label" style="margin-top:8px;">Scores</div>
+      <div class="score-row"><span style="font-size:12px;width:120px;flex-shrink:0;">Physique-Chimie</span><div class="score-bar-bg"><div class="score-bar" id="sb-pc" style="width:0%"></div></div><span class="score-val" id="sv-pc">—</span></div>
+      <div class="score-row"><span style="font-size:12px;width:120px;flex-shrink:0;">SVT</span><div class="score-bar-bg"><div class="score-bar" id="sb-svt" style="width:0%"></div></div><span class="score-val" id="sv-svt">—</span></div>
+      <div class="score-row"><span style="font-size:12px;width:120px;flex-shrink:0;">Exploit. docs</span><div class="score-bar-bg"><div class="score-bar" id="sb-docs" style="width:0%"></div></div><span class="score-val" id="sv-docs">—</span></div>
+      <div class="score-row"><span style="font-size:12px;width:120px;flex-shrink:0;">Calculs sci.</span><div class="score-bar-bg"><div class="score-bar" id="sb-calculs" style="width:0%"></div></div><span class="score-val" id="sv-calculs">—</span></div>
+      <div class="score-row"><span style="font-size:12px;width:120px;flex-shrink:0;">Argumentation</span><div class="score-bar-bg"><div class="score-bar" id="sb-arg" style="width:0%"></div></div><span class="score-val" id="sv-arg">—</span></div>
+    </div>
+  </div>
+  <div class="main">
+    <div class="header">
+      <div class="header-icon">🔬</div>
+      <div class="header-text">
+        <h1>Diagnostic Enseignement Scientifique — Première générale</h1>
+        <p>Épreuve IP005 · Exercices interdisciplinaires · 2h · Candidat libre</p>
+      </div>
+      <div class="phase-indicator" id="phase-indicator">Phase 1 / 2</div>
+    </div>
+    <div class="messages" id="messages"></div>
+    <div class="input-area">
+      <div style="flex:1;display:flex;flex-direction:column;gap:3px;">
+        <textarea id="input" placeholder="Tape ta réponse ici..." rows="1"></textarea>
+        <div class="kb-hint">Entrée pour envoyer · Maj+Entrée pour sauter une ligne</div>
+      </div>
+      <button class="send" id="send-btn" onclick="sendMessage()">Envoyer</button>
+    </div>
+  </div>
+</div>
+
+<button onclick="testWebhook()" style="position:fixed;bottom:20px;left:20px;background:#d5d4ce;color:#888;border:none;padding:6px 12px;border-radius:6px;font-size:11px;cursor:pointer;z-index:999;opacity:0.6;">⚙ Test</button>
+
+<script>
+const CHAPTERS = [
+  'seq1-pc','seq1-svt',
+  'seq2-pc','seq2-svt',
+  'seq3-pc','seq3-svt',
+  'seq4-pc','seq4-svt'
+];
+
+const CHAPTER_LABELS = {
+  'seq1-pc':  'PC — Seq1 : Distances, modeles geocentriques et heliocentrique',
+  'seq1-svt': 'SVT — Seq1 : Chronologie Terre, 4,5 milliards d\'annees',
+  'seq2-pc':  'PC — Seq2 : Elements chimiques et cristaux',
+  'seq2-svt': 'SVT — Seq2 : La cellule vivante',
+  'seq3-pc':  'PC — Seq3 : Rayonnement solaire et bilan radiatif terrestre',
+  'seq3-svt': 'SVT — Seq3 : Photosynthese et sources d\'energie',
+  'seq4-pc':  'PC — Seq4 : Son, numerisation et compression audio',
+  'seq4-svt': 'SVT — Seq4 : Oreille, traitement sonore et sante auditive'
+};
+
+const DOMAIN_GROUPS = [
+  { label: 'Séquence 1 — La Terre dans l\'Univers', badge: 'SEQ1', badgeClass: '', chapters: ['seq1-pc','seq1-svt'] },
+  { label: 'Séquence 2 — Une longue histoire de la matière', badge: 'SEQ2', badgeClass: '', chapters: ['seq2-pc','seq2-svt'] },
+  { label: 'Séquence 3 — Le Soleil, source d\'énergie', badge: 'SEQ3', badgeClass: '', chapters: ['seq3-pc','seq3-svt'] },
+  { label: 'Séquence 4 — Son, musique & audition', badge: 'SEQ4', badgeClass: '', chapters: ['seq4-pc','seq4-svt'] }
+];
+
+const SYSTEM_PROMPT = `Tu es un agent de diagnostic pedagogique pour l\'epreuve ponctuelle d\'Enseignement Scientifique (IP005) du baccalaureat general, programme Premiere CNED.
+
+L\'eleve est une candidate libre non reglementee - elle passe TOUT en evaluation ponctuelle.
+
+FORMAT DE L\'EPREUVE IP005 (Premiere, voie generale) :
+- Duree : 2 heures, note sur 20 points
+- 2 exercices interdisciplinaires choisis parmi 3 (chacun sur un theme different des 4 themes du programme)
+- Chaque exercice : 10 points
+- Competences evaluees : exploiter des documents, organiser/effectuer/controler des calculs, rediger une argumentation scientifique
+- La calculatrice est autorisee
+
+PROGRAMME CNED PREMIERE - 4 sequences :
+
+SEQ 1 - LA TERRE DANS L\'UNIVERS (PC + SVT)
+seq1-pc : Physique-Chimie
+- Calcul de distances astronomiques, regle des sinus
+- Mouvements du Soleil, de la Terre et de la Lune
+- Modele geocentrique vs heliocentrique, arguments scientifiques
+- Notation scientifique, ordres de grandeur
+
+seq1-svt : Sciences de la Vie et de la Terre
+- Chronologie de la Terre : age reconnu = 4,5 milliards d\'annees (4,5 Ga)
+- Arguments scientifiques qui ont conduit a cet age : roches, mineraux, datation radiometrique
+- Frise chronologique des grandes etapes de l\'histoire de la Terre
+
+SEQ 2 - UNE LONGUE HISTOIRE DE LA MATIERE (PC + SVT)
+seq2-pc : Physique-Chimie
+- Elements chimiques : tableau periodique, numeros atomiques, abondance cosmique
+- Cristaux : structure cristalline, maille, empilement d\'atomes
+- Lien entre structure cristalline et proprietes macroscopiques
+
+seq2-svt : Sciences de la Vie et de la Terre
+- La cellule vivante : structure complexe
+- Membrane plasmique, cytoplasme, organites (mitochondrie, chloroplaste, noyau...)
+- Types de cellules (procaryote/eucaryote), organisation en tissus, organes, appareils, organismes
+
+SEQ 3 - LE SOLEIL, NOTRE SOURCE D\'ENERGIE (PC + SVT)
+seq3-pc : Physique-Chimie
+- Rayonnement thermique : modele du corps noir, spectre continu avec maximum
+- Loi de Wien : lambda_max = b/T (b = 2,898e-3 m.K) - la longueur d\'onde maximale depend de la temperature
+- Loi de Stefan-Boltzmann : puissance proportionnelle a T^4 et a la surface
+- Fusion thermonucleaire dans le Soleil : H -> He, equivalence masse-energie E=mc^2
+- Constante solaire : rapport luminosite/surface sphere de rayon D
+- Rayonnement solaire incident = constante solaire / 4
+- Ensoleillement et temperature : inclinaison des rayons, variations diurnes/saisonnieres/regionales
+- Bilan radiatif terrestre : albedo (fraction reflechie = 31%), effet de serre (155 W/m2), equilibre dynamique
+- Atmosphère et surface reemettent en infrarouge lointain
+
+seq3-svt : Sciences de la Vie et de la Terre
+- Photosynthese : conversion du rayonnement solaire en energie chimique
+- Equation de la photosynthese : CO2 + H2O + lumiere -> glucose + O2
+- Importance planetaire : production de biomasse, base des chaines alimentaires
+- Energie fossile : origine biologique (combustibles fossiles = energie solaire stockee)
+- Energies renouvelables d\'origine solaire : solaire photovoltaique, eolien, hydraulique, biomasse
+
+SEQ 4 - SON, MUSIQUE ET AUDITION (PC + SVT)
+seq4-pc : Physique-Chimie
+- Son pur = sinusoide, son compose = superposition de sinusoides (frequences + amplitudes differentes)
+- Spectre d\'un son : representation des frequences
+- Corde vibrante : frequence depend de la tension (plus tendue -> plus aigu), longueur (plus longue -> plus grave), masse lineique
+- Intensite sonore I (W/m2), decroit avec la distance
+- Niveau sonore L = 10 log(I/Iref) en decibels (dB), Iref = 10^-12 W/m2
+- Seuil d\'audition = 0 dB, seuil de douleur = 120 dB
+- Intervalles entre notes : rapport des frequences. Octave = rapport 2
+- Numerisation : echantillonnage temporel, critere de Shannon (fe >= 2 * fmax), resolution b bits (2^b valeurs)
+- Taille fichier audio non compresse : S = delta_t * f * b * n / 8 (octets)
+- Compression sans perte vs avec perte, taux de compression r = S/S\'
+
+seq4-svt : Sciences de la Vie et de la Terre
+- Anatomie de l\'oreille : oreille externe (pavillon, conduit), moyenne (tympan, osselets), interne (coclee)
+- Traitement du stimulus sonore en 6 etapes :
+  1) Reception (oreille externe)
+  2) Amplification et transmission (oreille moyenne)
+  3) Conversion en message nerveux sensitif (oreille interne - cellules ciliees)
+  4) Conduction du message nerveux
+  5) Integration au niveau du cerveau (cortex auditif, lobe temporal)
+  6) Realisation du mouvement adapte
+- IRM : imagerie par resonance magnetique, zones actives = taches colorees
+- Cortex auditif secondaire : apprentissage et reconnaissance de l\'univers sonore
+- Sante auditive : traumatismes sonores, protection, seuil de douleur 120 dB
+
+METHODE SCIENTIFIQUE (transversale) :
+- Notation scientifique a.10^n, avec 1 <= a < 10
+- Chiffres significatifs : multiplication/division -> autant que le moins precis ; addition/soustraction -> autant de decimales que le moins precis
+- Prefixes : pico (10^-12), nano (10^-9), micro (10^-6), milli (10^-3), kilo (10^3), mega (10^6), giga (10^9)
+- Demarche scientifique : hypothese -> consequences verifiables -> protocole -> resultats -> analyse -> conclusion
+- Exploitation de documents : presenter source, degager idees directrices, mettre en relation avec connaissances, regard critique
+
+STRUCTURE - 2 PHASES
+
+PHASE 1 - COUVERTURE
+Tu recois "Voici ma couverture : ...".
+Genere immediatement ce JSON puis passe a la phase 2 :
+\`\`\`json
+{
+  "phase": 1,
+  "couverture": {
+    "seq1-pc": "oui|partiel|non",
+    "seq1-svt": "oui|partiel|non",
+    "seq2-pc": "oui|partiel|non",
+    "seq2-svt": "oui|partiel|non",
+    "seq3-pc": "oui|partiel|non",
+    "seq3-svt": "oui|partiel|non",
+    "seq4-pc": "oui|partiel|non",
+    "seq4-svt": "oui|partiel|non"
+  }
+}
+\`\`\`
+
+PHASE 2 - EVALUATION
+12 a 16 questions, UNE PAR UNE.
+
+5 DOMAINES ORIENTES REVISION :
+
+1. PHYSIQUE-CHIMIE (~25%)
+Questions sur les notions PC des 4 sequences declarees. Loi de Wien, bilan radiatif, spectre sonore, taille fichier audio, notation scientifique... Ex : "La temperature du Soleil est d\'environ 5 700 K. Calcule la longueur d\'onde maximale de son rayonnement (b = 2,898e-3 m.K)." / "Qu\'est-ce que l\'albedo terrestre ?"
+
+2. SVT (~25%)
+Questions sur les notions SVT des sequences declarees. Ex : "Cite les 6 etapes du traitement de l\'information sonore." / "Qu\'est-ce que la photosynthese ? Donne son equation globale." / "Quelle est l\'age de la Terre et comment a-t-il ete determine ?"
+
+3. EXPLOITATION DE DOCUMENTS (~20%)
+Simule une question type epreuve : fournis un court document (texte, donnees chiffrees, description d\'un graphique) et pose une question d\'exploitation. Ex : "D\'apres les donnees suivantes sur le bilan radiatif [donnees], quel est le pourcentage d\'energie absorbee par la surface ?"
+
+4. CALCULS SCIENTIFIQUES (~20%)
+Applications numeriques directes issues du programme. Ex : "Un fichier audio dure 3 minutes, frequence d\'echantillonnage 44100 Hz, resolution 16 bits, 2 canaux. Calcule sa taille non compressee en Mo." / "Convertis 5,4.10^-7 m en nanometres."
+
+5. ARGUMENTATION SCIENTIFIQUE (~10%)
+Capacite a rediger une conclusion, formuler une hypothese, critiquer un protocole. Ex : "A partir des etapes de la demarche scientifique, comment verifierais-tu que le son est mieux entendu la nuit ?"
+
+REGLES :
+- Alterner PC et SVT - jamais deux questions consecutives sur la meme sequence
+- UNE question a la fois, feedback bref apres chaque reponse
+- Pour les calculs : toujours corriger la notation scientifique et les chiffres significatifs si necessaire
+- Adapter la difficulte selon les reponses
+
+NOTATION (1 a 5) : 1=non maitrise, 2=lacunes importantes, 3=correct, 4=bon, 5=excellent
+
+JSON final :
+\`\`\`json
+{
+  "phase": 2,
+  "diagnostic_complet": true,
+  "couverture": {},
+  "scores": {
+    "physique_chimie": { "score": 0, "points_forts": "...", "lacunes": "..." },
+    "svt": { "score": 0, "points_forts": "...", "lacunes": "..." },
+    "exploitation_documents": { "score": 0, "points_forts": "...", "lacunes": "..." },
+    "calculs_scientifiques": { "score": 0, "points_forts": "...", "lacunes": "..." },
+    "argumentation": { "score": 0, "points_forts": "...", "lacunes": "..." }
+  },
+  "priorites": [{ "chapitre": "id", "raison": "...", "urgence": "critique|haute|normale" }],
+  "commentaire_general": "...",
+  "sequences_fortes": ["id1"],
+  "sequences_a_retravailler": ["id1"]
+}
+\`\`\`
+
+STYLE : Accueillant, direct. Tutoyer. Intro courte (2-3 phrases). Questions claires, un calcul a la fois. Feedback 1 phrase max puis question suivante.`;
+
+let conversation = [];
+let isLoading = false;
+let diagnosticDone = false;
+let coverageSelections = {};
+
+const WEBHOOK_URL = 'https://hook.eu1.make.com/omhd75bqteracqaewathwkzqyr9rm61q';
+const messagesEl = document.getElementById('messages');
+const inputEl = document.getElementById('input');
+const sendBtn = document.getElementById('send-btn');
+
+function fmt(text) {
+  return text
+    .replace(/```json([\s\S]*?)```/g, '<pre>$1</pre>')
+    .replace(/```([\s\S]*?)```/g, '<pre>$1</pre>')
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\n/g, '<br>');
+}
+
+function addMsg(role, content) {
+  const d = document.createElement('div');
+  d.className = 'msg ' + role;
+  d.innerHTML = `<div class="avatar">${role==='agent'?'ES':'S'}</div><div class="bubble">${fmt(content)}</div>`;
+  messagesEl.appendChild(d);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+
+function addTyping() {
+  const d = document.createElement('div');
+  d.className = 'msg agent'; d.id = 'typing';
+  d.innerHTML = `<div class="avatar">ES</div><div class="bubble"><div class="typing"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div>`;
+  messagesEl.appendChild(d);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+
+function removeTyping() { const t = document.getElementById('typing'); if(t) t.remove(); }
+
+function parseJSON(text) {
+  const m = text.match(/```json([\s\S]*?)```/);
+  if (!m) return null;
+  try { return JSON.parse(m[1].trim()); } catch { return null; }
+}
+
+const coverageClass  = { 'oui': 'studied', 'partiel': 'partial', 'non': 'not-studied' };
+const coverageIcon   = { 'oui': 's', 'partiel': 'p', 'non': 'n' };
+const coverageSymbol = { 'oui': '✓', 'partiel': '~', 'non': '✕' };
+
+function updateCoverage(data) {
+  if (!data || !data.couverture) return;
+  Object.entries(data.couverture).forEach(([ch, val]) => {
+    const el = document.getElementById('ch-' + ch);
+    if (!el) return;
+    el.className = 'chapter-item ' + (coverageClass[val] || 'pending');
+    el.innerHTML = `<div class="ch-icon ${coverageIcon[val]||'q'}">${coverageSymbol[val]||'?'}</div>${CHAPTER_LABELS[ch]||ch}`;
+  });
+}
+
+function updateScores(scores) {
+  if (!scores) return;
+  document.getElementById('scores-section').style.display = 'block';
+  const map = {
+    physique_chimie: 'pc',
+    svt: 'svt',
+    exploitation_documents: 'docs',
+    calculs_scientifiques: 'calculs',
+    argumentation: 'arg'
+  };
+  Object.entries(map).forEach(([key, id]) => {
+    const d = scores[key]; if (!d) return;
+    const s = d.score || 0;
+    const bar = document.getElementById('sb-' + id);
+    const val = document.getElementById('sv-' + id);
+    if (!bar || !val) return;
+    bar.style.width = (s/5*100) + '%';
+    bar.style.background = s<=2 ? '#e24b4a' : s<=3 ? '#ef9f27' : '#1d9e75';
+    val.textContent = s + '/5';
+  });
+}
+
+function showCoverageUI() {
+  const container = document.createElement('div');
+  container.id = 'coverage-ui';
+  container.style.cssText = 'background:#fff;border:1px solid #d8e4d8;border-radius:12px;padding:16px;margin:8px 0;max-width:680px;';
+  let html = '<div style="font-size:13px;font-weight:500;margin-bottom:12px;color:#555;">Pour chaque partie, indique si tu l\'as etudiee :</div>';
+  DOMAIN_GROUPS.forEach(domain => {
+    html += `<div style="margin-bottom:12px;"><div style="font-size:11px;font-weight:500;color:#aaa;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">${domain.label}</div>`;
+    domain.chapters.forEach(ch => {
+      const isPC = ch.endsWith('-pc');
+      const badgeCls = isPC ? 'disc-pc' : 'disc-svt';
+      const badgeTxt = isPC ? 'PC' : 'SVT';
+      html += `<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid #f5f4f0;">
+        <span style="font-size:13px;"><span class="disc-badge ${badgeCls}">${badgeTxt}</span>${isPC ? CHAPTER_LABELS[ch].replace('PC — '+ch.replace('-pc','').replace('seq','Seq')+' : ','') : CHAPTER_LABELS[ch].replace('SVT — '+ch.replace('-svt','').replace('seq','Seq')+' : ','')}</span>
+        <div style="display:flex;gap:4px;">
+          <button onclick="setCoverage('${ch}','oui',this)" style="padding:4px 10px;border-radius:5px;border:1px solid #d5d4ce;background:#fff;font-size:12px;cursor:pointer;">Oui</button>
+          <button onclick="setCoverage('${ch}','partiel',this)" style="padding:4px 10px;border-radius:5px;border:1px solid #d5d4ce;background:#fff;font-size:12px;cursor:pointer;">Partiel</button>
+          <button onclick="setCoverage('${ch}','non',this)" style="padding:4px 10px;border-radius:5px;border:1px solid #d5d4ce;background:#fff;font-size:12px;cursor:pointer;">Non</button>
+        </div>
+      </div>`;
+    });
+    html += '</div>';
+  });
+  html += `<button onclick="validateCoverage()" style="margin-top:12px;width:100%;background:#3a7d3a;color:#fff;border:none;border-radius:8px;padding:10px;font-size:14px;font-weight:500;cursor:pointer;">Valider mes reponses →</button>`;
+  container.innerHTML = html;
+  messagesEl.appendChild(container);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+
+function setCoverage(ch, val, btn) {
+  coverageSelections[ch] = val;
+  btn.parentElement.querySelectorAll('button').forEach(b => { b.style.background='#fff'; b.style.color='#1a1a1a'; b.style.borderColor='#d5d4ce'; });
+  const colors = { oui:'#1d9e75', partiel:'#ef9f27', non:'#e24b4a' };
+  btn.style.background = colors[val]; btn.style.color = '#fff'; btn.style.borderColor = colors[val];
+}
+
+async function validateCoverage() {
+  const missing = CHAPTERS.filter(ch => !coverageSelections[ch]);
+  if (missing.length > 0) {
+    const btn = document.querySelector('#coverage-ui button[onclick="validateCoverage()"]');
+    btn.textContent = `⚠ ${missing.length} element(s) non renseigne(s)`;
+    setTimeout(() => btn.textContent = 'Valider mes reponses →', 2000);
+    return;
+  }
+  document.getElementById('coverage-ui').remove();
+  const summary = CHAPTERS.map(ch => `${CHAPTER_LABELS[ch]}: ${coverageSelections[ch]}`).join(', ');
+  addMsg('user', 'Reponses envoyees ✓');
+  conversation.push({ role: 'user', content: `Voici ma couverture : ${summary}` });
+  isLoading = true; sendBtn.disabled = true; addTyping();
+  try {
+    const reply = await callAPI(conversation);
+    removeTyping(); addMsg('agent', reply);
+    conversation.push({ role: 'assistant', content: reply });
+    const json = parseJSON(reply);
+    if (json && json.phase === 1) {
+      updateCoverage(json);
+      document.getElementById('phase-badge').textContent = 'Phase 2 — Evaluation';
+      document.getElementById('phase-badge').className = 'phase-badge phase-2';
+      document.getElementById('phase-indicator').textContent = 'Phase 2 / 2';
+    } else if (json && json.phase === 2 && json.diagnostic_complet) { showFinalProfile(json); }
+  } catch(err) { removeTyping(); addMsg('agent', 'Erreur : ' + err.message); }
+  finally { isLoading = false; sendBtn.disabled = false; inputEl.disabled = false; inputEl.focus(); }
+}
+
+function showFinalProfile(data) {
+  updateCoverage(data); updateScores(data.scores);
+  const card = document.createElement('div');
+  card.className = 'final-card';
+  const labels = {
+    physique_chimie:       'Physique-Chimie',
+    svt:                   'SVT',
+    exploitation_documents:'Exploitation de documents',
+    calculs_scientifiques: 'Calculs scientifiques',
+    argumentation:         'Argumentation scientifique'
+  };
+  let rows = '';
+  if (data.scores) {
+    Object.entries(labels).forEach(([k, label]) => {
+      const d = data.scores[k]; if (!d) return;
+      const s = d.score||0; const pct = (s/5)*100;
+      const cls = s<=2?'bl':s<=3?'bm':'bh';
+      rows += `<div class="final-row"><div class="final-label">${label}</div><div class="final-bar-bg"><div class="final-bar ${cls}" style="width:${pct}%"></div></div><div class="final-score">${s}/5</div></div>`;
+    });
+  }
+  let html = `<h3>Profil de competences — Enseignement Scientifique</h3>${rows}`;
+  if (data.sequences_fortes && data.sequences_fortes.length) {
+    html += '<div style="margin-top:12px;"><div style="font-size:12px;color:#1d9e75;margin-bottom:4px;font-weight:500;">✓ Points forts</div>';
+    data.sequences_fortes.forEach(id => { html += `<span style="display:inline-block;background:#f0faf5;color:#2d6a2d;font-size:11px;padding:3px 8px;border-radius:4px;margin:2px;">${CHAPTER_LABELS[id]||id}</span>`; });
+    html += '</div>';
+  }
+  if (data.priorites && data.priorites.length) {
+    html += '<div style="margin-top:10px;"><div style="font-size:12px;color:#aaa;margin-bottom:4px;font-weight:500;text-transform:uppercase;letter-spacing:0.04em;">A retravailler</div>';
+    data.priorites.forEach(p => { html += `<span class="priority-tag">${CHAPTER_LABELS[p.chapitre]||p.chapitre} — ${p.urgence}</span>`; });
+    html += '</div>';
+  }
+  if (data.commentaire_general) html += `<div style="margin-top:12px;font-size:13px;color:#666;line-height:1.6;border-top:1px solid #f0efe9;padding-top:12px;">${data.commentaire_general}</div>`;
+  card.innerHTML = html;
+  messagesEl.appendChild(card);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+  document.getElementById('phase-badge').textContent = 'Diagnostic termine';
+  document.getElementById('phase-badge').style.background = '#f0faf5';
+  document.getElementById('phase-badge').style.color = '#1d9e75';
+  document.getElementById('phase-indicator').textContent = 'Termine';
+  diagnosticDone = true; sendBtn.disabled = true; inputEl.disabled = true;
+  inputEl.placeholder = 'Diagnostic termine.';
+  sendToMake(data);
+}
+
+async function sendToMake(data) {
+  const payload = {
+    matiere: 'Enseignement scientifique',
+    date: new Date().toISOString(),
+    couverture: data.couverture || {},
+    scores: {
+      score_1: data.scores?.physique_chimie?.score       || 0,
+      score_2: data.scores?.svt?.score                   || 0,
+      score_3: data.scores?.exploitation_documents?.score|| 0,
+      score_4: data.scores?.calculs_scientifiques?.score || 0,
+      score_5: data.scores?.argumentation?.score         || 0,
+      domaine_1: 'Physique-Chimie',
+      domaine_2: 'SVT',
+      domaine_3: 'Exploitation de documents',
+      domaine_4: 'Calculs scientifiques',
+      domaine_5: 'Argumentation scientifique'
+    },
+    priorites: (data.priorites||[]).map(p => (CHAPTER_LABELS[p.chapitre]||p.chapitre) + ' — ' + p.urgence).join(', '),
+    commentaire: data.commentaire_general || '',
+    notation_methode: '',
+    json_brut: JSON.stringify(data).substring(0, 1800)
+  };
+  payload.chapitres_str = [
+    { label: payload.scores.domaine_1, score: payload.scores.score_1 },
+    { label: payload.scores.domaine_2, score: payload.scores.score_2 },
+    { label: payload.scores.domaine_3, score: payload.scores.score_3 },
+    { label: payload.scores.domaine_4, score: payload.scores.score_4 },
+    { label: payload.scores.domaine_5, score: payload.scores.score_5 }
+  ].filter(d => d.label).map(d => {
+    const statut  = d.score >= 4 ? 'oui' : d.score >= 3 ? 'partiel' : 'non';
+    const urgence = d.score <= 2 ? 'critique' : d.score <= 3 ? 'haute' : 'normale';
+    return d.label + ':' + statut + ':' + urgence;
+  }).join('|');
+  try {
+    await fetch(WEBHOOK_URL, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) });
+    const notif = document.createElement('div');
+    notif.style.cssText = 'font-size:12px;color:#1d9e75;padding:8px 16px;text-align:center;';
+    notif.textContent = 'Resultats envoyes vers Notion ✓';
+    messagesEl.appendChild(notif); messagesEl.scrollTop = messagesEl.scrollHeight;
+  } catch(e) {
+    const notif = document.createElement('div');
+    notif.style.cssText = 'font-size:12px;color:#e24b4a;padding:8px 16px;text-align:center;';
+    notif.textContent = 'Envoi vers Notion echoue.';
+    messagesEl.appendChild(notif);
+  }
+}
+
+async function callAPI(messages) {
+  const res = await fetch('https://bac-2026-agents.vercel.app/api/proxy', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1200, system: SYSTEM_PROMPT, messages })
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error?.message || 'Erreur API');
+  return data.content[0].text;
+}
+
+async function sendMessage() {
+  if (isLoading || diagnosticDone) return;
+  const text = inputEl.value.trim(); if (!text) return;
+  inputEl.value = ''; inputEl.style.height = 'auto';
+  addMsg('user', text); conversation.push({ role: 'user', content: text });
+  isLoading = true; sendBtn.disabled = true; addTyping();
+  try {
+    const reply = await callAPI(conversation);
+    removeTyping(); addMsg('agent', reply);
+    conversation.push({ role: 'assistant', content: reply });
+    const json = parseJSON(reply);
+    if (json) {
+      if (json.phase === 1) {
+        updateCoverage(json);
+        document.getElementById('phase-badge').textContent = 'Phase 2 — Evaluation';
+        document.getElementById('phase-badge').className = 'phase-badge phase-2';
+        document.getElementById('phase-indicator').textContent = 'Phase 2 / 2';
+      } else if (json.phase === 2 && json.diagnostic_complet) { showFinalProfile(json); }
+    }
+  } catch(err) { removeTyping(); addMsg('agent', 'Erreur : ' + err.message); }
+  finally { isLoading = false; if (!diagnosticDone) sendBtn.disabled = false; }
+}
+
+async function init() {
+  isLoading = true; sendBtn.disabled = true; inputEl.disabled = true; addTyping();
+  try {
+    const reply = await callAPI([{ role: 'user', content: 'Commençons.' }]);
+    removeTyping();
+    conversation.push({ role: 'user', content: 'Commençons.' });
+    conversation.push({ role: 'assistant', content: reply });
+    addMsg('agent', reply);
+    showCoverageUI();
+  } catch(err) {
+    removeTyping(); addMsg('agent', 'Impossible de demarrer : ' + err.message);
+    inputEl.disabled = false; sendBtn.disabled = false;
+  } finally { isLoading = false; }
+}
+
+async function testWebhook() {
+  const testData = {
+    matiere: 'Enseignement scientifique',
+    date: new Date().toISOString(),
+    couverture: {"seq1-pc":"oui","seq1-svt":"oui","seq2-pc":"partiel","seq2-svt":"partiel","seq3-pc":"oui","seq3-svt":"oui","seq4-pc":"non","seq4-svt":"non"},
+    scores: {
+      score_1: 3, score_2: 3, score_3: 2, score_4: 2, score_5: 2,
+      domaine_1: 'Physique-Chimie',
+      domaine_2: 'SVT',
+      domaine_3: 'Exploitation de documents',
+      domaine_4: 'Calculs scientifiques',
+      domaine_5: 'Argumentation scientifique'
+    },
+    priorites: 'Calculs scientifiques — critique, Argumentation scientifique — haute',
+    commentaire: 'Test Enseignement Scientifique',
+    notation_methode: '',
+    json_brut: '{"test":true}'
+  };
+  testData.chapitres_str = [
+    { label: testData.scores.domaine_1, score: testData.scores.score_1 },
+    { label: testData.scores.domaine_2, score: testData.scores.score_2 },
+    { label: testData.scores.domaine_3, score: testData.scores.score_3 },
+    { label: testData.scores.domaine_4, score: testData.scores.score_4 },
+    { label: testData.scores.domaine_5, score: testData.scores.score_5 }
+  ].filter(d => d.label).map(d => {
+    const statut  = d.score >= 4 ? 'oui' : d.score >= 3 ? 'partiel' : 'non';
+    const urgence = d.score <= 2 ? 'critique' : d.score <= 3 ? 'haute' : 'normale';
+    return d.label + ':' + statut + ':' + urgence;
+  }).join('|');
+  await fetch(WEBHOOK_URL, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(testData) });
+  alert('Payload test Enseignement Scientifique envoye !');
+}
+
+inputEl.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } });
+inputEl.addEventListener('input', () => { inputEl.style.height = 'auto'; inputEl.style.height = Math.min(inputEl.scrollHeight, 120) + 'px'; });
+
+init();
+</script>
+</body>
+</html>
