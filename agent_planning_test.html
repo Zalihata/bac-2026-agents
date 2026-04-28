@@ -3,70 +3,66 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>[TEST] Mon Planning Bac 2026</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+  <title>[TEST] Planning Bac 2026</title>
   <style>
     :root {
       --bg: #090d18; --surface: #111827; --card: #1c2437; --border: #2d3f5f;
       --accent: #f59e0b; --text: #f0f4ff; --muted: #8899b4;
       --critique: #ff5b5b; --haute: #ff9640; --normale: #34d399;
       --r: 14px; --r-sm: 8px;
+      --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; overflow-x: hidden; }
+    body { background: var(--bg); color: var(--text); font-family: var(--font); min-height: 100vh; overflow-x: hidden; }
 
-    .screen { display: none; min-height: 100vh; padding: 20px 16px 48px; animation: fadeIn .3s ease; }
+    .screen { display: none; min-height: 100vh; padding: 20px 16px 56px; animation: fadeIn .25s ease; }
     .screen.active { display: block; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 
     .load-center { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; gap: 20px; }
-    .spinner { width: 36px; height: 36px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .8s linear infinite; }
+    .spinner { width: 32px; height: 32px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .8s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .load-msg { color: var(--muted); font-size: 15px; }
+    .load-msg { color: var(--muted); font-size: 14px; }
 
-    h1 { font-family: 'Nunito', sans-serif; font-size: 26px; font-weight: 800; line-height: 1.2; }
-    h2 { font-family: 'Nunito', sans-serif; font-size: 18px; font-weight: 700; }
-    p { font-size: 15px; line-height: 1.6; }
+    h1 { font-size: 26px; font-weight: 800; line-height: 1.2; }
+    h2 { font-size: 18px; font-weight: 700; }
+    p  { font-size: 15px; line-height: 1.6; }
 
     .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--r); padding: 16px; margin-bottom: 12px; }
     .session-card { border-left: 4px solid var(--normale); padding: 14px 14px 14px 16px; }
     .session-card.critique { border-left-color: var(--critique); }
-    .session-card.haute { border-left-color: var(--haute); }
-    .session-card.normale { border-left-color: var(--normale); }
-    .session-card .matiere { font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 15px; }
-    .session-card .domaine { color: var(--muted); font-size: 13px; margin-top: 2px; }
-    .session-card .meta { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+    .session-card.haute    { border-left-color: var(--haute); }
+    .session-card .smat  { font-weight: 700; font-size: 15px; }
+    .session-card .sdom  { color: var(--muted); font-size: 13px; margin-top: 2px; }
+    .session-card .smeta { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
     .badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 20px; background: rgba(255,255,255,.08); color: var(--muted); }
-    .badge.critique { background: rgba(255,91,91,.15); color: var(--critique); }
-    .badge.haute { background: rgba(255,150,64,.15); color: var(--haute); }
-    .badge.normale { background: rgba(52,211,153,.15); color: var(--normale); }
+    .badge.critique { background: rgba(255,91,91,.15);  color: var(--critique); }
+    .badge.haute    { background: rgba(255,150,64,.15); color: var(--haute); }
+    .badge.normale  { background: rgba(52,211,153,.15); color: var(--normale); }
 
-    .btn { width: 100%; padding: 16px; border: none; border-radius: var(--r); font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 16px; cursor: pointer; transition: all .15s; }
-    .btn-primary { background: var(--accent); color: #000; }
-    .btn-primary:hover { background: #fbbf24; transform: translateY(-1px); }
+    .btn { width: 100%; padding: 16px; border: none; border-radius: var(--r); font-weight: 700; font-size: 16px; cursor: pointer; transition: all .15s; font-family: var(--font); }
+    .btn-primary   { background: var(--accent); color: #000; }
+    .btn-primary:active { transform: scale(.98); }
     .btn-secondary { background: var(--card); border: 1px solid var(--border); color: var(--text); }
-    .btn-ghost { background: transparent; color: var(--muted); font-size: 14px; padding: 12px; }
-    .btn-sm { padding: 10px 16px; font-size: 14px; width: auto; }
+    .btn-ghost     { background: transparent; color: var(--muted); font-size: 14px; padding: 12px; }
+    .btn-sm        { padding: 10px 16px; font-size: 14px; width: auto; }
 
-    input[type="text"] { width: 100%; background: var(--card); border: 1px solid var(--border); border-radius: var(--r-sm); padding: 14px 16px; color: var(--text); font-size: 22px; font-family: 'Nunito', sans-serif; font-weight: 600; outline: none; transition: border-color .15s; text-align: center; }
+    input[type="text"] { width: 100%; background: var(--card); border: 1px solid var(--border); border-radius: var(--r-sm); padding: 14px 16px; color: var(--text); font-size: 22px; font-weight: 700; outline: none; transition: border-color .15s; text-align: center; font-family: var(--font); }
     input[type="text"]:focus { border-color: var(--accent); }
-    textarea { width: 100%; background: var(--card); border: 1px solid var(--border); border-radius: var(--r-sm); padding: 12px 16px; color: var(--text); font-size: 14px; font-family: 'DM Sans', sans-serif; outline: none; resize: none; transition: border-color .15s; }
-    textarea:focus { border-color: var(--accent); }
+    textarea { width: 100%; background: var(--card); border: 1px solid var(--border); border-radius: var(--r-sm); padding: 12px 16px; color: var(--text); font-size: 14px; outline: none; resize: none; font-family: var(--font); }
 
     .energy-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 16px 0; }
     .energy-btn { background: var(--card); border: 2px solid var(--border); border-radius: var(--r); padding: 16px 12px; text-align: center; cursor: pointer; transition: all .15s; }
     .energy-btn:hover, .energy-btn.selected { border-color: var(--accent); background: rgba(245,158,11,.08); }
-    .energy-btn .eicon { font-size: 28px; display: block; margin-bottom: 4px; }
+    .energy-btn .eicon  { font-size: 28px; display: block; margin-bottom: 4px; }
     .energy-btn .elabel { font-size: 13px; font-weight: 600; color: var(--muted); }
     .energy-btn.selected .elabel { color: var(--accent); }
 
     .ressenti-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 12px 0; }
     .ressenti-btn { background: var(--card); border: 2px solid var(--border); border-radius: var(--r-sm); padding: 12px 8px; text-align: center; cursor: pointer; transition: all .15s; }
     .ressenti-btn:hover, .ressenti-btn.selected { border-color: var(--accent); background: rgba(245,158,11,.08); }
-    .ressenti-btn .ricon { font-size: 22px; display: block; margin-bottom: 2px; }
+    .ressenti-btn .ricon  { font-size: 22px; display: block; margin-bottom: 2px; }
     .ressenti-btn .rlabel { font-size: 11px; font-weight: 600; color: var(--muted); }
-    .ressenti-btn.selected .rlabel { color: var(--accent); }
 
     .dispo-table { width: 100%; border-collapse: separate; border-spacing: 4px; }
     .dispo-table th { font-size: 11px; font-weight: 700; color: var(--muted); text-align: center; padding: 4px; }
@@ -74,54 +70,60 @@
     .dispo-check { width: 36px; height: 36px; background: var(--card); border: 2px solid var(--border); border-radius: var(--r-sm); cursor: pointer; display: flex; align-items: center; justify-content: center; margin: 0 auto; transition: all .15s; font-size: 14px; }
     .dispo-check.checked { background: rgba(245,158,11,.15); border-color: var(--accent); color: var(--accent); }
 
-    .progress-bar { background: var(--border); border-radius: 20px; height: 6px; overflow: hidden; margin: 8px 0; }
+    .progress-bar  { background: var(--border); border-radius: 20px; height: 6px; overflow: hidden; margin: 8px 0; }
     .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), #fbbf24); border-radius: 20px; transition: width .5s ease; }
     .progress-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); }
 
     .week-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin: 12px 0; }
     .week-day { text-align: center; }
     .week-day .dname { font-size: 10px; font-weight: 600; color: var(--muted); text-transform: uppercase; }
-    .week-day .dnum { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; margin: 3px auto; }
+    .week-day .dnum  { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; margin: 3px auto; }
     .week-day.today .dnum { background: var(--accent); color: #000; }
-    .week-day .dots { display: flex; justify-content: center; gap: 2px; min-height: 6px; }
+    .week-day .dots  { display: flex; justify-content: center; gap: 2px; min-height: 6px; }
     .dot { width: 5px; height: 5px; border-radius: 50%; }
     .dot.critique { background: var(--critique); }
-    .dot.haute { background: var(--haute); }
-    .dot.normale { background: var(--normale); }
+    .dot.haute    { background: var(--haute); }
+    .dot.normale  { background: var(--normale); }
 
     .header { padding: 12px 0 20px; }
-    .greeting { font-family: 'Nunito', sans-serif; font-size: 24px; font-weight: 800; }
-    .sub { color: var(--muted); font-size: 14px; margin-top: 4px; }
+    .greeting  { font-size: 24px; font-weight: 800; }
+    .sub       { color: var(--muted); font-size: 14px; margin-top: 4px; }
     .countdown { display: inline-block; background: rgba(245,158,11,.12); color: var(--accent); font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 20px; margin-top: 8px; }
-    .section-label { font-family: 'Nunito', sans-serif; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin-bottom: 10px; margin-top: 24px; }
+    .section-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin-bottom: 10px; margin-top: 24px; }
 
-    .encouragement { background: linear-gradient(135deg, rgba(245,158,11,.07), rgba(251,191,36,.04)); border: 1px solid rgba(245,158,11,.2); border-radius: var(--r); padding: 16px; margin: 16px 0; }
+    .encouragement { background: linear-gradient(135deg, rgba(245,158,11,.07), rgba(251,191,36,.04)); border: 1px solid rgba(245,158,11,.2); border-radius: var(--r); padding: 16px; margin: 16px 0; min-height: 60px; }
     .encouragement p { font-size: 15px; line-height: 1.7; }
     .enc-thinking { color: var(--muted); font-size: 14px; font-style: italic; }
+
+    /* Skeleton loader */
+    .skel { background: linear-gradient(90deg, var(--card) 25%, var(--surface) 50%, var(--card) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: var(--r-sm); }
+    @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+    .skel-text { height: 14px; margin: 6px 0; }
+    .skel-title { height: 20px; margin: 8px 0; width: 70%; }
+    .skel-card { height: 80px; border-radius: var(--r); margin-bottom: 12px; }
 
     .check-item { display: flex; align-items: flex-start; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); cursor: pointer; }
     .check-item:last-child { border-bottom: none; }
     .check-box { width: 22px; height: 22px; border: 2px solid var(--border); border-radius: 6px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; margin-top: 1px; transition: all .15s; font-size: 13px; }
     .check-item.checked .check-box { background: var(--accent); border-color: var(--accent); color: #000; }
-    .check-item .cinfo { flex: 1; }
-    .check-item .cname { font-weight: 600; font-size: 14px; }
+    .check-item .cinfo  { flex: 1; }
+    .check-item .cname  { font-weight: 600; font-size: 14px; }
     .check-item .cdetail { font-size: 12px; color: var(--muted); margin-top: 2px; }
 
     .exam-marker { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); }
     .exam-marker:last-child { border-bottom: none; }
-    .exam-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+    .exam-dot  { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
     .exam-marker .ename { font-weight: 700; font-size: 14px; }
     .exam-marker .edate { font-size: 12px; color: var(--muted); }
     .exam-marker .ejours { margin-left: auto; font-size: 12px; font-weight: 700; flex-shrink: 0; }
 
-    .week-header { background: var(--surface); border-radius: var(--r-sm); padding: 10px 14px; margin: 20px 0 12px; font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 14px; display: flex; justify-content: space-between; }
+    .week-header { background: var(--surface); border-radius: var(--r-sm); padding: 10px 14px; margin: 20px 0 12px; font-weight: 700; font-size: 14px; display: flex; justify-content: space-between; }
     .day-group { margin-bottom: 16px; }
     .day-group-header { font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 8px; }
 
     .ob-header { padding: 40px 0 28px; text-align: center; }
-    .ob-header .obemoji { font-size: 52px; display: block; margin-bottom: 16px; }
-    .step-ind { display: flex; justify-content: center; gap: 6px; margin-bottom: 28px; }
-    .step-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border); }
+    .step-ind  { display: flex; justify-content: center; gap: 6px; margin-bottom: 28px; }
+    .step-dot  { width: 8px; height: 8px; border-radius: 50%; background: var(--border); }
     .step-dot.active { background: var(--accent); }
 
     .gen-center { display: flex; flex-direction: column; align-items: center; padding: 60px 20px; gap: 16px; }
@@ -130,37 +132,36 @@
     .gen-step.done { color: var(--normale); }
     .gen-step.done::before { content: '✓ '; }
 
-    .text-link { color: var(--accent); font-size: 14px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; background: none; border: none; font-family: inherit; padding: 0; }
-    .text-link:hover { text-decoration: underline; }
-
+    .text-link { color: var(--accent); font-size: 14px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; background: none; border: none; font-family: var(--font); padding: 0; }
     hr { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
-    .empty { text-align: center; padding: 32px 20px; color: var(--muted); }
     .rest-day { background: rgba(52,211,153,.06); border: 1px solid rgba(52,211,153,.2); border-radius: var(--r); padding: 16px; text-align: center; }
     .gap-8 { display: flex; flex-direction: column; gap: 8px; }
     .mt-8 { margin-top: 8px; }
     .mt-16 { margin-top: 16px; }
     .mt-24 { margin-top: 24px; }
-
-    @keyframes pop { 0% { transform: scale(.8); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+    @keyframes pop { 0%{transform:scale(.8)} 50%{transform:scale(1.1)} 100%{transform:scale(1)} }
     .pop { animation: pop .3s ease; }
-    .test-banner { background: rgba(255,91,91,.15); border-bottom: 1px solid rgba(255,91,91,.3); color: #ff5b5b; font-size: 12px; font-weight: 700; text-align: center; padding: 8px; letter-spacing: .06em; position: sticky; top: 0; z-index: 99; }
-</style>
+
+    /* Refresh indicator */
+    .refresh-indicator { position: fixed; top: 8px; right: 8px; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); opacity: 0; transition: opacity .3s; }
+    .refresh-indicator.active { opacity: 1; animation: pulse 1s infinite; }
+    @keyframes pulse { 0%,100%{opacity:.4} 50%{opacity:1} }
+  </style>
 </head>
 <body>
 
+<div style="background:rgba(255,91,91,.15);border-bottom:1px solid rgba(255,91,91,.3);color:#ff5b5b;font-size:12px;font-weight:700;text-align:center;padding:8px;position:sticky;top:0;z-index:99;letter-spacing:.06em;">⚠️ MODE TEST — données dans Planning TEST Notion</div>
+<div class="refresh-indicator" id="refresh-dot"></div>
+
 <!-- LOADING -->
-<div class="test-banner">⚠️ MODE TEST — données dans Planning TEST Notion</div>
 <div id="s-loading" class="screen active">
-  <div class="load-center">
-    <div class="spinner"></div>
-    <p class="load-msg" id="load-msg">Chargement...</p>
-  </div>
+  <div class="load-center"><div class="spinner"></div><p class="load-msg" id="load-msg">Chargement...</p></div>
 </div>
 
-<!-- ONBOARDING 1 — Prénom -->
+<!-- ONBOARDING 1 -->
 <div id="s-ob-name" class="screen">
   <div class="ob-header">
-    <span class="obemoji">👋</span>
+    <span style="font-size:52px;display:block;margin-bottom:16px;">👋</span>
     <h1>Salut !</h1>
     <p style="color:var(--muted);margin-top:8px;">Je suis ton assistant pour le bac. Comment tu t'appelles ?</p>
   </div>
@@ -169,21 +170,18 @@
   <button class="btn btn-primary" onclick="submitName()">Continuer →</button>
 </div>
 
-<!-- ONBOARDING 2 — Disponibilités -->
+<!-- ONBOARDING 2 -->
 <div id="s-ob-dispo" class="screen">
   <div style="padding:28px 0 20px;">
     <h1>Quand tu peux travailler ?</h1>
-    <p style="color:var(--muted);margin-top:8px;">Coche tes créneaux habituels — je préparerai ton planning en conséquence.</p>
+    <p style="color:var(--muted);margin-top:8px;">Coche tes créneaux habituels.</p>
   </div>
   <div class="step-ind"><div class="step-dot"></div><div class="step-dot active"></div></div>
   <table class="dispo-table">
-    <thead><tr>
-      <th style="text-align:left;">Jour</th>
-      <th>Matin</th><th>Après-midi</th><th>Soir</th>
-    </tr></thead>
+    <thead><tr><th style="text-align:left;">Jour</th><th>Matin</th><th>Après-midi</th><th>Soir</th></tr></thead>
     <tbody id="dispo-body"></tbody>
   </table>
-  <div style="margin-top:24px;" class="gap-8">
+  <div class="gap-8" style="margin-top:24px;">
     <button class="btn btn-primary" onclick="submitDispos()">Générer mon planning →</button>
     <button class="btn btn-ghost" onclick="showScreen('s-ob-name')">← Retour</button>
   </div>
@@ -208,25 +206,20 @@
 <!-- DÉMARRAGE -->
 <div id="s-demarrage" class="screen">
   <div class="header" id="dm-header"></div>
-
   <div class="section-label">Comment tu te sens ?</div>
   <div class="energy-grid">
-    <div class="energy-btn" data-val="Épuisée" onclick="selectEnergy(this)"><span class="eicon">😴</span><span class="elabel">Épuisée</span></div>
-    <div class="energy-btn" data-val="Moyenne" onclick="selectEnergy(this)"><span class="eicon">😐</span><span class="elabel">Moyenne</span></div>
-    <div class="energy-btn" data-val="Bonne" onclick="selectEnergy(this)"><span class="eicon">🙂</span><span class="elabel">Bonne</span></div>
+    <div class="energy-btn" data-val="Épuisée"  onclick="selectEnergy(this)"><span class="eicon">😴</span><span class="elabel">Épuisée</span></div>
+    <div class="energy-btn" data-val="Moyenne"  onclick="selectEnergy(this)"><span class="eicon">😐</span><span class="elabel">Moyenne</span></div>
+    <div class="energy-btn" data-val="Bonne"    onclick="selectEnergy(this)"><span class="eicon">🙂</span><span class="elabel">Bonne</span></div>
     <div class="energy-btn" data-val="En forme" onclick="selectEnergy(this)"><span class="eicon">💪</span><span class="elabel">En forme</span></div>
   </div>
-
   <div class="section-label">Ton programme aujourd'hui</div>
   <div id="dm-sessions"></div>
-
   <div class="section-label">Cette semaine</div>
   <div id="dm-week"></div>
-
   <div id="dm-encouragement" class="encouragement" style="display:none;">
     <p id="dm-enc-text" class="enc-thinking">...</p>
   </div>
-
   <hr>
   <div class="gap-8">
     <button class="text-link" onclick="showGlobal()">📅 Voir mon planning complet →</button>
@@ -237,24 +230,21 @@
 <!-- FIN DE SESSION -->
 <div id="s-fin" class="screen">
   <div style="padding:24px 0 16px;">
-    <h1>Super ! Qu'est-ce que tu as fait ?</h1>
-    <p style="color:var(--muted);margin-top:8px;">Coche les sessions que tu as terminées.</p>
+    <h1>Qu'est-ce que tu as fait ?</h1>
+    <p style="color:var(--muted);margin-top:8px;">Coche les sessions terminées.</p>
   </div>
   <div id="fin-sessions" class="card"></div>
-
   <div class="section-label mt-24">Comment tu te sens ?</div>
   <div class="ressenti-grid">
     <div class="ressenti-btn" data-val="Trop chargé" onclick="selectRessenti(this)"><span class="ricon">😓</span><span class="rlabel">Trop chargé</span></div>
-    <div class="ressenti-btn" data-val="Bien" onclick="selectRessenti(this)"><span class="ricon">😊</span><span class="rlabel">Bien</span></div>
-    <div class="ressenti-btn" data-val="Motivée" onclick="selectRessenti(this)"><span class="ricon">🔥</span><span class="rlabel">Motivée</span></div>
-    <div class="ressenti-btn" data-val="Stressée" onclick="selectRessenti(this)"><span class="ricon">😰</span><span class="rlabel">Stressée</span></div>
-    <div class="ressenti-btn" data-val="Trop léger" onclick="selectRessenti(this)"><span class="ricon">😅</span><span class="rlabel">Trop léger</span></div>
-    <div class="ressenti-btn" data-val="Fatiguée" onclick="selectRessenti(this)"><span class="ricon">😪</span><span class="rlabel">Fatiguée</span></div>
+    <div class="ressenti-btn" data-val="Bien"        onclick="selectRessenti(this)"><span class="ricon">😊</span><span class="rlabel">Bien</span></div>
+    <div class="ressenti-btn" data-val="Motivée"     onclick="selectRessenti(this)"><span class="ricon">🔥</span><span class="rlabel">Motivée</span></div>
+    <div class="ressenti-btn" data-val="Stressée"    onclick="selectRessenti(this)"><span class="ricon">😰</span><span class="rlabel">Stressée</span></div>
+    <div class="ressenti-btn" data-val="Trop léger"  onclick="selectRessenti(this)"><span class="ricon">😅</span><span class="rlabel">Trop léger</span></div>
+    <div class="ressenti-btn" data-val="Fatiguée"    onclick="selectRessenti(this)"><span class="ricon">😪</span><span class="rlabel">Fatiguée</span></div>
   </div>
-
   <div class="section-label mt-24">Un blocage ? <span style="font-weight:400;font-style:italic;">(optionnel)</span></div>
   <textarea id="fin-blocage" rows="2" placeholder="Ex: je n'ai pas compris les suites géométriques..."></textarea>
-
   <div class="gap-8 mt-16">
     <button class="btn btn-primary" onclick="saveFin()">Enregistrer →</button>
     <button class="btn btn-ghost" onclick="showScreen('s-demarrage')">← Retour</button>
@@ -267,9 +257,7 @@
     <span style="font-size:52px;" id="result-emoji">✨</span>
     <h1 style="margin-top:16px;" id="result-title">Bien joué !</h1>
   </div>
-  <div class="encouragement">
-    <p id="result-text" class="enc-thinking">...</p>
-  </div>
+  <div class="encouragement"><p id="result-text" class="enc-thinking">...</p></div>
   <div class="gap-8 mt-24">
     <button class="text-link" onclick="showGlobal()" id="result-global-link" style="display:none;">📅 Voir mon planning global →</button>
     <button class="btn btn-primary" onclick="loadDemarrage()">← Retour au planning du jour</button>
@@ -301,99 +289,81 @@ const JOURS_FR   = ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Sa
 const JOURS_SH   = ['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
 const MOIS_FR    = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
 const DAYS_ORDER = ['lundi','mardi','mercredi','jeudi','vendredi','samedi','dimanche'];
+const CACHE_TTL_MATIERES = 24 * 60 * 60 * 1000; // 24h
+const CACHE_TTL_SESSIONS = 30 * 60 * 1000;       // 30min
 
 /* ── STATE ── */
 const S = {
-  get name()      { return localStorage.getItem('bac_test_name') || ''; },
-  set name(v)     { localStorage.setItem('bac_test_name', v); },
-  get dispos()    { try { return JSON.parse(localStorage.getItem('bac_test_dispos')); } catch(e) { return null; } },
-  set dispos(v)   { localStorage.setItem('bac_test_dispos', JSON.stringify(v)); },
-  get setupDone() { return localStorage.getItem('bac_test_setup') === 'done'; },
-  set setupDone(v){ localStorage.setItem('bac_test_setup', v ? 'done' : ''); },
-  get planOk()    { return localStorage.getItem('bac_test_plan_ok') === 'true'; },
-  set planOk(v)   { localStorage.setItem('bac_test_plan_ok', v ? 'true' : ''); },
-  get lastGlobal(){ return localStorage.getItem('bac_test_last_global') || ''; },
+  get name()       { return localStorage.getItem('bac_test_name') || ''; },
+  set name(v)      { localStorage.setItem('bac_test_name', v); },
+  get dispos()     { try { return JSON.parse(localStorage.getItem('bac_test_dispos')); } catch(e) { return null; } },
+  set dispos(v)    { localStorage.setItem('bac_test_dispos', JSON.stringify(v)); },
+  get setupDone()  { return localStorage.getItem('bac_test_setup') === 'done'; },
+  set setupDone(v) { localStorage.setItem('bac_test_setup', v ? 'done' : ''); },
+  get planOk()     { return localStorage.getItem('bac_test_plan_ok') === 'true'; },
+  set planOk(v)    { localStorage.setItem('bac_test_plan_ok', v ? 'true' : ''); },
+  get lastGlobal() { return localStorage.getItem('bac_test_last_global') || ''; },
   set lastGlobal(v){ localStorage.setItem('bac_test_last_global', v); },
-  todayDone()     { return JSON.parse(localStorage.getItem('bac_test_done_' + todayStr()) || '[]'); },
-  setTodayDone(a) { localStorage.setItem('bac_test_done_' + todayStr(), JSON.stringify(a)); }
+  todayDone()      { return JSON.parse(localStorage.getItem('bac_test_done_' + todayStr()) || '[]'); },
+  setTodayDone(a)  { localStorage.setItem('bac_test_done_' + todayStr(), JSON.stringify(a)); },
+  // Cache
+  getCache(key)    { try { const c = JSON.parse(localStorage.getItem('bac_test_cache_' + key)); return c && Date.now() - c.ts < c.ttl ? c.data : null; } catch(e) { return null; } },
+  setCache(key, data, ttl) { localStorage.setItem('bac_test_cache_' + key, JSON.stringify({ data, ts: Date.now(), ttl })); },
+  clearCache(key)  { localStorage.removeItem('bac_test_cache_' + key); }
 };
 
-let _todaySessions = [];
-let _selEnergy = '';
-let _selRessenti = '';
-let _checkedIds = [];
-let _fromScreen = 's-demarrage';
+let _todaySessions = [], _selEnergy = '', _selRessenti = '', _checkedIds = [], _fromScreen = 's-demarrage';
 let dispoState = {};
 
 /* ── UTILS ── */
-function todayStr() { return new Date().toISOString().split('T')[0]; }
-function formatDateFR(iso) {
-  const d = new Date(iso + 'T00:00:00');
-  return `${JOURS_FR[d.getDay()]} ${d.getDate()} ${MOIS_FR[d.getMonth()]}`;
-}
-function formatDateShort(iso) {
-  const d = new Date(iso + 'T00:00:00');
-  return `${d.getDate()} ${MOIS_FR[d.getMonth()].slice(0,4)}.`;
-}
-function daysUntil(iso) {
-  const now = new Date(todayStr() + 'T00:00:00');
-  const tgt = new Date(iso + 'T00:00:00');
-  return Math.round((tgt - now) / 86400000);
-}
-function getWeekMon(dateStr) {
-  const d = new Date(dateStr + 'T00:00:00');
-  const day = d.getDay();
-  const diff = day === 0 ? -6 : 1 - day;
-  const m = new Date(d); m.setDate(d.getDate() + diff);
-  return m.toISOString().split('T')[0];
-}
-function urgCls(u) { return (u || 'normale').toLowerCase(); }
+function todayStr()    { return new Date().toISOString().split('T')[0]; }
+function formatDateFR(iso) { const d = new Date(iso+'T00:00:00'); return `${JOURS_FR[d.getDay()]} ${d.getDate()} ${MOIS_FR[d.getMonth()]}`; }
+function formatDateShort(iso) { const d = new Date(iso+'T00:00:00'); return `${d.getDate()} ${MOIS_FR[d.getMonth()].slice(0,4)}.`; }
+function daysUntil(iso) { return Math.round((new Date(iso+'T00:00:00') - new Date(todayStr()+'T00:00:00')) / 86400000); }
+function getWeekMon(dateStr) { const d = new Date(dateStr+'T00:00:00'), day = d.getDay(), m = new Date(d); m.setDate(d.getDate() + (day===0?-6:1-day)); return m.toISOString().split('T')[0]; }
+function urgCls(u) { return (u||'normale').toLowerCase(); }
+function showScreen(id) { document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); const el = document.getElementById(id); if(el){el.classList.add('active');window.scrollTo(0,0);} }
+function setLoadMsg(m) { const el=document.getElementById('load-msg'); if(el) el.textContent=m; }
+function setRefresh(on) { const el=document.getElementById('refresh-dot'); if(el) el.classList.toggle('active',on); }
 
-function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  const el = document.getElementById(id);
-  if (el) { el.classList.add('active'); window.scrollTo(0, 0); }
-}
-function setLoadMsg(m) { const el = document.getElementById('load-msg'); if (el) el.textContent = m; }
-
-/* ── NOTION ── */
-async function notionCall(action, payload = {}) {
-  const r = await fetch(NOTION_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ action, ...payload })
-  });
+/* ── NOTION (with cache) ── */
+async function notionCall(action, payload={}) {
+  const r = await fetch(NOTION_URL, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({action,...payload}) });
   return r.json();
 }
 
-async function getMatieres() {
+async function getMatieres(forceRefresh=false) {
+  if (!forceRefresh) { const c = S.getCache('matieres'); if (c) return c; }
   const d = await notionCall('get_matieres', { database_id: DB.matieres });
-  return (d.results || []).map(p => ({
+  const matieres = (d.results||[]).map(p => ({
     id: p.id,
     nom: p.properties['Matiere']?.title?.[0]?.plain_text || '',
     coeff: parseInt(p.properties['Coefficient']?.rich_text?.[0]?.plain_text || '1'),
     dateEpreuve: p.properties['Date épreuve']?.date?.start || '',
     statut: p.properties['Statut diagnostic']?.select?.name || ''
   })).filter(m => m.dateEpreuve && m.nom && !m.nom.includes('terminale') && !m.nom.includes('Économiques'));
+  S.setCache('matieres', matieres, CACHE_TTL_MATIERES);
+  return matieres;
 }
 
 async function getDiagnostics() {
+  const c = S.getCache('diagnostics'); if (c) return c;
   const d = await notionCall('get_diagnostics', { database_id: DB.diagnostics });
-  return (d.results || []).map(p => ({
+  const diags = (d.results||[]).map(p => ({
     id: p.id,
-    matiereIds: (p.properties['Matiere']?.relation || []).map(r => r.id),
+    matiereIds: (p.properties['Matiere']?.relation||[]).map(r=>r.id),
     date: p.properties['Date']?.date?.start || '',
-    s1: p.properties['Score 1']?.number || 0,
-    s2: p.properties['Score 2']?.number || 0,
-    s3: p.properties['Score 3']?.number || 0,
-    s4: p.properties['Score 4']?.number || 0,
-    s5: p.properties['Score 5']?.number || 0,
-    priorites: p.properties['Priorites']?.rich_text?.[0]?.plain_text || '',
+    s1: p.properties['Score 1']?.number||0, s2: p.properties['Score 2']?.number||0,
+    s3: p.properties['Score 3']?.number||0, s4: p.properties['Score 4']?.number||0,
+    s5: p.properties['Score 5']?.number||0,
+    priorites: p.properties['Priorites']?.rich_text?.[0]?.plain_text || ''
   }));
+  S.setCache('diagnostics', diags, CACHE_TTL_MATIERES);
+  return diags;
 }
 
 function parseSessions(data) {
-  return (data.results || []).map(p => ({
+  return (data.results||[]).map(p => ({
     id: p.id,
     titre: p.properties['Session']?.title?.[0]?.plain_text || '',
     date: p.properties['Date']?.date?.start || '',
@@ -405,38 +375,37 @@ function parseSessions(data) {
   }));
 }
 
-async function getPlanning() {
+async function getPlanning(forceRefresh=false) {
+  if (!forceRefresh) { const c = S.getCache('planning'); if (c) return c; }
   const d = await notionCall('get_planning', { database_id: DB.planning });
-  return parseSessions(d);
+  const sessions = parseSessions(d);
+  S.setCache('planning', sessions, CACHE_TTL_SESSIONS);
+  return sessions;
 }
 
 async function markDone(id) {
+  S.clearCache('planning'); // invalidate cache
   return notionCall('update_session', { page_id: id, statut: 'Fait', completee_le: todayStr() });
 }
-
-async function createCheckin(payload) {
-  return notionCall('create_checkin', { database_id: DB.energie, ...payload });
-}
-
-async function createSessions(sessions) {
-  return notionCall('create_sessions', { database_id: DB.planning, sessions });
-}
+async function createCheckin(payload) { return notionCall('create_checkin', { database_id: DB.energie, ...payload }); }
+async function createSessions(sessions) { return notionCall('create_sessions', { database_id: DB.planning, sessions }); }
 
 /* ── CLAUDE ── */
 async function claudeShort(user, sys) {
-  const body = { model: 'claude-haiku-4-5-20251001', max_tokens: 250, messages: [{ role: 'user', content: user }] };
+  // Check cache — encouragement is valid for 1 hour
+  const key = 'enc_' + todayStr() + '_' + (sys||'').slice(0,20);
+  const cached = S.getCache(key); if (cached) return cached;
+  const body = { model:'claude-haiku-4-5-20251001', max_tokens:200, messages:[{role:'user',content:user}] };
   if (sys) body.system = sys;
-  const r = await fetch(CLAUDE_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  const r = await fetch(CLAUDE_URL, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body) });
   const d = await r.json();
-  return d.content?.[0]?.text || '';
+  const text = d.content?.[0]?.text || '';
+  if (text) S.setCache(key, text, 60*60*1000);
+  return text;
 }
 
 async function claudeLong(prompt) {
-  const r = await fetch(CLAUDE_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ model: 'claude-haiku-4-5-20251001', max_tokens: 4096, messages: [{ role: 'user', content: prompt }] })
-  });
+  const r = await fetch(CLAUDE_URL, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ model:'claude-haiku-4-5-20251001', max_tokens:4096, messages:[{role:'user',content:prompt}] }) });
   const d = await r.json();
   return d.content?.[0]?.text || '';
 }
@@ -447,101 +416,60 @@ function buildDispoTable() {
   const tbody = document.getElementById('dispo-body');
   tbody.innerHTML = '';
   DAYS_ORDER.forEach(j => {
-    const cap = j.charAt(0).toUpperCase() + j.slice(1);
+    const cap = j.charAt(0).toUpperCase()+j.slice(1);
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td class="day-label">${cap}</td>` +
-      ['matin','aprem','soir'].map(s =>
-        `<td><div class="dispo-check" id="dc-${j}-${s}" onclick="tglDispo('${j}','${s}')"></div></td>`
-      ).join('');
+    tr.innerHTML = `<td class="day-label">${cap}</td>` + ['matin','aprem','soir'].map(s => `<td><div class="dispo-check" id="dc-${j}-${s}" onclick="tglDispo('${j}','${s}')"></div></td>`).join('');
     tbody.appendChild(tr);
   });
 }
 
-function tglDispo(j, s) {
+function tglDispo(j,s) {
   const el = document.getElementById(`dc-${j}-${s}`);
-  if (dispoState[j].includes(s)) {
-    dispoState[j] = dispoState[j].filter(x => x !== s);
-    el.classList.remove('checked'); el.textContent = '';
-  } else {
-    dispoState[j].push(s);
-    el.classList.add('checked'); el.textContent = '✓';
-  }
+  if (dispoState[j].includes(s)) { dispoState[j]=dispoState[j].filter(x=>x!==s); el.classList.remove('checked'); el.textContent=''; }
+  else { dispoState[j].push(s); el.classList.add('checked'); el.textContent='✓'; }
 }
 
 function submitName() {
   const v = document.getElementById('input-name').value.trim();
   if (!v) { document.getElementById('input-name').focus(); return; }
-  S.name = v;
-  showScreen('s-ob-dispo');
-  buildDispoTable();
+  S.name = v; showScreen('s-ob-dispo'); buildDispoTable();
 }
 
 function submitDispos() {
-  if (!Object.values(dispoState).some(v => v.length > 0)) { alert('Coche au moins un créneau !'); return; }
-  S.dispos = dispoState;
-  S.setupDone = true;
-  generateFlow();
+  if (!Object.values(dispoState).some(v=>v.length>0)) { alert('Coche au moins un créneau !'); return; }
+  S.dispos = dispoState; S.setupDone = true; generateFlow();
 }
 
 /* ── PLANNING GENERATION ── */
 async function generateFlow() {
   showScreen('s-generating');
-  const step = n => {
-    for (let i = 1; i <= 4; i++) {
-      const el = document.getElementById('gs-' + i);
-      if (el) el.className = 'gen-step' + (i < n ? ' done' : i === n ? ' active' : '');
-    }
-  };
-
+  const step = n => { for(let i=1;i<=4;i++) { const el=document.getElementById('gs-'+i); if(el) el.className='gen-step'+(i<n?' done':i===n?' active':''); } };
   try {
     step(1);
-    const [matieres, diagnostics] = await Promise.all([getMatieres(), getDiagnostics()]);
-
+    const [matieres, diagnostics] = await Promise.all([getMatieres(true), getDiagnostics()]);
     step(2);
     const diagMap = {};
-    diagnostics.forEach(d => {
-      d.matiereIds.forEach(mid => {
-        if (!diagMap[mid] || d.date > diagMap[mid].date) diagMap[mid] = d;
-      });
-    });
-
+    diagnostics.forEach(d => d.matiereIds.forEach(mid => { if(!diagMap[mid]||d.date>diagMap[mid].date) diagMap[mid]=d; }));
     const matList = matieres.map(m => {
       const diag = diagMap[m.id];
-      let moy = 2.5, prio = '', scores = [];
-      if (diag) {
-        scores = [diag.s1, diag.s2, diag.s3, diag.s4, diag.s5].filter(s => s > 0);
-        moy = scores.length ? scores.reduce((a,b) => a+b,0) / scores.length : 2.5;
-        prio = diag.priorites;
-      }
-      const j = daysUntil(m.dateEpreuve);
-      const charge = Math.max(1, scores.filter(s => s <= 3).length);
-      const score_p = ((m.coeff * (5 - moy) * 60) / Math.max(j, 1)) / charge;
-      return { ...m, moy, score_p, prio, jours: j };
-    }).sort((a, b) => b.score_p - a.score_p);
+      let moy=2.5, prio='';
+      if (diag) { const sc=[diag.s1,diag.s2,diag.s3,diag.s4,diag.s5].filter(s=>s>0); moy=sc.length?sc.reduce((a,b)=>a+b,0)/sc.length:2.5; prio=diag.priorites; }
+      const j=daysUntil(m.dateEpreuve); const charge=Math.max(1,[diag?.s1,diag?.s2,diag?.s3,diag?.s4,diag?.s5].filter(s=>s>0&&s<=3).length);
+      return { ...m, moy, score_p:((m.coeff*(5-moy)*60)/Math.max(j,1))/charge, prio, jours:j };
+    }).sort((a,b)=>b.score_p-a.score_p);
 
     step(3);
-
-    const dispos = S.dispos || {};
-    const dispoStr = Object.entries(dispos)
-      .filter(([,slots]) => slots.length > 0)
-      .map(([j, slots]) => `${j.charAt(0).toUpperCase()+j.slice(1)}: ${slots.join(', ')}`)
-      .join('\n') || 'Tous les jours, soir';
-
-    const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
-    const tmrISO = tomorrow.toISOString().split('T')[0];
-
-    const matLines = matList.map((m, i) =>
-      `${i+1}. ${m.nom} | Coeff ${m.coeff} | Épreuve ${formatDateFR(m.dateEpreuve)} (J-${m.jours})\n   Score moy: ${m.moy.toFixed(1)}/5 | Priorités: ${m.prio || 'à définir'}`
-    ).join('\n\n');
+    const disposStr = Object.entries(S.dispos||{}).filter(([,v])=>v.length>0).map(([j,v])=>`${j.charAt(0).toUpperCase()+j.slice(1)}: ${v.join(', ')}`).join('\n')||'Tous les jours, soir';
+    const tmr = new Date(); tmr.setDate(tmr.getDate()+1);
+    const tmrISO = tmr.toISOString().split('T')[0];
 
     const prompt = `Génère un planning de révisions bac pour ${S.name}, candidate libre CNED.
 
 AUJOURD'HUI: ${formatDateFR(todayStr())} (${todayStr()})
-DISPONIBILITÉS (créneaux habituels):
-${dispoStr}
+DISPONIBILITÉS:\n${disposStr}
 
 MATIÈRES PAR PRIORITÉ:
-${matLines}
+${matList.map((m,i)=>`${i+1}. ${m.nom} | Coeff ${m.coeff} | Épreuve ${formatDateFR(m.dateEpreuve)} (J-${m.jours})\n   Score moy: ${m.moy.toFixed(1)}/5 | Priorités: ${m.prio||'à définir'}`).join('\n\n')}
 
 RÈGLES:
 - Max 2 matières/jour, max 180min/jour total
@@ -550,320 +478,209 @@ RÈGLES:
 - 3 jours avant chaque épreuve: type "Révision" uniquement, 45min max
 - Anglais LLCE (coeff 8): minimum 3 sessions/semaine
 - Commence dès le ${tmrISO}, planifie jusqu'au 22 juin
-- Varie les domaines dans la semaine
 
 Retourne UNIQUEMENT un tableau JSON, sans texte ni backticks:
 [{"matiere":"nom","domaine":"chapitre","date":"YYYY-MM-DD","duree":90,"type":"Cours","urgence":"critique","notes":"conseil"}]`;
 
     const resp = await claudeLong(prompt);
-
     let sessions = [];
-    try {
-      const clean = resp.replace(/```json\n?/g,'').replace(/```\n?/g,'').trim();
-      sessions = JSON.parse(clean);
-    } catch(e) {
-      const m = resp.match(/\[[\s\S]*\]/);
-      if (m) sessions = JSON.parse(m[0]);
-    }
-
-    if (!sessions.length) throw new Error('Aucune session générée');
+    try { const clean=resp.replace(/```json\n?/g,'').replace(/```\n?/g,'').trim(); sessions=JSON.parse(clean); }
+    catch(e) { const m=resp.match(/\[[\s\S]*\]/); if(m) sessions=JSON.parse(m[0]); }
+    if (!sessions.length) throw new Error('Aucune session');
 
     step(4);
-    for (let i = 0; i < sessions.length; i += 8) {
-      await createSessions(sessions.slice(i, i + 8));
-    }
-
+    for (let i=0;i<sessions.length;i+=8) await createSessions(sessions.slice(i,i+8));
     S.planOk = true;
+    S.clearCache('planning');
     await loadDemarrage();
-
-  } catch(e) {
-    console.error('Planning error:', e);
-    S.planOk = true;
-    await loadDemarrage();
-  }
+  } catch(e) { console.error(e); S.planOk=true; await loadDemarrage(); }
 }
 
-/* ── DÉMARRAGE ── */
-async function loadDemarrage() {
-  showScreen('s-loading');
-  setLoadMsg('Chargement de ton planning...');
-  _selEnergy = '';
-  _checkedIds = [];
-  document.querySelectorAll('.energy-btn').forEach(b => b.classList.remove('selected'));
-
-  let sessions = [], matieres = [];
-  try {
-    [sessions, matieres] = await Promise.all([getPlanning(), getMatieres()]);
-  } catch(e) { console.error(e); }
-
-  _todaySessions = sessions.filter(s => s.date === todayStr() && s.statut !== 'Fait');
-  const upcomingMat = matieres.filter(m => m.dateEpreuve && daysUntil(m.dateEpreuve) >= 0)
-    .sort((a,b) => a.dateEpreuve.localeCompare(b.dateEpreuve));
-  const next = upcomingMat[0];
-
-  const today = new Date();
-  document.getElementById('dm-header').innerHTML = `
-    <div class="greeting">Bonjour ${S.name} ! 👋</div>
-    <div class="sub">${JOURS_FR[today.getDay()]} ${today.getDate()} ${MOIS_FR[today.getMonth()]}</div>
-    ${next ? `<span class="countdown">J-${daysUntil(next.dateEpreuve)} · ${next.nom}</span>` : ''}`;
-
-  // Sessions du jour
-  const sessEl = document.getElementById('dm-sessions');
-  if (!_todaySessions.length) {
-    const hasFuture = sessions.some(s => s.date > todayStr());
-    sessEl.innerHTML = `<div class="rest-day">
-      <span style="font-size:32px;display:block;margin-bottom:8px;">${hasFuture ? '😌' : '📋'}</span>
-      <p style="font-weight:600;">${hasFuture ? "Pas de session prévue aujourd'hui !" : "Ton planning se charge..."}</p>
-      <p style="font-size:13px;color:var(--muted);margin-top:4px;">${hasFuture ? 'C'est un jour de repos — profites-en.' : ''}</p>
-    </div>`;
-  } else {
-    sessEl.innerHTML = _todaySessions.map(s => {
-      const parts = s.titre.split(' — ');
-      const mat = parts[0]; const dom = parts.slice(1).join(' — ');
-      const urg = urgCls(s.urgence);
-      return `<div class="card session-card ${urg}">
-        <div class="matiere">${mat}</div>
-        ${dom ? `<div class="domaine">${dom}</div>` : ''}
-        <div class="meta">
-          <span class="badge ${urg}">${s.urgence}</span>
-          <span class="badge">${s.duree} min</span>
-          <span class="badge">${s.type}</span>
-        </div>
-        ${s.notes ? `<div style="font-size:12px;color:var(--muted);margin-top:8px;font-style:italic;">${s.notes}</div>` : ''}
-      </div>`;
-    }).join('');
-  }
-
-  // Semaine
-  const weekStart = getWeekMon(todayStr());
-  const weekEnd = new Date(weekStart + 'T00:00:00'); weekEnd.setDate(weekEnd.getDate() + 6);
-  const weekEndStr = weekEnd.toISOString().split('T')[0];
-  const weekSess = sessions.filter(s => s.date >= weekStart && s.date <= weekEndStr);
-  const done = S.todayDone();
-
-  let weekHtml = `<div class="progress-label"><span>${done.length} faite${done.length > 1 ? 's' : ''} aujourd'hui</span><span>${weekSess.length} cette semaine</span></div>
-    <div class="progress-bar"><div class="progress-fill" style="width:${weekSess.length > 0 ? Math.round(done.length / Math.max(weekSess.length, 1) * 100) : 0}%"></div></div>
-    <div class="week-days">`;
-
-  const todayDate = new Date();
-  const dayOfWeek = todayDate.getDay();
-  const diffToMon = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
-  for (let i = 0; i < 7; i++) {
-    const d = new Date(todayDate); d.setDate(todayDate.getDate() + diffToMon + i);
-    const iso = d.toISOString().split('T')[0];
-    const isToday = iso === todayStr();
-    const ds = sessions.filter(s => s.date === iso);
-    const dayIdx = (d.getDay() + 6) % 7;
-    weekHtml += `<div class="week-day ${isToday ? 'today' : ''}">
-      <div class="dname">${JOURS_SH[dayIdx]}</div>
-      <div class="dnum">${d.getDate()}</div>
-      <div class="dots">${ds.slice(0,3).map(s => `<div class="dot ${urgCls(s.urgence)}"></div>`).join('')}</div>
-    </div>`;
-  }
-  weekHtml += '</div>';
-  document.getElementById('dm-week').innerHTML = weekHtml;
-
-  showScreen('s-demarrage');
-
-  // Encouragement async
-  const encEl = document.getElementById('dm-encouragement');
-  const encTxt = document.getElementById('dm-enc-text');
-  encEl.style.display = 'block';
-  encTxt.className = 'enc-thinking';
-  encTxt.textContent = '...';
-
-  const sessionList = _todaySessions.map(s => {
-    const p = s.titre.split(' — ');
-    return `${p[0]}${p[1] ? ' ('+p[1]+')' : ''} — ${s.duree}min`;
-  }).join(', ') || 'pas de session planifiée aujourd\'hui';
-
-  claudeShort(
-    `Prénom: ${S.name}\nAujourd'hui: ${formatDateFR(todayStr())}\nSessions prévues: ${sessionList}\nSessions faites aujourd'hui: ${done.length}`,
-    `Tu es un coach bienveillant et honnête pour ${S.name}, lycéenne candidate libre. Écris 2-3 phrases d'encouragement personnalisées. Tutoie-la. Sois concrète. Maximum 60 mots. Pas de liste.`
-  ).then(enc => {
-    encTxt.className = '';
-    encTxt.textContent = enc || `✨ Chaque session compte — lance-toi et le reste suivra !`;
-  }).catch(() => {
-    encTxt.className = '';
-    encTxt.textContent = '✨ Chaque session compte — lance-toi et le reste suivra !';
-  });
-}
-
-function selectEnergy(el) {
-  document.querySelectorAll('.energy-btn').forEach(b => b.classList.remove('selected'));
-  el.classList.add('selected');
-  _selEnergy = el.dataset.val;
-}
-
-/* ── FIN DE SESSION ── */
-function showFin() {
-  showScreen('s-fin');
-  _selRessenti = '';
-  _checkedIds = [];
-  document.querySelectorAll('.ressenti-btn').forEach(b => b.classList.remove('selected'));
-
-  const c = document.getElementById('fin-sessions');
-  if (!_todaySessions.length) {
-    c.innerHTML = '<div style="color:var(--muted);font-size:14px;text-align:center;padding:12px;">Aucune session prévue aujourd\'hui.</div>';
+/* ── RENDER HELPERS ── */
+function renderSessions(sessions) {
+  const el = document.getElementById('dm-sessions');
+  if (!sessions.length) {
+    el.innerHTML = `<div class="rest-day"><span style="font-size:32px;display:block;margin-bottom:8px;">😌</span><p style="font-weight:600;">Pas de session prévue aujourd'hui !</p><p style="font-size:13px;color:var(--muted);margin-top:4px;">Profite de ce temps libre.</p></div>`;
     return;
   }
-  c.innerHTML = _todaySessions.map((s, i) => {
-    const p = s.titre.split(' — ');
-    const mat = p[0]; const dom = p.slice(1).join(' — ');
-    return `<div class="check-item" id="ci-${i}" onclick="tglSess(${i},'${s.id}')">
-      <div class="check-box" id="cb-${i}"></div>
-      <div class="cinfo"><div class="cname">${mat}</div><div class="cdetail">${dom ? dom+' · ' : ''}${s.duree}min · ${s.type}</div></div>
-    </div>`;
+  el.innerHTML = sessions.map(s => {
+    const p=s.titre.split(' — '), mat=p[0], dom=p.slice(1).join(' — '), urg=urgCls(s.urgence);
+    return `<div class="card session-card ${urg}"><div class="smat">${mat}</div>${dom?`<div class="sdom">${dom}</div>`:''}<div class="smeta"><span class="badge ${urg}">${s.urgence}</span><span class="badge">${s.duree}min</span><span class="badge">${s.type}</span></div>${s.notes?`<div style="font-size:12px;color:var(--muted);margin-top:8px;font-style:italic;">${s.notes}</div>`:''}</div>`;
   }).join('');
 }
 
-function tglSess(i, id) {
-  const item = document.getElementById('ci-' + i);
-  const box = document.getElementById('cb-' + i);
-  if (item.classList.contains('checked')) {
-    item.classList.remove('checked'); box.textContent = '';
-    _checkedIds = _checkedIds.filter(x => x !== id);
+function renderSkelSessions() {
+  document.getElementById('dm-sessions').innerHTML = '<div class="skel skel-card"></div><div class="skel skel-card" style="height:60px;"></div>';
+}
+
+function renderWeek(sessions) {
+  const today = new Date(), todayISO = todayStr(), done = S.todayDone();
+  const dayOfWeek = today.getDay(), diffToMon = dayOfWeek===0?-6:1-dayOfWeek;
+  const weekStart = new Date(today); weekStart.setDate(today.getDate()+diffToMon);
+  const weekStartISO = weekStart.toISOString().split('T')[0];
+  const weekEnd = new Date(weekStart); weekEnd.setDate(weekStart.getDate()+6);
+  const weekEndISO = weekEnd.toISOString().split('T')[0];
+  const weekSess = sessions.filter(s=>s.date>=weekStartISO&&s.date<=weekEndISO);
+
+  let html = `<div class="progress-label"><span>${done.length} faite${done.length>1?'s':''} aujourd'hui</span><span>${weekSess.length} cette semaine</span></div>
+    <div class="progress-bar"><div class="progress-fill" style="width:${weekSess.length>0?Math.round(done.length/Math.max(weekSess.length,1)*100):0}%"></div></div>
+    <div class="week-days">`;
+
+  for (let i=0;i<7;i++) {
+    const d=new Date(today); d.setDate(today.getDate()+diffToMon+i);
+    const iso=d.toISOString().split('T')[0], isToday=iso===todayISO;
+    const ds=sessions.filter(s=>s.date===iso), dayIdx=(d.getDay()+6)%7;
+    html+=`<div class="week-day ${isToday?'today':''}"><div class="dname">${JOURS_SH[dayIdx]}</div><div class="dnum">${d.getDate()}</div><div class="dots">${ds.slice(0,3).map(s=>`<div class="dot ${urgCls(s.urgence)}"></div>`).join('')}</div></div>`;
+  }
+  html+='</div>';
+  document.getElementById('dm-week').innerHTML = html;
+}
+
+/* ── DÉMARRAGE (cache-first) ── */
+async function loadDemarrage() {
+  _selEnergy=''; _checkedIds=[];
+  document.querySelectorAll('.energy-btn').forEach(b=>b.classList.remove('selected'));
+
+  // 1. Try cache first — show immediately
+  const cachedSessions  = S.getCache('planning') || [];
+  const cachedMatieres  = S.getCache('matieres') || [];
+
+  if (cachedSessions.length || cachedMatieres.length) {
+    buildDemarrageUI(cachedSessions, cachedMatieres);
+    showScreen('s-demarrage');
+    // 2. Refresh in background
+    setRefresh(true);
+    refreshDemarrageData().finally(()=>setRefresh(false));
   } else {
-    item.classList.add('checked'); box.textContent = '✓';
-    box.classList.add('pop'); setTimeout(() => box.classList.remove('pop'), 300);
-    _checkedIds.push(id);
+    // No cache — show skeleton then fetch
+    showScreen('s-demarrage');
+    buildDemarrageHeader([]);
+    renderSkelSessions();
+    document.getElementById('dm-week').innerHTML='<div class="skel skel-text" style="width:80%"></div><div class="skel skel-text" style="width:60%"></div>';
+    setRefresh(true);
+    await refreshDemarrageData();
+    setRefresh(false);
   }
 }
 
-function selectRessenti(el) {
-  document.querySelectorAll('.ressenti-btn').forEach(b => b.classList.remove('selected'));
-  el.classList.add('selected');
-  _selRessenti = el.dataset.val;
+async function refreshDemarrageData() {
+  const [sessions, matieres] = await Promise.all([getPlanning(true), getMatieres()]);
+  _todaySessions = sessions.filter(s=>s.date===todayStr()&&s.statut!=='Fait');
+  buildDemarrageUI(sessions, matieres);
+  loadEncouragement();
 }
+
+function buildDemarrageUI(sessions, matieres) {
+  _todaySessions = sessions.filter(s=>s.date===todayStr()&&s.statut!=='Fait');
+  buildDemarrageHeader(matieres);
+  renderSessions(_todaySessions);
+  renderWeek(sessions);
+}
+
+function buildDemarrageHeader(matieres) {
+  const today = new Date();
+  const upcomingMat = matieres.filter(m=>m.dateEpreuve&&daysUntil(m.dateEpreuve)>=0).sort((a,b)=>a.dateEpreuve.localeCompare(b.dateEpreuve));
+  const next = upcomingMat[0];
+  document.getElementById('dm-header').innerHTML = `
+    <div class="greeting">Bonjour ${S.name} ! 👋</div>
+    <div class="sub">${JOURS_FR[today.getDay()]} ${today.getDate()} ${MOIS_FR[today.getMonth()]}</div>
+    ${next?`<span class="countdown">J-${daysUntil(next.dateEpreuve)} · ${next.nom}</span>`:''}`;
+}
+
+function loadEncouragement() {
+  const encEl=document.getElementById('dm-encouragement'), encTxt=document.getElementById('dm-enc-text');
+  encEl.style.display='block'; encTxt.className='enc-thinking'; encTxt.textContent='...';
+  const sessionList = _todaySessions.map(s=>{const p=s.titre.split(' — ');return `${p[0]}${p[1]?'('+p[1]+')':''} — ${s.duree}min`;}).join(', ')||"pas de session aujourd'hui";
+  claudeShort(
+    `Prénom: ${S.name}\nAujourd'hui: ${formatDateFR(todayStr())}\nSessions prévues: ${sessionList}\nSessions faites aujourd'hui: ${S.todayDone().length}`,
+    `Coach bienveillant pour ${S.name}, lycéenne candidate libre. 2-3 phrases d'encouragement personnalisées et honnêtes. Tutoie-la. 60 mots max. Pas de liste.`
+  ).then(enc => { encTxt.className=''; encTxt.textContent=enc||'✨ Chaque session compte — lance-toi !'; })
+   .catch(()   => { encTxt.className=''; encTxt.textContent='✨ Chaque session compte — lance-toi !'; });
+}
+
+function selectEnergy(el) { document.querySelectorAll('.energy-btn').forEach(b=>b.classList.remove('selected')); el.classList.add('selected'); _selEnergy=el.dataset.val; }
+
+/* ── FIN DE SESSION ── */
+function showFin() {
+  showScreen('s-fin'); _selRessenti=''; _checkedIds=[];
+  document.querySelectorAll('.ressenti-btn').forEach(b=>b.classList.remove('selected'));
+  const c=document.getElementById('fin-sessions');
+  if (!_todaySessions.length) { c.innerHTML='<div style="color:var(--muted);font-size:14px;text-align:center;padding:12px;">Aucune session prévue aujourd\'hui.</div>'; return; }
+  c.innerHTML = _todaySessions.map((s,i)=>{const p=s.titre.split(' — ');return `<div class="check-item" id="ci-${i}" onclick="tglSess(${i},'${s.id}')"><div class="check-box" id="cb-${i}"></div><div class="cinfo"><div class="cname">${p[0]}</div><div class="cdetail">${p.slice(1).join(' — ')||''}${p.length>1?' · ':''}${s.duree}min · ${s.type}</div></div></div>`;}).join('');
+}
+
+function tglSess(i,id) {
+  const item=document.getElementById('ci-'+i), box=document.getElementById('cb-'+i);
+  if (item.classList.contains('checked')) { item.classList.remove('checked'); box.textContent=''; _checkedIds=_checkedIds.filter(x=>x!==id); }
+  else { item.classList.add('checked'); box.textContent='✓'; box.classList.add('pop'); setTimeout(()=>box.classList.remove('pop'),300); _checkedIds.push(id); }
+}
+
+function selectRessenti(el) { document.querySelectorAll('.ressenti-btn').forEach(b=>b.classList.remove('selected')); el.classList.add('selected'); _selRessenti=el.dataset.val; }
 
 async function saveFin() {
   if (!_selRessenti) { alert('Comment tu te sens ?'); return; }
-  const blocage = document.getElementById('fin-blocage').value.trim();
+  const blocage=document.getElementById('fin-blocage').value.trim();
   showScreen('s-loading'); setLoadMsg('Enregistrement...');
-
   try {
-    for (const id of _checkedIds) await markDone(id);
-
-    const done = [...new Set([...S.todayDone(), ..._checkedIds])];
-    S.setTodayDone(done);
-
-    const h = new Date().getHours();
-    const moment = h < 13 ? 'Matin' : h < 18 ? 'Après-midi' : 'Soir';
-    await createCheckin({
-      label: `${S.name} · ${formatDateFR(todayStr())} · ${moment}`,
-      date: todayStr(), moment,
-      energie: _selEnergy || 'Moyenne',
-      sessions_faites: _checkedIds.length,
-      ressenti: _selRessenti,
-      blocage: blocage || ''
-    });
+    await Promise.all(_checkedIds.map(id=>markDone(id)));
+    S.setTodayDone([...new Set([...S.todayDone(),..._checkedIds])]);
+    const h=new Date().getHours(), moment=h<13?'Matin':h<18?'Après-midi':'Soir';
+    createCheckin({ label:`${S.name} · ${formatDateFR(todayStr())} · ${moment}`, date:todayStr(), moment, energie:_selEnergy||'Moyenne', sessions_faites:_checkedIds.length, ressenti:_selRessenti, blocage:blocage||'' }); // fire-and-forget
 
     showScreen('s-result');
-    const n = _checkedIds.length; const t = _todaySessions.length;
-    document.getElementById('result-emoji').textContent = n >= t ? '🎉' : n > 0 ? '👍' : '💙';
-    document.getElementById('result-title').textContent = n >= t ? 'Bien joué !' : n > 0 ? 'C\'est noté !' : 'On garde le cap !';
-    document.getElementById('result-text').textContent = '...';
-    document.getElementById('result-text').className = 'enc-thinking';
+    const n=_checkedIds.length, t=_todaySessions.length;
+    document.getElementById('result-emoji').textContent = n>=t?'🎉':n>0?'👍':'💙';
+    document.getElementById('result-title').textContent = n>=t?'Bien joué !':n>0?"C'est noté !":'On garde le cap !';
+    document.getElementById('result-text').textContent='...';
+    document.getElementById('result-text').className='enc-thinking';
+    document.getElementById('result-global-link').style.display = (!S.lastGlobal||daysUntil(S.lastGlobal)<-7)?'flex':'none';
 
-    const showGLink = !S.lastGlobal || daysUntil(S.lastGlobal) < -7;
-    document.getElementById('result-global-link').style.display = showGLink ? 'flex' : 'none';
-
-    const doneNames = _todaySessions.filter(s => _checkedIds.includes(s.id)).map(s => s.titre.split(' — ')[0]).join(', ') || 'aucune';
+    const doneNames=_todaySessions.filter(s=>_checkedIds.includes(s.id)).map(s=>s.titre.split(' — ')[0]).join(', ')||'aucune';
     claudeShort(
-      `Prénom: ${S.name}\nSessions faites: ${doneNames} (${n}/${t})\nRessenti: ${_selRessenti}\nBlocage: ${blocage || 'aucun'}`,
-      `Coach bienveillant pour ${S.name}. 2-3 phrases de feedback honnête. Si blocage: 1 conseil pratique concret. Tutoie-la. 50 mots max. Pas de liste.`
-    ).then(enc => {
-      const el = document.getElementById('result-text');
-      el.className = ''; el.textContent = enc || 'Chaque session construite est une victoire. Continue comme ça ! 💪';
-    }).catch(() => {
-      const el = document.getElementById('result-text');
-      el.className = ''; el.textContent = 'Chaque session construite est une victoire. Continue comme ça ! 💪';
-    });
-
+      `Prénom: ${S.name}\nSessions faites: ${doneNames} (${n}/${t})\nRessenti: ${_selRessenti}\nBlocage: ${blocage||'aucun'}`,
+      `Coach bienveillant pour ${S.name}. 2 phrases feedback honnête. Si blocage: 1 conseil. Tutoie. 50 mots max.`
+    ).then(enc=>{ const el=document.getElementById('result-text'); el.className=''; el.textContent=enc||'Chaque session compte. Continue comme ça ! 💪'; })
+     .catch(()=>{ const el=document.getElementById('result-text'); el.className=''; el.textContent='Chaque session compte. Continue comme ça ! 💪'; });
   } catch(e) { console.error(e); loadDemarrage(); }
 }
 
 /* ── PLANNING GLOBAL ── */
 async function showGlobal() {
-  _fromScreen = document.querySelector('.screen.active')?.id || 's-demarrage';
-  S.lastGlobal = todayStr();
-  showScreen('s-loading'); setLoadMsg('Chargement du planning...');
-
+  _fromScreen=document.querySelector('.screen.active')?.id||'s-demarrage';
+  S.lastGlobal=todayStr(); showScreen('s-loading'); setLoadMsg('Chargement...');
   try {
-    const [sessions, matieres] = await Promise.all([getPlanning(), getMatieres()]);
-    const done = S.todayDone();
-
-    // Stats
-    document.getElementById('global-stats').innerHTML = `
-      <div style="display:flex;justify-content:space-between;align-items:center;">
-        <div><div style="font-family:'Nunito',sans-serif;font-weight:800;font-size:30px;">${sessions.length}</div><div style="font-size:12px;color:var(--muted);">sessions planifiées</div></div>
-        <div style="text-align:right;"><div style="font-family:'Nunito',sans-serif;font-weight:800;font-size:30px;color:var(--normale);">${done.length}</div><div style="font-size:12px;color:var(--muted);">faites aujourd'hui</div></div>
-      </div>`;
-
-    // Examens
-    const sortedMat = matieres.filter(m => m.dateEpreuve).sort((a,b) => a.dateEpreuve.localeCompare(b.dateEpreuve));
-    document.getElementById('global-exams').innerHTML = sortedMat.map(m => {
-      const j = daysUntil(m.dateEpreuve);
-      const label = j < 0 ? 'Passée' : j === 0 ? "Aujourd'hui !" : `J-${j}`;
-      const color = j < 0 ? 'var(--muted)' : j <= 7 ? 'var(--critique)' : j <= 14 ? 'var(--haute)' : 'var(--normale)';
-      return `<div class="exam-marker">
-        <div class="exam-dot" style="background:${color}"></div>
-        <div><div class="ename">${m.nom}</div><div class="edate">${formatDateFR(m.dateEpreuve)}</div></div>
-        <div class="ejours" style="color:${color}">${label}</div>
-      </div>`;
-    }).join('');
-
-    // Planning semaine par semaine
-    if (!sessions.length) {
-      document.getElementById('global-weeks').innerHTML = `<div class="empty"><span style="font-size:36px;display:block;margin-bottom:12px;">📋</span><p>Aucune session planifiée.</p></div>`;
-    } else {
-      const byDate = {};
-      sessions.forEach(s => { if (!byDate[s.date]) byDate[s.date] = []; byDate[s.date].push(s); });
-      const sortedDates = Object.keys(byDate).sort();
-      const weekGroups = {};
-      sortedDates.forEach(d => {
-        const mon = getWeekMon(d);
-        if (!weekGroups[mon]) weekGroups[mon] = { mon, dates: [] };
-        weekGroups[mon].dates.push(d);
+    const [sessions,matieres] = await Promise.all([getPlanning(),getMatieres()]);
+    const done=S.todayDone();
+    document.getElementById('global-stats').innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center;"><div><div style="font-size:30px;font-weight:800;">${sessions.length}</div><div style="font-size:12px;color:var(--muted);">sessions planifiées</div></div><div style="text-align:right;"><div style="font-size:30px;font-weight:800;color:var(--normale);">${done.length}</div><div style="font-size:12px;color:var(--muted);">faites aujourd'hui</div></div></div>`;
+    const sortedMat=matieres.filter(m=>m.dateEpreuve).sort((a,b)=>a.dateEpreuve.localeCompare(b.dateEpreuve));
+    document.getElementById('global-exams').innerHTML=sortedMat.map(m=>{const j=daysUntil(m.dateEpreuve),label=j<0?'Passée':j===0?"Aujourd'hui !":"J-"+j,color=j<0?'var(--muted)':j<=7?'var(--critique)':j<=14?'var(--haute)':'var(--normale)';return `<div class="exam-marker"><div class="exam-dot" style="background:${color}"></div><div><div class="ename">${m.nom}</div><div class="edate">${formatDateFR(m.dateEpreuve)}</div></div><div class="ejours" style="color:${color}">${label}</div></div>`;}).join('');
+    if (!sessions.length) { document.getElementById('global-weeks').innerHTML='<div style="text-align:center;padding:32px;color:var(--muted);">Aucune session planifiée.</div>'; }
+    else {
+      const byDate={};
+      sessions.forEach(s=>{if(!byDate[s.date])byDate[s.date]=[];byDate[s.date].push(s);});
+      const weekGroups={};
+      Object.keys(byDate).sort().forEach(d=>{const mon=getWeekMon(d);if(!weekGroups[mon])weekGroups[mon]={mon,dates:[]};weekGroups[mon].dates.push(d);});
+      let html='';
+      Object.values(weekGroups).sort((a,b)=>a.mon.localeCompare(b.mon)).forEach(wg=>{
+        const wS=wg.dates.flatMap(d=>byDate[d]),wU=wS.some(s=>s.urgence==='critique')?'critique':wS.some(s=>s.urgence==='haute')?'haute':'normale';
+        html+=`<div class="week-header"><span>Semaine du ${formatDateShort(wg.mon)}</span><span style="color:var(--${wU});">${wS.length} sessions</span></div>`;
+        wg.dates.forEach(d=>{html+=`<div class="day-group"><div class="day-group-header">${formatDateFR(d)}</div>`;byDate[d].forEach(s=>{const p=s.titre.split(' — '),urg=urgCls(s.urgence);html+=`<div class="card session-card ${urg}" style="margin-bottom:8px;"><div class="smat">${p[0]}</div>${p[1]?`<div class="sdom">${p.slice(1).join(' — ')}</div>`:''}<div class="smeta"><span class="badge ${urg}">${s.urgence}</span><span class="badge">${s.duree}min</span><span class="badge">${s.type}</span></div></div>`;});html+='</div>';});
       });
-
-      let html = '';
-      Object.values(weekGroups).sort((a,b) => a.mon.localeCompare(b.mon)).forEach(wg => {
-        const wSess = wg.dates.flatMap(d => byDate[d]);
-        const wUrg = wSess.some(s => s.urgence === 'critique') ? 'critique' : wSess.some(s => s.urgence === 'haute') ? 'haute' : 'normale';
-        html += `<div class="week-header"><span>Semaine du ${formatDateShort(wg.mon)}</span><span style="color:var(--${wUrg});">${wSess.length} sessions</span></div>`;
-        wg.dates.forEach(d => {
-          html += `<div class="day-group"><div class="day-group-header">${formatDateFR(d)}</div>`;
-          byDate[d].forEach(s => {
-            const p = s.titre.split(' — ');
-            const urg = urgCls(s.urgence);
-            html += `<div class="card session-card ${urg}" style="margin-bottom:8px;">
-              <div class="matiere">${p[0]}</div>
-              ${p[1] ? `<div class="domaine">${p.slice(1).join(' — ')}</div>` : ''}
-              <div class="meta"><span class="badge ${urg}">${s.urgence}</span><span class="badge">${s.duree}min</span><span class="badge">${s.type}</span></div>
-            </div>`;
-          });
-          html += '</div>';
-        });
-      });
-      document.getElementById('global-weeks').innerHTML = html;
+      document.getElementById('global-weeks').innerHTML=html;
     }
-
     showScreen('s-global');
   } catch(e) { console.error(e); showScreen(_fromScreen); }
 }
 
-function goBackFromGlobal() { showScreen(_fromScreen || 's-demarrage'); }
+function goBackFromGlobal() { showScreen(_fromScreen||'s-demarrage'); }
 
-/* ── INPUT HELPER ── */
-document.getElementById('input-name')?.addEventListener('keydown', e => { if (e.key === 'Enter') submitName(); });
+document.getElementById('input-name')?.addEventListener('keydown', e=>{if(e.key==='Enter')submitName();});
 
 /* ── INIT ── */
 async function init() {
   if (!S.setupDone) { showScreen('s-ob-name'); return; }
-  if (!S.planOk) { generateFlow(); return; }
-  try { await loadDemarrage(); }
-  catch(e) { console.error(e); showScreen('s-demarrage'); }
+  if (!S.planOk)    { generateFlow(); return; }
+  await loadDemarrage();
 }
 
 init();
