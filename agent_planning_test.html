@@ -463,7 +463,78 @@ function tglD(j,s){const el=document.getElementById(`dc-${j}-${s}`);if(dispoStat
 function submitName(){const v=document.getElementById('input-name').value.trim();if(!v){document.getElementById('input-name').focus();return;}S.name=v;showScreen('s-ob-dispo');buildDispoTable();}
 function submitDispos(){if(!Object.values(dispoState).some(v=>v.length>0)){alert('Coche au moins un créneau !');return;}S.dispos=dispoState;S.setupDone=true;generateFlow();}
 
-// GÉNÉRATION (Niveau 1 — avec scoring et fiches)
+// ─── GÉNÉRATION ALGORITHMIQUE (sans Claude — 100% fiable) ───────────────────
+
+function addDays(iso,n){const d=new Date(iso+'T00:00:00');d.setDate(d.getDate()+n);return d.toISOString().split('T')[0];}
+
+function buildPlanningAlgo(matWithScores,dispos){
+  const JOUR_IDX={lundi:1,mardi:2,mercredi:3,jeudi:4,vendredi:5,samedi:6,dimanche:0};
+  const availDoW=new Set(Object.entries(dispos||{}).filter(([,v])=>v.length>0).map(([j])=>JOUR_IDX[j]));
+  if(availDoW.size===0)[0,1,2,3,4,5,6].forEach(d=>availDoW.add(d));
+  const usage={};
+  function getU(d){if(!usage[d])usage[d]={min:0,subjects:new Set()};return usage[d];}
+  function nextSlot(from,duree,mat,maxAhead=120){
+    let d=new Date(from+'T00:00:00');
+    for(let i=0;i<maxAhead;i++){
+      const iso=d.toISOString().split('T')[0];
+      if(availDoW.has(d.getDay())){const u=getU(iso);if((u.subjects.has(mat)||u.subjects.size<2)&&(u.min+duree<=180))return iso;}
+      d.setDate(d.getDate()+1);
+    }
+    return null;
+  }
+  const sessions=[];
+  function add(mat,dom,date,duree,type,urg,statut='À faire',opt=false,notes=''){
+    if(!date)return;
+    const u=getU(date);u.min+=duree;u.subjects.add(mat);
+    sessions.push({titre:dom?`${mat} — ${dom}`:mat,matiere:mat,domaine:dom,date,duree,type,urgence:urg,statut,optionnel:opt,notes});
+  }
+  function parseDoms(prio,nom){
+    if(!prio)return[nom];
+    const parts=prio.split(',').map(p=>p.split(/[—–-]/)[0].trim()).filter(p=>p&&p.length>2);
+    return parts.length>0?parts.slice(0,4):[nom];
+  }
+  const start=todayStr();
+  matWithScores.forEach(m=>{
+    if(!m.dateEpreuve)return;
+    const moy=m.moy||2.5;
+    if(moy>=4)return;
+    const jours=daysTo(m.dateEpreuve);
+    const urg=moy<=1.5?'critique':moy<=2.5?'haute':'normale';
+    const doms=parseDoms(m.prio,m.nom);
+    if(moy>=3){
+      const d1=nextSlot(start,60,m.nom);
+      add(m.nom,doms[0]||'Révision générale',d1,60,'Révision','normale');
+      if(d1){const d2=nextSlot(addDays(d1,2),45,m.nom);add(m.nom,'Fiche de synthèse',d2,45,'Fiche',urg,'En pause',true,'Optionnel — crée une fiche papier si tu veux consolider');}
+    }else{
+      const maxD=jours<10?1:jours<20?2:jours<35?3:4;
+      doms.slice(0,Math.min(maxD,doms.length)).forEach(dom=>{
+        const cD=nextSlot(start,moy<=1.5?90:60,m.nom);
+        if(!cD||daysTo(m.dateEpreuve)<=3)return;
+        add(m.nom,dom,cD,moy<=1.5?90:60,'Cours',urg);
+        if(jours>5){
+          const eD=nextSlot(addDays(cD,2),60,m.nom);
+          if(eD){
+            add(m.nom,dom,eD,60,'Exercices',urg);
+            if(jours>7){
+              const fD=nextSlot(addDays(eD,1),45,m.nom);
+              if(fD){
+                add(m.nom,dom,fD,45,'Fiche',urg,'À faire',false,'Crée ta fiche papier sur ce chapitre');
+                const ro=jours<20?3:5;
+                const r1=nextSlot(addDays(fD,ro),15,m.nom);
+                if(r1&&daysTo(m.dateEpreuve)>3)add(m.nom,`Relis ta fiche — ${dom}`,r1,15,'Rappel relecture','normale','À faire',false,'15 min — relis seulement');
+                if(jours>12){const r2=nextSlot(addDays(fD,jours<20?8:10),15,m.nom);if(r2&&daysTo(m.dateEpreuve)>3)add(m.nom,`Relis ta fiche — ${dom}`,r2,15,'Rappel relecture','normale','À faire',false,'15 min — relis seulement');}
+                if(jours>20){const r3=nextSlot(addDays(fD,17),15,m.nom);if(r3&&daysTo(m.dateEpreuve)>3)add(m.nom,`Relis ta fiche — ${dom}`,r3,15,'Rappel relecture','normale','À faire',false,'15 min — relis seulement');}
+              }
+            }
+          }
+        }
+      });
+      if(jours>3){const rD=nextSlot(addDays(m.dateEpreuve,-3),45,m.nom);if(rD&&rD<m.dateEpreuve)add(m.nom,'Révision finale',rD,45,'Révision','critique','À faire',false,'Révision légère avant l\'épreuve');}
+    }
+  });
+  return sessions.sort((a,b)=>a.date.localeCompare(b.date));
+}
+
 async function generateFlow(){
   showScreen('s-generating');
   const step=n=>{for(let i=1;i<=4;i++){const el=document.getElementById('gs-'+i);if(el)el.className='gen-step'+(i<n?' done':i===n?' active':'');}};
@@ -473,71 +544,16 @@ async function generateFlow(){
     step(2);
     const diagMap={};
     diagnostics.forEach(d=>d.matiereIds.forEach(mid=>{if(!diagMap[mid]||d.date>diagMap[mid].date)diagMap[mid]=d;}));
-
     const matWithScores=matieres.map(m=>{
       const diag=diagMap[m.id];let moy=2.5,prio='',scores=[];
-      if(diag){
-        scores=[diag.s1,diag.s2,diag.s3,diag.s4,diag.s5].filter(s=>s>0);
-        moy=scores.length?scores.reduce((a,b)=>a+b,0)/scores.length:2.5;
-        prio=diag.priorites;
-      }
+      if(diag){scores=[diag.s1,diag.s2,diag.s3,diag.s4,diag.s5].filter(s=>s>0);moy=scores.length?scores.reduce((a,b)=>a+b,0)/scores.length:2.5;prio=diag.priorites;}
       const j=daysTo(m.dateEpreuve),charge=Math.max(1,scores.filter(s=>s>0&&s<=3).length);
-      const score_p=((m.coeff*(5-moy)*60)/Math.max(j,1))/charge;
-      return{...m,moy,score_p,prio,jours:j,scores,diagId:diag?.id};
+      return{...m,moy,score_p:((m.coeff*(5-moy)*60)/Math.max(j,1))/charge,prio,jours:j,scores};
     }).sort((a,b)=>b.score_p-a.score_p);
-
     step(3);
-    const disposStr=Object.entries(S.dispos||{}).filter(([,v])=>v.length>0).map(([j,v])=>`${j.charAt(0).toUpperCase()+j.slice(1)}: ${v.join(', ')}`).join('\n')||'Tous les jours, soir';
-
-    const prompt=`Tu génères un planning de révisions bac pour ${S.name}, candidate libre CNED.
-
-AUJOURD'HUI: ${fmtFR(todayStr())} (${todayStr()})
-DISPONIBILITÉS:\n${disposStr}
-
-MATIÈRES PAR PRIORITÉ (avec scores diagnostics):
-${matWithScores.map((m,i)=>`${i+1}. ${m.nom} | Coeff ${m.coeff} | Épreuve ${fmtFR(m.dateEpreuve)} (J-${m.jours})
-   Score moyen: ${m.moy.toFixed(1)}/5 | Priorités: ${m.prio||'à définir'}`).join('\n\n')}
-
-RÈGLES DE GÉNÉRATION — RESPECT IMPÉRATIF:
-
-RÈGLE 1 — IMPASSES (ne génère AUCUNE session):
-- Score moyen ≥ 4 → domaine acquis, zéro session, ignore-le complètement
-
-RÈGLE 2 — SCORE 3 (1 session normale + 1 fiche optionnelle):
-- 1 session "Révision" (60min, statut "À faire", optionnel: false)
-- 1 session "Fiche" (45min, statut "En pause", optionnel: true) — elle décide si elle la fait
-
-RÈGLE 3 — SCORE 1-2 (parcours complet):
-- Cours (90min critique, 60min haute) → Exercices (60min) → Fiche (45min, J+2 après cours) → Rappel relecture (15min, J+5) → Rappel relecture (15min, J+10) → Rappel relecture (15min, J+17)
-- Si J-épreuve < 20j: comprimer à J+3 → J+8 → J+14
-- Si J-épreuve < 10j: 1 seule relecture max
-
-RÈGLE 4 — VOLUME:
-- Max 2 matières différentes/jour, max 180min/jour total
-- Planifie UNIQUEMENT les jours avec disponibilités
-- 3 jours avant chaque épreuve: uniquement "Révision" 45min max
-- Commence dès aujourd'hui si disponible, sinon demain
-
-RÈGLE 5 — RAPPEL RELECTURE:
-- Type "Rappel relecture", duree: 15, urgence: "normale"
-- Titre: "[Matière] — Relis ta fiche [domaine]"
-- Notes: "15 min — relis seulement, ne réécris pas"
-
-Retourne UNIQUEMENT un tableau JSON, sans texte ni backticks:
-[{"matiere":"nom","domaine":"chapitre","date":"YYYY-MM-DD","duree":90,"type":"Cours","urgence":"critique","statut":"À faire","optionnel":false,"notes":"conseil"}]`;
-
-    const resp=await cLong(prompt);
-    let sessions=[];
-    try{const clean=resp.replace(/```json\n?/g,'').replace(/```\n?/g,'').trim();sessions=JSON.parse(clean);}
-    catch(e){const m=resp.match(/\[[\s\S]*\]/);if(m)sessions=JSON.parse(m[0]);}
-    if(!sessions.length)throw new Error('Aucune session');
-
-    // Normalise les sessions — Claude renvoie matiere+domaine, notion.js attend titre
-    sessions = sessions.map(s => ({
-      ...s,
-      titre: s.titre || (s.matiere && s.domaine ? `${s.matiere} — ${s.domaine}` : s.matiere || 'Session')
-    }));
-
+    const sessions=buildPlanningAlgo(matWithScores,S.dispos||{});
+    if(!sessions.length)throw new Error('Aucune session — vérifie tes disponibilités dans les paramètres');
+    console.log('📋 '+sessions.length+' sessions construites algorithmiquement');
     step(4);
     let created=0;
     for(let i=0;i<sessions.length;i+=8){const r=await createSessions(sessions.slice(i,i+8));created+=(r.created||0);}
@@ -547,10 +563,9 @@ Retourne UNIQUEMENT un tableau JSON, sans texte ni backticks:
   }catch(e){
     console.error('❌ generateFlow error:',e);
     const gc=document.querySelector('.gen-center');
-    if(gc)gc.innerHTML+=`<div style="background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;padding:12px;margin-top:16px;font-size:13px;color:#dc2626;max-width:300px;text-align:left;"><strong>Erreur :</strong> ${e.message}</div><button onclick="S.planOk=false;generateFlow()" style="margin-top:12px;background:#c2860a;color:#fff;border:none;border-radius:8px;padding:10px 20px;font-weight:700;cursor:pointer;">Réessayer</button>`;
+    if(gc)gc.innerHTML+=`<div style="background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;padding:12px;margin-top:16px;font-size:13px;color:#dc2626;max-width:300px;text-align:left;word-break:break-word;"><strong>Erreur :</strong> ${e.message}</div><button onclick="S.planOk=false;generateFlow()" style="margin-top:12px;background:#c2860a;color:#fff;border:none;border-radius:8px;padding:10px 20px;font-weight:700;cursor:pointer;">Réessayer</button>`;
   }
 }
-
 // RENDER SESSIONS
 function renderSessions(sessions,allSessions,paused){
   const el=document.getElementById('dm-sessions');
