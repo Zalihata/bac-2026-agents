@@ -235,7 +235,7 @@
   <hr>
   <div class="gap-8">
     <button class="text-link" onclick="showRevision()">🔄 Réviser mon planning</button>
-    <button class="text-link" onclick="showGlobal()">📅 Voir mon planning complet →</button>
+    <a class="text-link" href="https://www.notion.so/40ab4b67fae749fbb8685c3076322523" target="_blank">📅 Voir mon planning dans Notion →</a>
     <button class="btn btn-primary mt-8" onclick="showFin()">J'ai terminé une session ✓</button>
   </div>
 </div>
@@ -267,7 +267,7 @@
   </div>
   <div class="encouragement"><p id="result-text" class="enc-thinking">...</p></div>
   <div class="gap-8 mt-24">
-    <button class="text-link" onclick="showGlobal()" id="result-global-link" style="display:none;">📅 Voir mon planning global →</button>
+    <a class="text-link" href="https://www.notion.so/40ab4b67fae749fbb8685c3076322523" target="_blank" id="result-global-link" style="display:none;">📅 Voir mon planning dans Notion →</a>
     <button class="btn btn-primary" onclick="loadDemarrage()">← Retour au planning du jour</button>
   </div>
 </div>
@@ -533,10 +533,16 @@ Retourne UNIQUEMENT un tableau JSON, sans texte ni backticks:
     if(!sessions.length)throw new Error('Aucune session');
 
     step(4);
-    for(let i=0;i<sessions.length;i+=8)await createSessions(sessions.slice(i,i+8));
+    let created=0;
+    for(let i=0;i<sessions.length;i+=8){const r=await createSessions(sessions.slice(i,i+8));created+=(r.created||0);}
+    console.log('✅ '+created+' sessions créées dans Notion');
     S.planOk=true;S.clearCache('plan');S.clearCache('paused');
     await loadDemarrage();
-  }catch(e){console.error(e);S.planOk=true;await loadDemarrage();}
+  }catch(e){
+    console.error('❌ generateFlow error:',e);
+    const gc=document.querySelector('.gen-center');
+    if(gc)gc.innerHTML+=`<div style="background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;padding:12px;margin-top:16px;font-size:13px;color:#dc2626;max-width:300px;text-align:left;"><strong>Erreur :</strong> ${e.message}</div><button onclick="S.planOk=false;generateFlow()" style="margin-top:12px;background:#c2860a;color:#fff;border:none;border-radius:8px;padding:10px 20px;font-weight:700;cursor:pointer;">Réessayer</button>`;
+  }
 }
 
 // RENDER SESSIONS
@@ -979,6 +985,11 @@ function goBackFromGlobal(){showScreen(_from||'s-demarrage');}
 document.getElementById('input-name')?.addEventListener('keydown',e=>{if(e.key==='Enter')submitName();});
 
 async function init(){
+  // ?reset dans l'URL → efface planOk et cache pour forcer la régénération
+  if(new URLSearchParams(window.location.search).has('reset')){
+    S.planOk=false;S.clearCache('plan');S.clearCache('paused');
+    window.history.replaceState({},'',window.location.pathname);
+  }
   if(!S.setupDone){showScreen('s-ob-name');return;}
   if(!S.planOk){generateFlow();return;}
   await loadDemarrage();
