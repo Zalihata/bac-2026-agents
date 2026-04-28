@@ -204,26 +204,28 @@ export default async function handler(req, res) {
 
         // Supprime toutes les sessions d'une base (pour régénération propre)
     if (action === 'purge_planning') {
-      // Récupère tous les IDs de sessions
-      let allIds = [];
-      let cursor = undefined;
+      let allIds = [], cursor, safetyLimit = 10;
       do {
-        const body = { page_size: 100, filter: { property: 'Statut', select: { does_not_equal: 'archived_placeholder' } } };
+        const body = { page_size: 100 };
         if (cursor) body.start_cursor = cursor;
         const r = await fetch(`${NOTION_API}/databases/${payload.database_id}/query`, {
           method: 'POST', headers: notionHeaders(token), body: JSON.stringify(body)
         });
+        if (!r.ok) break;
         const d = await r.json();
         allIds = allIds.concat((d.results||[]).map(p=>p.id));
         cursor = d.has_more ? d.next_cursor : undefined;
-      } while (cursor);
-      // Archive chaque page (Notion ne supprime pas via API, on archive)
-      await Promise.all(allIds.map(id =>
-        fetch(`${NOTION_API}/pages/${id}`, {
-          method: 'PATCH', headers: notionHeaders(token),
-          body: JSON.stringify({ archived: true })
-        })
-      ));
+      } while (cursor && --safetyLimit > 0);
+      // Archive par batch de 10 pour éviter rate limit
+      for (let i = 0; i < allIds.length; i += 10) {
+        await Promise.all(allIds.slice(i, i+10).map(id =>
+          fetch(`${NOTION_API}/pages/${id}`, {
+            method: 'PATCH', headers: notionHeaders(token),
+            body: JSON.stringify({ archived: true })
+          })
+        ));
+        if (i + 10 < allIds.length) await new Promise(r => setTimeout(r, 300));
+      }
       return res.status(200).json({ deleted: allIds.length });
     }
 
