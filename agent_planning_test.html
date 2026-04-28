@@ -532,6 +532,12 @@ Retourne UNIQUEMENT un tableau JSON, sans texte ni backticks:
     catch(e){const m=resp.match(/\[[\s\S]*\]/);if(m)sessions=JSON.parse(m[0]);}
     if(!sessions.length)throw new Error('Aucune session');
 
+    // Normalise les sessions — Claude renvoie matiere+domaine, notion.js attend titre
+    sessions = sessions.map(s => ({
+      ...s,
+      titre: s.titre || (s.matiere && s.domaine ? `${s.matiere} — ${s.domaine}` : s.matiere || 'Session')
+    }));
+
     step(4);
     let created=0;
     for(let i=0;i<sessions.length;i+=8){const r=await createSessions(sessions.slice(i,i+8));created+=(r.created||0);}
