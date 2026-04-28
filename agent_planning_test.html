@@ -511,15 +511,31 @@ function buildPlanningAlgo(matWithScores,dispos){
     return null;
   }
   const sessions=[];
+  const subLastDate={}; // dernière date planifiée par sujet
   function add(mat,dom,date,duree,type,urg,statut='À faire',opt=false,notes=''){
     if(!date)return;
     const u=getU(date);u.min+=duree;u.subjects.add(mat);u.subMin[mat]=(u.subMin[mat]||0)+duree;
+    // Avance le curseur de ce sujet
+    if(!subLastDate[mat]||date>subLastDate[mat])subLastDate[mat]=date;
     sessions.push({titre:dom?`${mat} — ${dom}`:mat,matiere:mat,domaine:dom,date,duree,type,urgence:urg,statut,optionnel:opt,notes});
   }
   function parseDoms(prio,nom){
     if(!prio)return[nom];
-    const parts=prio.split(',').map(p=>p.split(/[—–-]/)[0].trim()).filter(p=>p&&p.length>2);
-    return parts.length>0?parts.slice(0,4):[nom];
+    const parts=prio.split(',').map(p=>{
+      let s=p.trim();
+      // Supprime les préfixes "1) URGENT:", "2)", etc.
+      s=s.replace(/^\d+[\)\.]\s*(URGENT[:\s]+)?/i,'');
+      // Supprime les suffixes " — critique/haute/normale"
+      s=s.replace(/\s*[—–]\s*(critique|haute|normale|très\s+haute)[\s\S]*$/i,'');
+      // Supprime ": critique" en fin
+      s=s.replace(/\s*:\s*(critique|haute|normale)[\s\S]*$/i,'');
+      // Supprime les numéros restants en début
+      s=s.replace(/^\d+[\s.\)]+/,'').trim();
+      // Tronque à 45 chars
+      return s.length>45?s.slice(0,42)+'…':s;
+    }).filter(p=>p&&p.length>2&&p!==nom);
+    const unique=[...new Set(parts)];
+    return unique.length>0?unique.slice(0,4):[nom];
   }
   const start=todayStr();
   matWithScores.forEach(m=>{
@@ -535,8 +551,10 @@ function buildPlanningAlgo(matWithScores,dispos){
       if(d1){const d2=nextSlot(addDays(d1,2),45,m.nom);add(m.nom,'Fiche de synthèse',d2,45,'Fiche',urg,'reserve',true,'Crée une fiche papier sur ce chapitre');}
     }else{
       const maxD=jours<10?1:jours<20?2:jours<35?3:4;
-      doms.slice(0,Math.min(maxD,doms.length)).forEach(dom=>{
-        const cD=nextSlot(start,moy<=1.5?90:60,m.nom);
+      doms.slice(0,Math.min(maxD,doms.length)).forEach((dom,domIdx)=>{
+        // Chaque domaine démarre après la dernière session planifiée pour ce sujet
+        const domFrom=subLastDate[m.nom]?addDays(subLastDate[m.nom],1):start;
+        const cD=nextSlot(domFrom,moy<=1.5?90:60,m.nom);
         if(!cD||daysTo(m.dateEpreuve)<=3)return;
         add(m.nom,dom,cD,moy<=1.5?90:60,'Cours',urg);
         if(jours>5){
@@ -629,9 +647,10 @@ function renderSessions(sessions,allSessions,paused){
   let html=normales.map(s=>{
     const p=s.titre.split(' — '),mat=p[0],dom=p.slice(1).join(' — '),urg=urgCls(s.urgence);
     const typeBadge=s.type==='Fiche'?'fiche':'';
+    const showDom=dom&&dom!==mat&&dom.length>2;
     return `<div class="card session-card ${urg}">
       <div class="smat">${mat}${s.bonus?' <span style="font-size:11px;color:var(--accent);">+bonus</span>':''}</div>
-      ${dom?`<div class="sdom">${dom}</div>`:''}
+      ${showDom?`<div class="sdom">${dom}</div>`:''}
       <div class="smeta"><span class="badge ${urg}">${s.urgence}</span><span class="badge ${typeBadge}">${s.type}</span><span class="badge">${s.duree}min</span></div>
       ${s.notes?`<div style="font-size:12px;color:var(--muted);margin-top:8px;font-style:italic;">${s.notes}</div>`:''}
     </div>`;
@@ -708,27 +727,21 @@ function renderPaused(paused){
       <div class="pinfo"><div class="pmat">${mat}</div>${dom?`<div class="pdom">${dom}</div>`:''}<div style="font-size:11px;color:var(--muted-light);">${fmtFR(s.date)} · ${s.duree}min · ${s.type}</div></div>
       <div style="display:flex;gap:6px;flex-shrink:0;">
         <button class="btn-pause" onclick="doActivatePaused('${s.id}')" title="Ajoute cette activité à ton planning actif">Ajouter</button>
-        <button style="background:#f1f5f9;border:1px solid var(--border);color:var(--muted-light);padding:6px 10px;border-radius:var(--r-sm);font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font);" onclick="doIgnorePaused('${s.id}')" title="Ignorer définitivement cette activité">Ignorer</button>
+        <button style="background:#f1f5f9;border:1px solid var(--border);color:var(--muted-light);padding:6px 10px;border-radius:var(--r-sm);font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font);" onclick="doIgnorePaused('${s.id}')" title="Repousse cette activité à dans 7 jours">Mettre en attente</button>
       </div>
     </div>`;
   }).join('');
   el.innerHTML+=`<div class="paused-section" style="margin-top:12px;">
     <div class="ps-title">📌 Activités optionnelles <span style="font-weight:400;font-size:11px;text-transform:none;letter-spacing:0;">(déplacées dans la réserve si tu ignores)</span></div>
-    <p style="font-size:12px;color:var(--pause);margin-bottom:10px;font-style:italic;">Ces activités sont prévues pour les matières où tu as déjà des bases. "Ajouter" les met dans ton planning actif, "Ignorer" les retire définitivement.</p>
+    <p style="font-size:12px;color:var(--pause);margin-bottom:10px;font-style:italic;">Ces activités sont prévues pour les matières où tu as déjà des bases. "Ajouter" les met dans ton planning actif, "Mettre en attente" les repousse à dans 7 jours — elles reviendront automatiquement.</p>
     ${items}
   </div>`;
 }
 
 async function doIgnorePaused(id){
-  // Envoie dans la Réserve d'activités au lieu de supprimer
-  const paused=_paused||[];
-  const item=paused.find(s=>s.id===id);
-  if(item){
-    // Crée dans Réserve
-    await nCall('create_reserve_item',{database_id:DB.reserve,item});
-    // Annule dans Planning
-    await nCall('update_session',{page_id:id,statut:'Annulé'});
-  }
+  // Repousse à J+7 (resurface automatiquement)
+  const future=addDays(todayStr(),3);
+  await nCall('update_session',{page_id:id,new_date:future});
   S.clearCache('paused');S.clearCache('reserve');
   const [sessions,pausedNew]=await Promise.all([getPlanning(true),getPaused(true)]);
   _all=sessions;_today=sessions.filter(s=>s.date===todayStr()&&s.statut!=='Fait');_paused=pausedNew;
