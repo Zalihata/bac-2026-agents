@@ -561,7 +561,7 @@ function renderSessions(sessions,allSessions,paused){
       }).join('');
       el.innerHTML=`<div class="info-box">💡 Pas de session planifiée aujourd'hui — tape ＋ pour commencer sur une session prioritaire.</div>${cards}`;
     }else{
-      el.innerHTML=`<div style="text-align:center;padding:24px;color:var(--muted);"><span style="font-size:32px;display:block;margin-bottom:8px;">✨</span><p style="font-weight:600;">Planning en cours de génération</p></div>`;
+      el.innerHTML=`<div style="text-align:center;padding:24px;color:var(--muted);"><span style="font-size:32px;display:block;margin-bottom:8px;">📋</span><p style="font-weight:600;">Aucune session dans le planning</p><p style="font-size:13px;margin-top:4px;">Recharge la page pour lancer la génération.</p></div>`;
     }
     renderPaused(paused);
     return;
@@ -695,6 +695,15 @@ async function loadDemarrage(){
 
 async function refreshAll(){
   const [sessions,matieres,paused,checkins]=await Promise.all([getPlanning(true),getMatieres(),getPaused(true),getCheckins(5)]);
+
+  // Si Notion est vide malgré planOk=true → re-générer
+  if(!sessions.length&&!paused.length){
+    S.planOk=false;
+    S.clearCache('plan');S.clearCache('paused');
+    generateFlow();
+    return;
+  }
+
   _all=sessions;_today=sessions.filter(s=>s.date===todayStr()&&s.statut!=='Fait');_paused=paused;
   buildUI(sessions,matieres,paused);
   loadLevel2Adaptation(checkins,sessions);
