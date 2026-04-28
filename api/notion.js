@@ -202,6 +202,31 @@ export default async function handler(req, res) {
       return res.status(r.status).json(await r.json());
     }
 
+        // Supprime toutes les sessions d'une base (pour régénération propre)
+    if (action === 'purge_planning') {
+      // Récupère tous les IDs de sessions
+      let allIds = [];
+      let cursor = undefined;
+      do {
+        const body = { page_size: 100, filter: { property: 'Statut', select: { does_not_equal: 'archived_placeholder' } } };
+        if (cursor) body.start_cursor = cursor;
+        const r = await fetch(`${NOTION_API}/databases/${payload.database_id}/query`, {
+          method: 'POST', headers: notionHeaders(token), body: JSON.stringify(body)
+        });
+        const d = await r.json();
+        allIds = allIds.concat((d.results||[]).map(p=>p.id));
+        cursor = d.has_more ? d.next_cursor : undefined;
+      } while (cursor);
+      // Archive chaque page (Notion ne supprime pas via API, on archive)
+      await Promise.all(allIds.map(id =>
+        fetch(`${NOTION_API}/pages/${id}`, {
+          method: 'PATCH', headers: notionHeaders(token),
+          body: JSON.stringify({ archived: true })
+        })
+      ));
+      return res.status(200).json({ deleted: allIds.length });
+    }
+
         return res.status(400).json({ error: `Unknown action: ${action}` });
 
   } catch (err) {
