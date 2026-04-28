@@ -717,8 +717,14 @@ async function generateFlow(){
     console.log('📋 '+sessions.length+' sessions construites algorithmiquement');
     step(4);
     // Purge les anciennes sessions avant de régénérer
-    setMsg('Nettoyage du planning précédent...');
-    try{ await nCall('purge_planning',{database_id:DB.planning}); }catch(e){ console.warn('purge skip',e); }
+    setMsg('Suppression des anciennes sessions...');
+    try{
+      const purgeRes=await nCall('purge_planning',{database_id:DB.planning});
+      console.log('Purge OK:', purgeRes);
+    }catch(e){
+      console.error('Purge failed:', e);
+      // Continue quand même
+    }
     setMsg('Création des sessions...');
     let created=0;
     for(let i=0;i<sessions.length;i+=8){const r=await createSessions(sessions.slice(i,i+8));created+=(r.created||0);}
