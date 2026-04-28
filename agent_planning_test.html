@@ -238,7 +238,6 @@
       <a href="https://www.notion.so/40ab4b67fae749fbb8685c3076322523" target="_blank" style="font-size:11px;color:var(--muted);text-decoration:none;">✅ Cocher dans Notion →</a>
     </div>
     <div id="dm-sessions"></div>
-  <div id="dm-week"></div>
   </div><!-- /dm-program -->
   <div id="dm-enc" class="encouragement" style="display:none;"><p id="dm-enc-txt" class="enc-thinking">...</p></div>
   <hr>
@@ -702,6 +701,10 @@ async function generateFlow(){
     if(!sessions.length)throw new Error('Aucune session — vérifie tes disponibilités dans les paramètres');
     console.log('📋 '+sessions.length+' sessions construites algorithmiquement');
     step(4);
+    // Purge les anciennes sessions avant de régénérer
+    setMsg('Nettoyage du planning précédent...');
+    try{ await nCall('purge_planning',{database_id:DB.planning}); }catch(e){ console.warn('purge skip',e); }
+    setMsg('Création des sessions...');
     let created=0;
     for(let i=0;i<sessions.length;i+=8){const r=await createSessions(sessions.slice(i,i+8));created+=(r.created||0);}
     console.log('✅ '+created+' sessions créées dans Notion');
@@ -866,7 +869,7 @@ function renderReserveSuggestions(){
 async function doAddFromReserve(id){
   await addReserveToPlanning(id);
   const sessions=await getPlanning(true);
-  _all=sessions;_today=sessions.filter(s=>s.date===todayStr()&&s.statut!=='Fait');
+  _all=sessions;_today=sessions.filter(s=>s.date===todayStr()&&s.statut!=='Fait'&&s.statut!=='reserve');
   renderSessions(_today,sessions,_paused);
 }
 
@@ -896,7 +899,7 @@ async function doIgnorePaused(id){
   await nCall('update_session',{page_id:id,new_date:future});
   S.clearCache('paused');S.clearCache('reserve');
   const [sessions,pausedNew]=await Promise.all([getPlanning(true),getPaused(true)]);
-  _all=sessions;_today=sessions.filter(s=>s.date===todayStr()&&s.statut!=='Fait');_paused=pausedNew;
+  _all=sessions;_today=sessions.filter(s=>s.date===todayStr()&&s.statut!=='Fait'&&s.statut!=='reserve');_paused=pausedNew;
   renderSessions(_today,sessions,pausedNew);
 }
 
@@ -904,7 +907,7 @@ async function doActivatePaused(id){
   await activatePaused(id);
   // Refresh
   const [sessions,paused]=await Promise.all([getPlanning(true),getPaused(true)]);
-  _all=sessions;_today=sessions.filter(s=>s.date===todayStr()&&s.statut!=='Fait');_paused=paused;
+  _all=sessions;_today=sessions.filter(s=>s.date===todayStr()&&s.statut!=='Fait'&&s.statut!=='reserve');_paused=paused;
   renderSessions(_today,sessions,paused);
 }
 
@@ -917,20 +920,6 @@ function addExtra(id){
   renderSessions(_today,_all,_paused);
 }
 
-function renderWeek(sessions){
-  const today=new Date(),todayISO=todayStr();
-  const dayOfWeek=today.getDay(),diffToMon=dayOfWeek===0?-6:1-dayOfWeek;
-  const dates=[];for(let i=0;i<7;i++){const d=new Date(today);d.setDate(today.getDate()+diffToMon+i);dates.push(d);}
-  // Juste les dots — compact, pas de barre de progression
-  let html='<div class="week-days">';
-  dates.forEach(d=>{
-    const iso=d.toISOString().split('T')[0],isToday=iso===todayISO;
-    const ds=sessions.filter(s=>s.date===iso&&s.type!=='Rappel relecture');
-    html+=`<div class="week-day ${isToday?'today':''}"><div class="dname">${JOURS_SH[d.getDay()]}</div><div class="dnum">${d.getDate()}</div><div class="dots">${ds.slice(0,3).map(s=>`<div class="dot ${urgCls(s.urgence)}"></div>`).join('')}</div></div>`;
-  });
-  html+='</div>';
-  document.getElementById('dm-week').innerHTML=html;
-}
 
 // DÉMARRAGE (Niveau 2 — cache-first + adaptation)
 async function loadDemarrage(){
@@ -945,7 +934,6 @@ async function loadDemarrage(){
   }else{
     showScreen('s-demarrage');buildHeader([]);
     document.getElementById('dm-sessions').innerHTML='<div class="skel skel-card"></div><div class="skel skel-card" style="height:60px;"></div>';
-    document.getElementById('dm-week').innerHTML='<div class="skel skel-card" style="height:50px;"></div>';
     setRefresh(true);await refreshAll();setRefresh(false);
   }
 }
@@ -963,7 +951,7 @@ async function refreshAll(){
   }
 
   _all=sessions;
-  _today=sessions.filter(s=>s.date===todayStr()&&s.statut!=='Fait');
+  _today=sessions.filter(s=>s.date===todayStr()&&s.statut!=='Fait'&&s.statut!=='reserve');
   // Sessions en retard : date < aujourd'hui, max 3 jours, on exclut les Rappel relecture
   _overdue=sessions.filter(s=>s.date<todayStr()&&s.statut!=='Fait'&&s.type!=='Rappel relecture'&&daysTo(s.date)>=-3);
   _paused=paused;
@@ -973,11 +961,10 @@ async function refreshAll(){
 }
 
 function buildUI(sessions,matieres,paused){
-  _all=sessions;_today=sessions.filter(s=>s.date===todayStr()&&s.statut!=='Fait');_paused=paused||[];
+  _all=sessions;_today=sessions.filter(s=>s.date===todayStr()&&s.statut!=='Fait'&&s.statut!=='reserve');_paused=paused||[];
   buildHeader(matieres);
   // Re-rend si les deux sont déjà sélectionnés (ex: refresh en arrière-plan)
   if(_selE){renderSessionsWithEnergy(_today,sessions,_paused,_selE);document.getElementById('dm-program')?.style.setProperty('display','block');}
-  renderWeek(sessions);
 }
 
 function buildHeader(matieres){
