@@ -595,14 +595,14 @@ function buildPlanningAlgo(matWithScores,dispos,chapMap){
   const jourBudgets={};
   DAYS_ORDER.forEach(j=>{jourBudgets[JOUR_IDX_MAP[j]]=getDayBudget(dispos,j,'En forme');});
 
-  function nextSlot(from,duree,mat,maxAhead=120){
+  function nextSlot(from,duree,mat,maxAhead=120,maxSubjects=5){
     let d=new Date(from+'T00:00:00');
     for(let i=0;i<maxAhead;i++){
       const iso=d.toISOString().split('T')[0];
       if(availDoW.has(d.getDay())){
         const u=getU(iso);
         const dayMax=jourBudgets[d.getDay()]||180;
-        if((u.subjects.has(mat)||u.subjects.size<2)&&(u.min+duree<=dayMax)&&((u.subMin[mat]||0)+duree<=150))return iso;
+        if((u.subjects.has(mat)||u.subjects.size<maxSubjects)&&(u.min+duree<=dayMax)&&((u.subMin[mat]||0)+duree<=150))return iso;
       }
       d.setDate(d.getDate()+1);
     }
@@ -693,10 +693,10 @@ function buildPlanningAlgo(matWithScores,dispos,chapMap){
               if(fD){
                 add(m.nom,dom,fD,45,'Fiche',urg,'À faire',false,'Crée ta fiche papier');
                 const ro=jours<20?3:5;
-                const r1=nextSlot(addDays(fD,ro),15,m.nom);
+                const r1=nextSlot(addDays(fD,ro),15,m.nom,120,6);
                 if(r1&&daysTo(m.dateEpreuve)>3)add(m.nom,`Relis — ${dom}`,r1,15,'Rappel relecture','normale');
-                if(jours>12){const r2=nextSlot(addDays(fD,jours<20?8:10),15,m.nom);if(r2&&daysTo(m.dateEpreuve)>3)add(m.nom,`Relis — ${dom}`,r2,15,'Rappel relecture','normale');}
-                if(jours>20){const r3=nextSlot(addDays(fD,17),15,m.nom);if(r3&&daysTo(m.dateEpreuve)>3)add(m.nom,`Relis — ${dom}`,r3,15,'Rappel relecture','normale');}
+                if(jours>12){const r2=nextSlot(addDays(fD,jours<20?8:10),15,m.nom,120,6);if(r2&&daysTo(m.dateEpreuve)>3)add(m.nom,`Relis — ${dom}`,r2,15,'Rappel relecture','normale');}
+                if(jours>20){const r3=nextSlot(addDays(fD,17),15,m.nom,120,6);if(r3&&daysTo(m.dateEpreuve)>3)add(m.nom,`Relis — ${dom}`,r3,15,'Rappel relecture','normale');}
               }
             }
           }
@@ -911,15 +911,23 @@ function renderReserveSuggestions(){
       <div style="font-size:12px;color:var(--muted);">${r.domaine||r.titre} · ${r.duree}min · ${r.type}</div></div>
       <button onclick="doAddFromReserve('${r.id}')" style="background:#16a34a;color:#fff;border:none;border-radius:var(--r-sm);padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font);">Ajouter</button>
     </div>`).join('')}
-    <a href="https://www.notion.so/d3bd575c61cc4305bcab3ccbe5b319f9" target="_blank" style="display:block;text-align:center;color:var(--muted);font-size:12px;margin-top:10px;">Voir toutes les activités optionnelles →</a>
+    <a href="https://www.notion.so/3501933a9644817aae5efa3bf181f704" target="_blank" style="display:block;text-align:center;color:var(--muted);font-size:12px;margin-top:10px;">Voir toutes les activités optionnelles →</a>
   </div>`;
 }
 
 async function doAddFromReserve(id){
-  await addReserveToPlanning(id);
+  // Active la session reserve : change son statut + déplace à aujourd'hui
+  await nCall('update_session',{page_id:id,statut:'À faire',new_date:todayStr()});
+  S.clearCache('plan');
   const sessions=await getPlanning(true);
-  _all=sessions;_today=sessions.filter(s=>s.date===todayStr()&&s.statut!=='Fait'&&s.statut!=='reserve');
-  renderSessions(_today,sessions,_paused);
+  _all=sessions;
+  _today=sessions.filter(s=>s.date===todayStr()&&s.statut!=='Fait'&&s.statut!=='reserve');
+  _reserveItems=sessions.filter(s=>s.statut==='reserve').map(s=>({
+    id:s.id,titre:s.titre,matiere:s.titre.split(' — ')[0],
+    domaine:s.titre.split(' — ').slice(1).join(' — '),
+    duree:s.duree,type:s.type,urgence:s.urgence,statut:'Disponible',notes:s.notes
+  }));
+  renderSessionsWithEnergy(_today,sessions,_paused,_selE);
 }
 
 function renderPaused(paused){
@@ -988,8 +996,19 @@ async function loadDemarrage(){
 }
 
 async function refreshAll(){
-  const [sessions,matieres,paused,checkins,reserve]=await Promise.all([getPlanning(true),getMatieres(),getPaused(true),getCheckins(5),getReserve(true)]);
-  _reserveItems=reserve||[];
+  const [sessions,matieres,paused,checkins]=await Promise.all([getPlanning(true),getMatieres(),getPaused(true),getCheckins(5)]);
+  // Les activités optionnelles sont les sessions statut='reserve' dans le planning
+  _reserveItems=sessions.filter(s=>s.statut==='reserve').map(s=>({
+    id:s.id,
+    titre:s.titre,
+    matiere:s.titre.split(' — ')[0],
+    domaine:s.titre.split(' — ').slice(1).join(' — '),
+    duree:s.duree,
+    type:s.type,
+    urgence:s.urgence,
+    statut:'Disponible',
+    notes:s.notes
+  }));
 
   // Si Notion est vide malgré planOk=true → re-générer
   if(!sessions.length&&!paused.length){
