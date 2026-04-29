@@ -595,13 +595,14 @@ function buildPlanningAlgo(matWithScores,dispos,chapMap){
   const jourBudgets={};
   DAYS_ORDER.forEach(j=>{jourBudgets[JOUR_IDX_MAP[j]]=getDayBudget(dispos,j,'En forme');});
 
-  function nextSlot(from,duree,mat,maxAhead=120,maxSubjects=5){
+  function nextSlot(from,duree,mat,maxAhead=120,maxSubjects=5,before=null){
     let d=new Date(from+'T00:00:00');
     for(let i=0;i<maxAhead;i++){
       const iso=d.toISOString().split('T')[0];
       if(availDoW.has(d.getDay())){
         const u=getU(iso);
         const dayMax=jourBudgets[d.getDay()]||180;
+        if(before&&iso>=before)return null; // ne pas dépasser la deadline
         if((u.subjects.has(mat)||u.subjects.size<maxSubjects)&&(u.min+duree<=dayMax)&&((u.subMin[mat]||0)+duree<=150))return iso;
       }
       d.setDate(d.getDate()+1);
@@ -676,27 +677,27 @@ function buildPlanningAlgo(matWithScores,dispos,chapMap){
       _hasMore=true;
       const {m,moy,urg,jours,dom,type}=q.shift();
       if(type==='score3'){
-        const d1=nextSlot(start,60,m.nom);
+        const d1=nextSlot(start,60,m.nom,120,5,addDays(m.dateEpreuve,-2));
         add(m.nom,dom,d1,60,'Révision','normale');
         if(d1){const d2=nextSlot(addDays(d1,2),45,m.nom);add(m.nom,'Fiche de synthèse',d2,45,'Fiche',urg,'reserve',true,'Optionnel — crée une fiche papier si tu veux consolider');}
       }else if(type==='full'){
         const domFrom=subLastDate[m.nom]?addDays(subLastDate[m.nom],1):start;
-        const cD=nextSlot(domFrom,moy<=1.5?90:60,m.nom);
+        const cD=nextSlot(domFrom,moy<=1.5?90:60,m.nom,120,5,addDays(m.dateEpreuve,-2));
         if(!cD||daysTo(m.dateEpreuve)<=3)return;
         add(m.nom,dom,cD,moy<=1.5?90:60,'Cours',urg);
         if(jours>5){
-          const eD=nextSlot(addDays(cD,2),60,m.nom);
+          const eD=nextSlot(addDays(cD,2),60,m.nom,120,5,addDays(m.dateEpreuve,-2));
           if(eD){
             add(m.nom,dom,eD,60,'Exercices',urg);
             if(jours>7){
-              const fD=nextSlot(addDays(eD,1),45,m.nom);
+              const fD=nextSlot(addDays(eD,1),45,m.nom,120,5,addDays(m.dateEpreuve,-3));
               if(fD){
                 add(m.nom,dom,fD,45,'Fiche',urg,'À faire',false,'Crée ta fiche papier');
                 const ro=jours<20?3:5;
-                const r1=nextSlot(addDays(fD,ro),15,m.nom,120,6);
+                const r1=nextSlot(addDays(fD,ro),15,m.nom,120,6,addDays(m.dateEpreuve,-1));
                 if(r1&&daysTo(m.dateEpreuve)>3)add(m.nom,`Relis — ${dom}`,r1,15,'Rappel relecture','normale');
-                if(jours>12){const r2=nextSlot(addDays(fD,jours<20?8:10),15,m.nom,120,6);if(r2&&daysTo(m.dateEpreuve)>3)add(m.nom,`Relis — ${dom}`,r2,15,'Rappel relecture','normale');}
-                if(jours>20){const r3=nextSlot(addDays(fD,17),15,m.nom,120,6);if(r3&&daysTo(m.dateEpreuve)>3)add(m.nom,`Relis — ${dom}`,r3,15,'Rappel relecture','normale');}
+                if(jours>12){const r2=nextSlot(addDays(fD,jours<20?8:10),15,m.nom,120,6,addDays(m.dateEpreuve,-1));if(r2&&daysTo(m.dateEpreuve)>3)add(m.nom,`Relis — ${dom}`,r2,15,'Rappel relecture','normale');}
+                if(jours>20){const r3=nextSlot(addDays(fD,17),15,m.nom,120,6,addDays(m.dateEpreuve,-1));if(r3&&daysTo(m.dateEpreuve)>3)add(m.nom,`Relis — ${dom}`,r3,15,'Rappel relecture','normale');}
               }
             }
           }
