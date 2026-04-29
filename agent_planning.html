@@ -415,7 +415,10 @@ const S={
 let _today=[],_extra=[],_paused=[],_overdue=[],_reserveItems=[],_selSlot='',_selE='',_selR='',_checked=[],_rescheduleItems=[],_from='s-demarrage',_all=[],_revChanges=[];
 let dispoState={};
 
-function todayStr(){return new Date().toISOString().split('T')[0];}
+function todayStr(){
+  const d=new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
 function fmtFR(iso){const d=new Date(iso+'T00:00:00');return `${JOURS[d.getDay()]} ${d.getDate()} ${MOIS[d.getMonth()]}`;}
 function fmtShort(iso){const d=new Date(iso+'T00:00:00');return `${d.getDate()} ${MOIS[d.getMonth()].slice(0,4)}.`;}
 function daysTo(iso){return Math.round((new Date(iso+'T00:00:00')-new Date(todayStr()+'T00:00:00'))/86400000);}
