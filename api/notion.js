@@ -33,20 +33,29 @@ export default async function handler(req, res) {
       return res.status(r.status).json(await r.json());
     }
 
-    // Planning actif — exclut En pause, Annulé, Fait
+    // Planning actif — avec pagination pour >100 sessions
     if (action === 'get_planning') {
-      const r = await fetch(`${NOTION_API}/databases/${payload.database_id}/query`, {
-        method: 'POST', headers: notionHeaders(token),
-        body: JSON.stringify({
+      let allResults = [], cursor, safety = 10;
+      do {
+        const body = {
           filter: { and: [
             { property: 'Statut', select: { does_not_equal: 'Annulé' } },
             { property: 'Statut', select: { does_not_equal: 'Fait' } },
             { property: 'Statut', select: { does_not_equal: 'En pause' } }
           ]},
-          sorts: [{ property: 'Date', direction: 'ascending' }]
-        })
-      });
-      return res.status(r.status).json(await r.json());
+          sorts: [{ property: 'Date', direction: 'ascending' }],
+          page_size: 100
+        };
+        if (cursor) body.start_cursor = cursor;
+        const r = await fetch(`${NOTION_API}/databases/${payload.database_id}/query`, {
+          method: 'POST', headers: notionHeaders(token), body: JSON.stringify(body)
+        });
+        if (!r.ok) break;
+        const d = await r.json();
+        allResults = allResults.concat(d.results || []);
+        cursor = d.has_more ? d.next_cursor : undefined;
+      } while (cursor && --safety > 0);
+      return res.status(200).json({ results: allResults, has_more: false });
     }
 
     // Sessions optionnelles en attente (score 3)
