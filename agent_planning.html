@@ -243,6 +243,7 @@
     <button class="text-link" onclick="showRevision()">🔄 Réviser mon planning</button>
     <a class="text-link" href="https://www.notion.so/3501933a96448136a2d2dcf6d9dfdc6b" target="_blank">📅 Voir mon planning dans Notion →</a>
     <button class="text-link" onclick="showDispos()" style="color:var(--muted);font-size:13px;">⚙️ Définir ou modifier mes disponibilités de la semaine</button>
+    <button class="text-link" onclick="testConnexion()" style="color:var(--muted);font-size:11px;">🔧 Tester la connexion</button>
     <button class="btn btn-primary mt-8" onclick="showFin()">Bilan de fin de journée →</button>
   </div>
 </div>
@@ -1380,6 +1381,28 @@ async function showGlobal(){
   }catch(e){console.error(e);showScreen(_from);}
 }
 function goBackFromGlobal(){showScreen(_from||'s-demarrage');}
+
+async function testConnexion(){
+  const results=[];
+  // Test 1 : proxy Notion
+  try{
+    const r=await fetch(NOTION_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'get_matieres',database_id:DB.matieres})});
+    results.push(`Notion API: ${r.status} ${r.ok?'✅':'❌'}`);
+    if(!r.ok){const t=await r.text();results.push('Réponse: '+t.slice(0,100));}
+  }catch(e){results.push('Notion API: ❌ '+e.message);}
+  // Test 2 : proxy Claude
+  try{
+    const r=await fetch(CLAUDE_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:10,messages:[{role:'user',content:'hi'}]})});
+    results.push(`Claude API: ${r.status} ${r.ok?'✅':'❌'}`);
+  }catch(e){results.push('Claude API: ❌ '+e.message);}
+  // Test 3 : purge action
+  try{
+    const r=await fetch(NOTION_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'purge_planning',database_id:'TEST_ONLY_NO_DB'})});
+    const d=await r.json();
+    results.push(`purge_planning action: ${r.status} ${d.error&&d.error.includes('Unknown')?'❌ action manquante':'✅ action présente'}`);
+  }catch(e){results.push('purge_planning: ❌ '+e.message);}
+  alert(results.join('\n'));
+}
 
 document.getElementById('input-name')?.addEventListener('keydown',e=>{if(e.key==='Enter')submitName();});
 
