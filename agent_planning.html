@@ -735,8 +735,9 @@ async function generateFlow(){
     const matWithScores=matieres.map(m=>{
       const diag=diagMap[m.id];let moy=2.5,prio='',scores=[];
       if(diag){scores=[diag.s1,diag.s2,diag.s3,diag.s4,diag.s5].filter(s=>s>0);moy=scores.length?scores.reduce((a,b)=>a+b,0)/scores.length:2.5;prio=diag.priorites;}
-      const j=daysTo(m.dateEpreuve),charge=Math.max(1,scores.filter(s=>s>0&&s<=3).length);
-      return{...m,moy,score_p:((m.coeff*(5-moy)*60)/Math.max(j,1))/charge,prio,jours:j,scores};
+      const j=daysTo(m.dateEpreuve);
+      // Score = coeff × écart × urgence temporelle (sans pénalité charge)
+      return{...m,moy,score_p:(m.coeff*(5-moy)*60)/Math.max(j,1),prio,jours:j,scores};
     }).sort((a,b)=>b.score_p-a.score_p);
     step(3);
     const sessions=buildPlanningAlgo(matWithScores,S.dispos||{},chapMap||{});
